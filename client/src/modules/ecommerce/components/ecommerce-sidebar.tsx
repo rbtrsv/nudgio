@@ -16,6 +16,9 @@ import {
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
+import logoNudgioDark from '@/modules/main/logos/nudgio_black_text_with_logo.svg';
+import logoNudgioLight from '@/modules/main/logos/nudgio_white_text_with_logo.svg';
 import { useAuthStore } from "@/modules/accounts/store/auth.server.store"
 
 import { Avatar, AvatarFallback } from "@/modules/shadcnui/components/ui/avatar"
@@ -114,8 +117,20 @@ export function EcommerceSidebar({ ...props }: React.ComponentProps<typeof Sideb
       {/* Header with Logo */}
       <SidebarHeader className="p-4">
         <div className="flex items-center">
-          <span className="text-xl font-bold tracking-tight group-data-[collapsible=icon]:hidden">Nudgio</span>
-          <span className="text-xl font-bold tracking-tight hidden group-data-[collapsible=icon]:block">N</span>
+          <Image
+            src={logoNudgioLight}
+            alt="Nudgio"
+            width={180}
+            height={42}
+            className="dark:block hidden"
+          />
+          <Image
+            src={logoNudgioDark}
+            alt="Nudgio"
+            width={180}
+            height={42}
+            className="dark:hidden block"
+          />
         </div>
       </SidebarHeader>
 

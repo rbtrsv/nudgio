@@ -17,8 +17,8 @@ import { LoginSchema, RegisterSchema } from '../schemas/auth.schema';
 import { clearAuthCookies } from '../utils/token.client.utils';
 
 // Import logos
-import logoNexotypeDark from '@/modules/main/logos/nexotype-black-text-with-logo.svg';
-import logoNexotypeLight from '@/modules/main/logos/nextotype-white-text-with-logo.svg';
+import logoNudgioDark from '@/modules/main/logos/nudgio_black_text_with_logo.svg';
+import logoNudgioLight from '@/modules/main/logos/nudgio_white_text_with_logo.svg';
 
 // Define form data types based on Zod schemas
 type LoginInput = {
@@ -50,15 +50,15 @@ export default function Login({ mode = 'signin' }: { mode?: 'signin' | 'signup' 
           <div className="flex justify-center items-center flex-col space-y-4">
             <div className="mx-auto">
               <Image
-                src={logoNexotypeDark}
-                alt="Nexotype"
+                src={logoNudgioDark}
+                alt="Nudgio"
                 width={180}
                 height={42}
                 className="dark:hidden block"
               />
               <Image
-                src={logoNexotypeLight}
-                alt="Nexotype"
+                src={logoNudgioLight}
+                alt="Nudgio"
                 width={180}
                 height={42}
                 className="hidden dark:block"
@@ -260,15 +260,15 @@ function LoginForm({ mode = 'signin' }: { mode?: 'signin' | 'signup' }) {
         <div className="p-8">
           <div className="flex justify-center mb-6">
             <Image
-              src={logoNexotypeDark}
-              alt="Nexotype"
+              src={logoNudgioDark}
+              alt="Nudgio"
               width={180}
               height={42}
               className="dark:hidden block"
             />
             <Image
-              src={logoNexotypeLight}
-              alt="Nexotype"
+              src={logoNudgioLight}
+              alt="Nudgio"
               width={180}
               height={42}
               className="hidden dark:block"
