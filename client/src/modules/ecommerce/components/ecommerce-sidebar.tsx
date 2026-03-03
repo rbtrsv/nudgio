@@ -120,15 +120,15 @@ export function EcommerceSidebar({ ...props }: React.ComponentProps<typeof Sideb
           <Image
             src={logoNudgioLight}
             alt="Nudgio"
-            width={180}
-            height={42}
+            width={168}
+            height={39}
             className="dark:block hidden"
           />
           <Image
             src={logoNudgioDark}
             alt="Nudgio"
-            width={180}
-            height={42}
+            width={168}
+            height={39}
             className="dark:hidden block"
           />
         </div>
