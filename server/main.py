@@ -6,7 +6,7 @@ from core.config import settings
 
 from apps.main.router import router as main_router
 from apps.accounts.router import router as accounts_router
-from apps.nexotype.router import router as nexotype_router
+from apps.ecommerce.router import router as ecommerce_router
 
 
 app = FastAPI(
@@ -30,7 +30,7 @@ if settings.BACKEND_CORS_ORIGINS:
 
 app.include_router(main_router)
 app.include_router(accounts_router)
-app.include_router(nexotype_router)
+app.include_router(ecommerce_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=8000, reload=True)
+    uvicorn.run("main:app", port=8002, reload=True)

@@ -8,13 +8,13 @@ class Settings(BaseSettings):
     # Basic application settings
     API_V1_PREFIX: str = "/api/v1"
     DEBUG: bool = True
-    PROJECT_NAME: str = "Nexotype API"
+    PROJECT_NAME: str = "Nudgio API"
     VERSION: str = "0.1.0"
-    DESCRIPTION: str = "Unparalled. Software. Solutions"
-    
+    DESCRIPTION: str = "Ecommerce Recommendation Engine"
+
     # URL settings
-    SERVER_URL: str = "http://localhost:8000"
-    FRONTEND_URL: str = "http://localhost:3000"
+    SERVER_URL: str = "http://localhost:8002"
+    FRONTEND_URL: str = "http://localhost:3002"
     
     # Security
     SECRET_KEY: str = secrets.token_urlsafe(32)
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://user:pass@localhost/dbname"
     
     # CORS configuration
-    BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
+    BACKEND_CORS_ORIGINS: str = "http://localhost:3002"
     
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
