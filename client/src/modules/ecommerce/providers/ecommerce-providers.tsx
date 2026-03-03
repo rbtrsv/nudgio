@@ -1,6 +1,9 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { ConnectionProvider } from './connections-provider';
+import { SettingsProvider } from './settings-provider';
+import { AnalyticsProvider } from './analytics-provider';
 
 /**
  * EcommerceProviders props
@@ -19,9 +22,13 @@ interface EcommerceProvidersProps {
  */
 export function EcommerceProviders({ children }: EcommerceProvidersProps) {
   return (
-    <>
-      {children}
-    </>
+    <ConnectionProvider>
+      <SettingsProvider>
+        <AnalyticsProvider>
+          {children}
+        </AnalyticsProvider>
+      </SettingsProvider>
+    </ConnectionProvider>
   );
 }
 
