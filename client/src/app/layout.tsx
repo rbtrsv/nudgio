@@ -3,8 +3,8 @@ import "@/modules/main/styles/globals.css";
 import Favicon from '@/modules/main/public/favicon.ico';
 
 export const metadata: Metadata = {
-  title: "Nexotype",
-  description: "Modern financial analysis and portfolio management platform",
+  title: "Nudgio",
+  description: "Ecommerce Recommendation Engine",
 };
 
 function ThemeScript() {
