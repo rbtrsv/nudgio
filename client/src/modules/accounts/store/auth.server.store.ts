@@ -266,7 +266,7 @@ export const useAuthStore = create<AuthState>()(
       }
       })),
       {
-        name: 'nexotype-auth-storage',
+        name: 'nudgio-auth-storage',
         partialize: (state) => ({
           user: state.user,
           isInitialized: state.isInitialized,
