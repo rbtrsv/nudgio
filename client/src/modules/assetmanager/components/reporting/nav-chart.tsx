@@ -193,7 +193,6 @@ export default function NavChart({ valuations, isLoading }: NavChartProps) {
                 />
               }
             />
-            {/* @ts-expect-error recharts types mismatch with shadcn chart wrapper */}
             <ChartLegend content={<ChartLegendContent />} />
             {/* Valuation/NAV as bars */}
             <Bar
