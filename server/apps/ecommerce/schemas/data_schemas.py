@@ -1,9 +1,19 @@
+"""
+Nudgio Schemas — Data Management
+
+Data transfer objects for product/order import and connection statistics.
+"""
+
 from pydantic import BaseModel
-from typing import List
 from datetime import datetime
 
 
+# ==========================================
+# Data Transfer Objects
+# ==========================================
+
 class ProductData(BaseModel):
+    """Single product record for import"""
     product_id: str
     title: str
     handle: str | None = None
@@ -18,6 +28,7 @@ class ProductData(BaseModel):
 
 
 class OrderData(BaseModel):
+    """Single order record for import"""
     order_id: str
     customer_id: str | None = None
     total_price: float
@@ -26,6 +37,7 @@ class OrderData(BaseModel):
 
 
 class OrderItemData(BaseModel):
+    """Single order line item for import"""
     order_id: str
     product_id: str
     variant_id: str | None = None
@@ -36,33 +48,46 @@ class OrderItemData(BaseModel):
     order_date: datetime
 
 
+# ==========================================
+# Request Schemas
+# ==========================================
+
 class DataImportRequest(BaseModel):
+    """Base request for data import operations"""
     connection_id: int
     data_type: str  # "products", "orders", "order_items"
 
 
 class ProductImportRequest(DataImportRequest):
-    products: List[ProductData]
+    """Request for importing product data"""
+    products: list[ProductData]
 
 
 class OrderImportRequest(DataImportRequest):
-    orders: List[OrderData]
+    """Request for importing order data"""
+    orders: list[OrderData]
 
 
 class OrderItemImportRequest(DataImportRequest):
-    order_items: List[OrderItemData]
+    """Request for importing order item data"""
+    order_items: list[OrderItemData]
 
+
+# ==========================================
+# Response Schemas
+# ==========================================
 
 class DataImportResponse(BaseModel):
     """Response schema for data import operations"""
     success: bool
     message: str | None = None
     records_processed: int = 0
-    errors: List[str] = []
+    errors: list[str] = []
     error: str | None = None
 
 
-class ConnectionStatsResponse(BaseModel):
+class ConnectionStatsDetail(BaseModel):
+    """Schema for connection data statistics"""
     connection_id: int
     connection_name: str
     platform: str
@@ -72,8 +97,9 @@ class ConnectionStatsResponse(BaseModel):
     last_sync: datetime | None = None
     data_freshness_days: int | None = None
 
-class StatsResponse(BaseModel):
-    """Response schema for connection stats"""
+
+class ConnectionStatsResponse(BaseModel):
+    """Response schema for connection stats operations"""
     success: bool
-    data: ConnectionStatsResponse | None = None
+    data: ConnectionStatsDetail | None = None
     error: str | None = None

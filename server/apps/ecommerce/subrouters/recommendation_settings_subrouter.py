@@ -1,0 +1,288 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
+
+from core.db import get_session
+from apps.accounts.models import User
+from apps.accounts.utils.auth_utils import get_current_user
+
+from ..models import EcommerceConnection, RecommendationSettings
+from ..schemas.recommendation_settings_schemas import (
+    RecommendationSettingsCreate,
+    RecommendationSettingsDetail,
+    RecommendationSettingsResponse,
+    ConnectionSettingsDetail,
+    RecommendationSettingsListResponse,
+    MessageResponse,
+)
+
+# ==========================================
+# Recommendation Settings Router
+# ==========================================
+
+router = APIRouter(prefix="/settings", tags=["Recommendation Settings"])
+
+
+async def get_user_connection(connection_id: int, user_id: int, db: AsyncSession):
+    """Helper to get and validate user owns the connection"""
+    result = await db.execute(
+        select(EcommerceConnection).where(
+            and_(
+                EcommerceConnection.id == connection_id,
+                EcommerceConnection.user_id == user_id
+            )
+        )
+    )
+    connection = result.scalar_one_or_none()
+    if not connection:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Connection not found"
+        )
+    return connection
+
+
+@router.post("/{connection_id}", response_model=RecommendationSettingsResponse)
+async def create_or_update_settings(
+    connection_id: int,
+    payload: RecommendationSettingsCreate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Create or update recommendation settings for a connection
+
+    This endpoint:
+    1. Validates the user owns the connection
+    2. Checks if settings already exist for this connection
+    3. Updates existing settings or creates new ones
+    4. Returns the settings details
+    """
+    try:
+        # Validate user owns the connection
+        await get_user_connection(connection_id, user.id, db)
+
+        # Check if settings already exist
+        existing_result = await db.execute(
+            select(RecommendationSettings).where(
+                RecommendationSettings.connection_id == connection_id
+            )
+        )
+        existing_settings = existing_result.scalar_one_or_none()
+
+        if existing_settings:
+            # Update existing settings
+            existing_settings.bestseller_method = payload.bestseller_method.value
+            existing_settings.bestseller_lookback_days = payload.bestseller_lookback_days
+            existing_settings.crosssell_lookback_days = payload.crosssell_lookback_days
+            existing_settings.max_recommendations = payload.max_recommendations
+            existing_settings.min_price_increase_percent = payload.min_price_increase_percent
+            existing_settings.shop_base_url = payload.shop_base_url
+            existing_settings.product_url_template = payload.product_url_template
+
+            await db.commit()
+            await db.refresh(existing_settings)
+            return RecommendationSettingsResponse(
+                success=True,
+                data=RecommendationSettingsDetail.model_validate(existing_settings, from_attributes=True),
+            )
+        else:
+            # Create new settings
+            new_settings = RecommendationSettings(
+                connection_id=connection_id,
+                bestseller_method=payload.bestseller_method.value,
+                bestseller_lookback_days=payload.bestseller_lookback_days,
+                crosssell_lookback_days=payload.crosssell_lookback_days,
+                max_recommendations=payload.max_recommendations,
+                min_price_increase_percent=payload.min_price_increase_percent,
+                shop_base_url=payload.shop_base_url,
+                product_url_template=payload.product_url_template,
+            )
+            db.add(new_settings)
+            await db.commit()
+            await db.refresh(new_settings)
+            return RecommendationSettingsResponse(
+                success=True,
+                data=RecommendationSettingsDetail.model_validate(new_settings, from_attributes=True),
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.get("/{connection_id}", response_model=RecommendationSettingsResponse)
+async def get_settings(
+    connection_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Get recommendation settings for a connection
+
+    This endpoint:
+    1. Validates the user owns the connection
+    2. Retrieves the settings for the connection
+    3. Returns the settings details
+    """
+    try:
+        # Validate user owns the connection
+        await get_user_connection(connection_id, user.id, db)
+
+        # Get settings for this connection
+        result = await db.execute(
+            select(RecommendationSettings).where(
+                RecommendationSettings.connection_id == connection_id
+            )
+        )
+        settings = result.scalar_one_or_none()
+        if not settings:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Settings not found for this connection"
+            )
+
+        return RecommendationSettingsResponse(
+            success=True,
+            data=RecommendationSettingsDetail.model_validate(settings, from_attributes=True),
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.get("/", response_model=RecommendationSettingsListResponse)
+async def list_connection_settings(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    List settings for all user connections
+
+    This endpoint:
+    1. Queries all connections owned by the user
+    2. Retrieves settings for each connection
+    3. Returns a list of connections with their settings
+    """
+    try:
+        # Get all user connections
+        connections_result = await db.execute(
+            select(EcommerceConnection).where(
+                EcommerceConnection.user_id == user.id
+            ).order_by(EcommerceConnection.created_at.desc())
+        )
+        connections = connections_result.scalars().all()
+
+        # Build response with settings for each connection
+        response = []
+        for connection in connections:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
+            )
+            settings = settings_result.scalar_one_or_none()
+
+            response.append(ConnectionSettingsDetail(
+                connection_id=connection.id,
+                connection_name=connection.connection_name,
+                platform=connection.platform,
+                settings=RecommendationSettingsDetail.model_validate(settings, from_attributes=True) if settings else None,
+            ))
+
+        return RecommendationSettingsListResponse(
+            success=True,
+            data=response,
+            count=len(response),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.delete("/{connection_id}", response_model=MessageResponse)
+async def delete_settings(
+    connection_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Delete recommendation settings for a connection
+
+    This endpoint:
+    1. Validates the user owns the connection
+    2. Deletes the settings record
+    3. Returns a success message
+    """
+    try:
+        # Validate user owns the connection
+        await get_user_connection(connection_id, user.id, db)
+
+        # Get settings for this connection
+        result = await db.execute(
+            select(RecommendationSettings).where(
+                RecommendationSettings.connection_id == connection_id
+            )
+        )
+        settings = result.scalar_one_or_none()
+        if not settings:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Settings not found for this connection"
+            )
+
+        # Delete settings
+        await db.delete(settings)
+        await db.commit()
+
+        return MessageResponse(
+            success=True,
+            message="Settings have been deleted"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/{connection_id}/reset", response_model=MessageResponse)
+async def reset_settings_to_default(
+    connection_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Reset recommendation settings to default values
+
+    This endpoint:
+    1. Validates the user owns the connection
+    2. Deletes existing settings (defaults are applied at query time)
+    3. Returns a success message
+    """
+    try:
+        # Validate user owns the connection
+        await get_user_connection(connection_id, user.id, db)
+
+        # Delete existing settings if they exist
+        existing_result = await db.execute(
+            select(RecommendationSettings).where(
+                RecommendationSettings.connection_id == connection_id
+            )
+        )
+        existing_settings = existing_result.scalar_one_or_none()
+
+        if existing_settings:
+            await db.delete(existing_settings)
+            await db.commit()
+
+        return MessageResponse(
+            success=True,
+            message="Settings reset to default values"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

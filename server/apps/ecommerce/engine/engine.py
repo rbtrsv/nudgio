@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from ..adapters.base import PlatformAdapter
-from ..models import BestsellerMethod
+from ..schemas.recommendation_schemas import BestsellerMethod
 import logging
 
 

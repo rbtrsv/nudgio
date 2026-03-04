@@ -24,7 +24,7 @@ class PlatformAdapter(ABC):
         # - WooCommerce: MySQL (WordPress)
         # - Magento: MySQL
         
-        if self.connection.platform.value == "shopify":
+        if self.connection.platform == "shopify":
             # Shopify uses PostgreSQL
             db_url = f"postgresql+asyncpg://{self.connection.db_user}:{self.connection.db_password}@{self.connection.db_host}:{self.connection.db_port}/{self.connection.db_name}"
         else:

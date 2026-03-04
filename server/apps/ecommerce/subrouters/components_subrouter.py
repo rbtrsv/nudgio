@@ -4,9 +4,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from typing import Optional, List, Dict
 from core.db import get_session
-from apps.accounts.subrouters.auth_subrouter import get_current_user
 from apps.accounts.models import User
-from ..models import EcommerceConnection, PlatformType, RecommendationSettings
+from apps.accounts.utils.auth_utils import get_current_user
+from ..models import EcommerceConnection, RecommendationSettings
+from ..schemas.ecommerce_connection_schemas import PlatformType
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
 
@@ -45,22 +46,22 @@ def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[Re
     
     # Default URL patterns by platform
     defaults = {
-        PlatformType.SHOPIFY: {
-            "base_url": f"https://{connection.db_host}",  # Shopify store domain
+        PlatformType.SHOPIFY.value: {
+            "base_url": f"https://{connection.store_url or connection.db_host}",  # Shopify store domain
             "product_template": "/products/{handle}"
         },
-        PlatformType.WOOCOMMERCE: {
-            "base_url": f"https://{connection.db_host}",  # WordPress site domain
+        PlatformType.WOOCOMMERCE.value: {
+            "base_url": f"https://{connection.store_url or connection.db_host}",  # WordPress site domain
             "product_template": "/product/{handle}"  # or "/shop/{handle}"
         },
-        PlatformType.MAGENTO: {
-            "base_url": f"https://{connection.db_host}",  # Magento store domain
+        PlatformType.MAGENTO.value: {
+            "base_url": f"https://{connection.store_url or connection.db_host}",  # Magento store domain
             "product_template": "/catalog/product/view/id/{id}"
         }
     }
-    
+
     return defaults.get(connection.platform, {
-        "base_url": f"https://{connection.db_host}",
+        "base_url": f"https://{connection.store_url or connection.db_host}",
         "product_template": "/products/{handle}"
     })
 
