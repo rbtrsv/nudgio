@@ -13,9 +13,7 @@ from ..schemas.connection_schemas import (
     ConnectionTestResponse,
     MessageResponse
 )
-from ..adapters.shopify import ShopifyAdapter
-from ..adapters.woocommerce import WooCommerceAdapter
-from ..adapters.magento import MagentoAdapter
+from ..adapters.factory import get_adapter
 
 router = APIRouter(prefix="/connections", tags=["Database Connections"])
 
@@ -182,17 +180,7 @@ async def test_connection(
     
     try:
         # Create adapter based on platform
-        if connection.platform == PlatformType.SHOPIFY:
-            adapter = ShopifyAdapter(connection)
-        elif connection.platform == PlatformType.WOOCOMMERCE:
-            adapter = WooCommerceAdapter(connection)
-        elif connection.platform == PlatformType.MAGENTO:
-            adapter = MagentoAdapter(connection)
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Unsupported platform"
-            )
+        adapter = get_adapter(connection)
         
         # First, always explore database structure - this helps with debugging
         table_info = ""

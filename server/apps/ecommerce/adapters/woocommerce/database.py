@@ -1,18 +1,18 @@
 from typing import List, Dict, Any
 from sqlalchemy import text
-from .base import PlatformAdapter
+from ..base import PlatformAdapter
 
 
-class WooCommerceAdapter(PlatformAdapter):
+class WooCommerceDatabaseAdapter(PlatformAdapter):
     """
     WooCommerce database adapter.
     Queries WordPress database: wp_posts, wp_postmeta, woocommerce_order_items tables.
     """
-    
+
     async def get_products(self, limit: int = 1000) -> List[Dict[str, Any]]:
         """Get products from WooCommerce/WordPress database"""
         query = text("""
-            SELECT 
+            SELECT
                 p.ID as product_id,
                 p.post_title as title,
                 p.post_name as handle,
@@ -27,20 +27,20 @@ class WooCommerceAdapter(PlatformAdapter):
             LEFT JOIN wp_postmeta pm_sku ON p.ID = pm_sku.post_id AND pm_sku.meta_key = '_sku'
             LEFT JOIN wp_postmeta pm_stock ON p.ID = pm_stock.post_id AND pm_stock.meta_key = '_stock'
             LEFT JOIN wp_postmeta pm_type ON p.ID = pm_type.post_id AND pm_type.meta_key = '_product_type'
-            WHERE p.post_type = 'product' 
+            WHERE p.post_type = 'product'
             AND p.post_status = 'publish'
             ORDER BY p.ID
             LIMIT :limit
         """)
-        
+
         async with self.engine.begin() as conn:
             result = await conn.execute(query, {"limit": limit})
             return [dict(row._mapping) for row in result.fetchall()]
-    
+
     async def get_orders(self, lookback_days: int = 30, limit: int = 1000) -> List[Dict[str, Any]]:
         """Get orders from WooCommerce HPOS database"""
         query = text("""
-            SELECT 
+            SELECT
                 o.id as order_id,
                 o.customer_id,
                 o.total_amount as total_price,
@@ -52,15 +52,15 @@ class WooCommerceAdapter(PlatformAdapter):
             ORDER BY o.date_created_gmt DESC
             LIMIT :limit
         """)
-        
+
         async with self.engine.begin() as conn:
             result = await conn.execute(query, {"lookback_days": lookback_days, "limit": limit})
             return [dict(row._mapping) for row in result.fetchall()]
-    
+
     async def get_order_items(self, lookback_days: int = 30, limit: int = 10000) -> List[Dict[str, Any]]:
         """Get order items from WooCommerce HPOS database"""
         query = text("""
-            SELECT 
+            SELECT
                 opl.order_id,
                 opl.product_id,
                 opl.variation_id as variant_id,
@@ -76,15 +76,15 @@ class WooCommerceAdapter(PlatformAdapter):
             ORDER BY o.date_created_gmt DESC
             LIMIT :limit
         """)
-        
+
         async with self.engine.begin() as conn:
             result = await conn.execute(query, {"lookback_days": lookback_days, "limit": limit})
             return [dict(row._mapping) for row in result.fetchall()]
-    
+
     async def get_product_by_id(self, product_id: str) -> Dict[str, Any]:
         """Get single product by ID"""
         query = text("""
-            SELECT 
+            SELECT
                 p.ID as product_id,
                 p.post_title as title,
                 p.post_name as handle,
@@ -102,7 +102,7 @@ class WooCommerceAdapter(PlatformAdapter):
             AND p.ID = :product_id
             LIMIT 1
         """)
-        
+
         async with self.engine.begin() as conn:
             result = await conn.execute(query, {"product_id": product_id})
             row = result.fetchone()

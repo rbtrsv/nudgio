@@ -1,3 +1,5 @@
+"""Abstract base class with shared database engine logic for direct-connection adapters."""
+
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine

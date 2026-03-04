@@ -7,9 +7,7 @@ from core.db import get_session
 from apps.accounts.subrouters.auth_subrouter import get_current_user
 from apps.accounts.models import User
 from ..models import EcommerceConnection, PlatformType, RecommendationSettings
-from ..adapters.shopify import ShopifyAdapter
-from ..adapters.woocommerce import WooCommerceAdapter
-from ..adapters.magento import MagentoAdapter
+from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
 
 router = APIRouter(prefix="/components", tags=["Product Component Recommendations"])
@@ -67,21 +65,6 @@ def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[Re
     })
 
 
-def create_adapter(connection: EcommerceConnection):
-    """Create appropriate adapter for connection platform"""
-    if connection.platform == PlatformType.SHOPIFY:
-        return ShopifyAdapter(connection)
-    elif connection.platform == PlatformType.WOOCOMMERCE:
-        return WooCommerceAdapter(connection)
-    elif connection.platform == PlatformType.MAGENTO:
-        return MagentoAdapter(connection)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported platform"
-        )
-
-
 @router.get("/bestsellers", response_class=HTMLResponse)
 async def get_bestsellers_component(
     connection_id: int = Query(..., description="Connection ID to use for recommendations"),
@@ -110,7 +93,7 @@ async def get_bestsellers_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
         
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recs = await engine.get_bestsellers(limit=top)
@@ -165,7 +148,7 @@ async def get_cross_sell_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
         
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recs = await engine.get_cross_sell(product_id=product_id, limit=top)
@@ -220,7 +203,7 @@ async def get_upsell_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
         
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recs = await engine.get_upsell(product_id=product_id, limit=top)
@@ -275,7 +258,7 @@ async def get_similar_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
         
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recs = await engine.get_similar(product_id=product_id, limit=top)

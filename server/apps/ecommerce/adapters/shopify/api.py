@@ -2,7 +2,7 @@ from typing import List, Dict, Any
 import aiohttp
 import json
 from datetime import datetime, timedelta
-from ..models import EcommerceConnection
+from ...models import EcommerceConnection
 
 
 class ShopifyAdapter:
@@ -10,46 +10,46 @@ class ShopifyAdapter:
     Shopify Admin API adapter.
     Uses Shopify's REST Admin API to fetch products and orders.
     """
-    
+
     def __init__(self, connection: EcommerceConnection):
         self.connection = connection
         # For Shopify, we store API credentials in the database fields:
-        # db_host = store domain (e.g., "m0stv8-wr.myshopify.com") 
+        # db_host = store domain (e.g., "m0stv8-wr.myshopify.com")
         # db_password = access token (e.g., "shpat_...")
         self.store_domain = connection.db_host
         self.access_token = connection.db_password
         self.api_version = "2023-10"  # Shopify API version
-        
+
     def _get_headers(self) -> Dict[str, str]:
         """Get headers for Shopify API requests"""
         return {
             "X-Shopify-Access-Token": self.access_token,
             "Content-Type": "application/json"
         }
-    
+
     def _get_base_url(self) -> str:
         """Get base URL for Shopify API"""
         return f"https://{self.store_domain}/admin/api/{self.api_version}"
-    
+
     async def get_products(self, limit: int = 250) -> List[Dict[str, Any]]:
         """Get products from Shopify Admin API"""
         products = []
-        
+
         async with aiohttp.ClientSession() as session:
             url = f"{self._get_base_url()}/products.json"
             params = {
                 "limit": min(limit, 250),  # Shopify max is 250
                 "status": "active"
             }
-            
+
             async with session.get(url, headers=self._get_headers(), params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    
+
                     for product in data.get("products", []):
                         # Get the first variant for pricing
                         variant = product.get("variants", [{}])[0] if product.get("variants") else {}
-                        
+
                         products.append({
                             "product_id": str(product["id"]),
                             "title": product.get("title", ""),
@@ -66,16 +66,16 @@ class ShopifyAdapter:
                         })
                 else:
                     print(f"Shopify API error: {response.status} - {await response.text()}")
-        
+
         return products
-    
+
     async def get_orders(self, lookback_days: int = 30, limit: int = 250) -> List[Dict[str, Any]]:
         """Get orders from Shopify Admin API"""
         orders = []
-        
+
         # Calculate date filter
         since_date = (datetime.utcnow() - timedelta(days=lookback_days)).isoformat()
-        
+
         async with aiohttp.ClientSession() as session:
             url = f"{self._get_base_url()}/orders.json"
             params = {
@@ -84,11 +84,11 @@ class ShopifyAdapter:
                 "created_at_min": since_date,
                 "status": "any"
             }
-            
+
             async with session.get(url, headers=self._get_headers(), params=params) as response:
                 if response.status == 200:
                     data = await response.json()
-                    
+
                     for order in data.get("orders", []):
                         orders.append({
                             "order_id": str(order["id"]),
@@ -99,26 +99,26 @@ class ShopifyAdapter:
                         })
                 else:
                     print(f"Shopify API error: {response.status} - {await response.text()}")
-        
+
         return orders
-    
+
     async def get_order_items(self, lookback_days: int = 30, limit: int = 10000) -> List[Dict[str, Any]]:
         """Get order line items from Shopify Admin API"""
         order_items = []
-        
+
         # First get orders
         orders = await self.get_orders(lookback_days, min(limit // 5, 250))  # Estimate items per order
-        
+
         async with aiohttp.ClientSession() as session:
             for order in orders:
                 order_id = order["order_id"]
                 url = f"{self._get_base_url()}/orders/{order_id}.json"
-                
+
                 async with session.get(url, headers=self._get_headers()) as response:
                     if response.status == 200:
                         data = await response.json()
                         order_data = data.get("order", {})
-                        
+
                         for line_item in order_data.get("line_items", []):
                             order_items.append({
                                 "order_id": order_id,
@@ -130,27 +130,27 @@ class ShopifyAdapter:
                                 "order_date": order["order_date"],
                                 "customer_id": order["customer_id"]
                             })
-                    
+
                     # Stop if we've reached the limit
                     if len(order_items) >= limit:
                         break
-        
+
         return order_items[:limit]
-    
+
     async def get_product_by_id(self, product_id: str) -> Dict[str, Any]:
         """Get single product by ID from Shopify Admin API"""
         async with aiohttp.ClientSession() as session:
             url = f"{self._get_base_url()}/products/{product_id}.json"
-            
+
             async with session.get(url, headers=self._get_headers()) as response:
                 if response.status == 200:
                     data = await response.json()
                     product = data.get("product", {})
-                    
+
                     if product:
                         # Get the first variant for pricing
                         variant = product.get("variants", [{}])[0] if product.get("variants") else {}
-                        
+
                         return {
                             "product_id": str(product["id"]),
                             "title": product.get("title", ""),
@@ -164,15 +164,15 @@ class ShopifyAdapter:
                         }
                 else:
                     print(f"Shopify API error: {response.status} - {await response.text()}")
-        
+
         return {}
-    
+
     async def test_connection(self) -> bool:
         """Test if Shopify API connection is working"""
         try:
             async with aiohttp.ClientSession() as session:
                 url = f"{self._get_base_url()}/shop.json"
-                
+
                 async with session.get(url, headers=self._get_headers()) as response:
                     return response.status == 200
         except Exception:

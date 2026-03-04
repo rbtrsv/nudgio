@@ -14,9 +14,7 @@ from ..schemas.recommendation_schemas import (
     SimilarProductsRequest,
     RecommendationResponse,
 )
-from ..adapters.shopify import ShopifyAdapter
-from ..adapters.woocommerce import WooCommerceAdapter
-from ..adapters.magento import MagentoAdapter
+from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
 
 router = APIRouter(prefix="/recommendations", tags=["Product Recommendations"])
@@ -44,21 +42,6 @@ async def get_user_connection(connection_id: int, user_id: int, session: AsyncSe
     return connection
 
 
-def create_adapter(connection: EcommerceConnection):
-    """Create appropriate adapter for connection platform"""
-    if connection.platform == PlatformType.SHOPIFY:
-        return ShopifyAdapter(connection)
-    elif connection.platform == PlatformType.WOOCOMMERCE:
-        return WooCommerceAdapter(connection)
-    elif connection.platform == PlatformType.MAGENTO:
-        return MagentoAdapter(connection)
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported platform"
-        )
-
-
 @router.post("/bestsellers", response_model=RecommendationResponse)
 async def get_bestsellers(
     request: BestsellerRequest,
@@ -70,7 +53,7 @@ async def get_bestsellers(
     connection = await get_user_connection(request.connection_id, current_user.id, session)
     
     try:
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recommendations = await engine.get_bestsellers(
@@ -105,7 +88,7 @@ async def get_cross_sell(
     connection = await get_user_connection(request.connection_id, current_user.id, session)
     
     try:
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recommendations = await engine.get_cross_sell(
@@ -141,7 +124,7 @@ async def get_upsell(
     connection = await get_user_connection(request.connection_id, current_user.id, session)
     
     try:
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recommendations = await engine.get_upsell(
@@ -177,7 +160,7 @@ async def get_similar_products(
     connection = await get_user_connection(request.connection_id, current_user.id, session)
     
     try:
-        adapter = create_adapter(connection)
+        adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
         recommendations = await engine.get_similar(
