@@ -9,6 +9,31 @@ class MagentoDatabaseAdapter(PlatformAdapter):
     Queries Magento database: catalog_product_entity, sales_order, sales_order_item tables.
     """
 
+    async def get_product_count(self) -> int:
+        """Get total product count from Magento database"""
+        query = text("""
+            SELECT COUNT(*) as cnt
+            FROM catalog_product_entity
+            WHERE type_id IN ('simple', 'configurable', 'virtual', 'downloadable')
+        """)
+        async with self.engine.begin() as conn:
+            result = await conn.execute(query)
+            row = result.fetchone()
+            return row.cnt if row else 0
+
+    async def get_order_count(self, lookback_days: int = 365) -> int:
+        """Get total order count from Magento database"""
+        query = text("""
+            SELECT COUNT(*) as cnt
+            FROM sales_order
+            WHERE status IN ('complete', 'processing')
+            AND created_at >= DATE_SUB(NOW(), INTERVAL :lookback_days DAY)
+        """)
+        async with self.engine.begin() as conn:
+            result = await conn.execute(query, {"lookback_days": lookback_days})
+            row = result.fetchone()
+            return row.cnt if row else 0
+
     async def get_products(self, limit: int = 1000) -> List[Dict[str, Any]]:
         """Get products from Magento database"""
         query = text("""

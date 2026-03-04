@@ -31,6 +31,37 @@ class WooCommerceApiAdapter:
         """Get HTTP Basic Auth credentials for WooCommerce API requests"""
         return aiohttp.BasicAuth(self.consumer_key, self.consumer_secret)
 
+    async def get_product_count(self) -> int:
+        """Get total product count from WooCommerce REST API via X-WP-Total header"""
+        async with aiohttp.ClientSession() as session:
+            params = {"per_page": 1, "status": "publish"}
+            async with session.get(
+                f"{self.base_url}/products",
+                auth=self._get_auth(),
+                params=params,
+            ) as response:
+                if response.status != 200:
+                    return 0
+                return int(response.headers.get("X-WP-Total", 0))
+
+    async def get_order_count(self, lookback_days: int = 365) -> int:
+        """Get total order count from WooCommerce REST API via X-WP-Total header"""
+        since_date = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).isoformat()
+        async with aiohttp.ClientSession() as session:
+            params = {
+                "per_page": 1,
+                "status": "completed,processing",
+                "after": since_date,
+            }
+            async with session.get(
+                f"{self.base_url}/orders",
+                auth=self._get_auth(),
+                params=params,
+            ) as response:
+                if response.status != 200:
+                    return 0
+                return int(response.headers.get("X-WP-Total", 0))
+
     async def get_products(self, limit: int = 1000) -> List[Dict[str, Any]]:
         """
         Get products from WooCommerce REST API.

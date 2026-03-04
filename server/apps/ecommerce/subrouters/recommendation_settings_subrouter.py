@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -110,22 +111,36 @@ async def get_settings(
         # Validate user owns the connection
         await get_user_connection(connection_id, user.id, db)
 
-        # Get settings for this connection
+        # Get settings for this connection (returns saved or defaults)
         result = await db.execute(
             select(RecommendationSettings).where(
                 RecommendationSettings.connection_id == connection_id
             )
         )
         settings = result.scalar_one_or_none()
-        if not settings:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Settings not found for this connection"
+
+        if settings:
+            return RecommendationSettingsResponse(
+                success=True,
+                data=RecommendationSettingsDetail.model_validate(settings, from_attributes=True),
             )
 
+        # No saved settings — return defaults (settings always "exist" conceptually)
         return RecommendationSettingsResponse(
             success=True,
-            data=RecommendationSettingsDetail.model_validate(settings, from_attributes=True),
+            data=RecommendationSettingsDetail(
+                id=0,
+                connection_id=connection_id,
+                bestseller_method="volume",
+                bestseller_lookback_days=30,
+                crosssell_lookback_days=30,
+                max_recommendations=10,
+                min_price_increase_percent=10,
+                shop_base_url=None,
+                product_url_template=None,
+                created_at=datetime.now(timezone.utc),
+                updated_at=None,
+            ),
         )
     except HTTPException:
         raise

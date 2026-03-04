@@ -6,7 +6,7 @@ import { useAnalytics } from '@/modules/ecommerce/hooks/use-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
-import { Loader2, BarChart3, Package, ShoppingCart, ListOrdered, Clock, CalendarDays } from 'lucide-react';
+import { Loader2, BarChart3, Package, ShoppingCart, Clock, CalendarDays } from 'lucide-react';
 
 export default function AnalyticsPage() {
   const { connections, activeConnectionId, setActiveConnection } = useConnections();
@@ -17,12 +17,13 @@ export default function AnalyticsPage() {
     fetchConnectionStats,
   } = useAnalytics();
 
-  // Fetch stats when connection changes
+  // Fetch stats when connection changes (only if active — inactive connections have no stats)
   useEffect(() => {
-    if (activeConnectionId) {
+    const activeConn = connections.find(c => c.id === activeConnectionId);
+    if (activeConnectionId && activeConn?.is_active) {
       fetchConnectionStats(activeConnectionId);
     }
-  }, [activeConnectionId, fetchConnectionStats]);
+  }, [activeConnectionId, connections, fetchConnectionStats]);
 
   return (
     <div className="space-y-6">
@@ -101,18 +102,6 @@ export default function AnalyticsPage() {
               <CardContent>
                 <div className="text-2xl font-bold">{connectionStats.orders_count.toLocaleString()}</div>
                 <p className="text-xs text-muted-foreground">Total orders imported</p>
-              </CardContent>
-            </Card>
-
-            {/* Order Items Count */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Order Items</CardTitle>
-                <ListOrdered className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{connectionStats.order_items_count.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">Total order items imported</p>
               </CardContent>
             </Card>
 

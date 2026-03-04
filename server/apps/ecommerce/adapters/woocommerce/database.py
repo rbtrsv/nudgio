@@ -9,6 +9,32 @@ class WooCommerceDatabaseAdapter(PlatformAdapter):
     Queries WordPress database: wp_posts, wp_postmeta, woocommerce_order_items tables.
     """
 
+    async def get_product_count(self) -> int:
+        """Get total product count from WooCommerce database"""
+        query = text("""
+            SELECT COUNT(*) as cnt
+            FROM wp_posts
+            WHERE post_type = 'product'
+            AND post_status = 'publish'
+        """)
+        async with self.engine.begin() as conn:
+            result = await conn.execute(query)
+            row = result.fetchone()
+            return row.cnt if row else 0
+
+    async def get_order_count(self, lookback_days: int = 365) -> int:
+        """Get total order count from WooCommerce HPOS database"""
+        query = text("""
+            SELECT COUNT(*) as cnt
+            FROM wp_wc_orders
+            WHERE status IN ('wc-completed', 'wc-processing')
+            AND date_created_gmt >= DATE_SUB(NOW(), INTERVAL :lookback_days DAY)
+        """)
+        async with self.engine.begin() as conn:
+            result = await conn.execute(query, {"lookback_days": lookback_days})
+            row = result.fetchone()
+            return row.cnt if row else 0
+
     async def get_products(self, limit: int = 1000) -> List[Dict[str, Any]]:
         """Get products from WooCommerce/WordPress database"""
         query = text("""

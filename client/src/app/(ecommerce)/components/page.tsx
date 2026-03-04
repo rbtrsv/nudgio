@@ -20,6 +20,9 @@ export default function ComponentsPage() {
   const [widgetType, setWidgetType] = useState<WidgetType>('bestsellers');
   const [productId, setProductId] = useState('');
   const [top, setTop] = useState(4);
+  const [lookbackDays, setLookbackDays] = useState(30);
+  const [method, setMethod] = useState<'volume' | 'value' | 'balanced'>('volume');
+  const [minPriceIncrease, setMinPriceIncrease] = useState(10);
   const [style, setStyle] = useState<'card' | 'carousel' | 'list'>('card');
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [primaryColor, setPrimaryColor] = useState('#3B82F6');
@@ -29,6 +32,9 @@ export default function ComponentsPage() {
   const [copied, setCopied] = useState(false);
 
   const needsProductId = widgetType !== 'bestsellers';
+  const needsLookback = widgetType === 'bestsellers' || widgetType === 'cross-sell';
+  const needsMethod = widgetType === 'bestsellers';
+  const needsMinPriceIncrease = widgetType === 'upsell';
 
   const handleGenerate = async () => {
     if (!activeConnectionId) return;
@@ -38,6 +44,9 @@ export default function ComponentsPage() {
       connection_id: activeConnectionId,
       product_id: needsProductId ? productId : undefined,
       top,
+      lookback_days: needsLookback ? lookbackDays : undefined,
+      method: needsMethod ? method : undefined,
+      min_price_increase: needsMinPriceIncrease ? minPriceIncrease : undefined,
       style,
       device,
       primary_color: primaryColor,
@@ -138,6 +147,37 @@ export default function ComponentsPage() {
                 <Label>Items to Show</Label>
                 <Input type="number" min={1} max={20} value={top} onChange={(e) => setTop(parseInt(e.target.value) || 4)} />
               </div>
+
+              {/* Lookback Days — only for bestsellers and cross-sell (order-based algorithms) */}
+              {needsLookback && (
+                <div className="space-y-2">
+                  <Label>Lookback Days</Label>
+                  <Input type="number" min={1} max={3650} value={lookbackDays} onChange={(e) => setLookbackDays(parseInt(e.target.value) || 30)} />
+                </div>
+              )}
+
+              {/* Method — only for bestsellers */}
+              {needsMethod && (
+                <div className="space-y-2">
+                  <Label>Method</Label>
+                  <Select value={method} onValueChange={(v) => setMethod(v as 'volume' | 'value' | 'balanced')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="volume">Volume</SelectItem>
+                      <SelectItem value="value">Value</SelectItem>
+                      <SelectItem value="balanced">Balanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Min Price Increase — only for upsell */}
+              {needsMinPriceIncrease && (
+                <div className="space-y-2">
+                  <Label>Min Price Increase (%)</Label>
+                  <Input type="number" min={0} max={500} value={minPriceIncrease} onChange={(e) => setMinPriceIncrease(parseInt(e.target.value) || 10)} />
+                </div>
+              )}
 
               {/* Style */}
               <div className="space-y-2">

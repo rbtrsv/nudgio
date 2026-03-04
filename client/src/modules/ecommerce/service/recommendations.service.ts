@@ -30,16 +30,16 @@ export const getBestsellers = async (data: BestsellersInput): Promise<Recommenda
   BestsellersInputSchema.parse(data);
 
   try {
-    // Backend returns RecommendationResult directly
-    const result = await fetchClient<RecommendationResult>(
+    // Backend returns { success, data: RecommendationResult, error } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: RecommendationResult; error?: string }>(
       RECOMMENDATION_ENDPOINTS.BESTSELLERS,
       { method: 'POST', body: data as unknown as Record<string, unknown> }
     );
 
     return {
-      success: true,
-      data: result,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {
@@ -65,15 +65,16 @@ export const getCrossSell = async (data: CrossSellInput): Promise<Recommendation
   CrossSellInputSchema.parse(data);
 
   try {
-    const result = await fetchClient<RecommendationResult>(
+    // Backend returns { success, data: RecommendationResult, error } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: RecommendationResult; error?: string }>(
       RECOMMENDATION_ENDPOINTS.CROSS_SELL,
       { method: 'POST', body: data as unknown as Record<string, unknown> }
     );
 
     return {
-      success: true,
-      data: result,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {
@@ -99,15 +100,16 @@ export const getUpsell = async (data: UpsellInput): Promise<RecommendationRespon
   UpsellInputSchema.parse(data);
 
   try {
-    const result = await fetchClient<RecommendationResult>(
+    // Backend returns { success, data: RecommendationResult, error } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: RecommendationResult; error?: string }>(
       RECOMMENDATION_ENDPOINTS.UPSELL,
       { method: 'POST', body: data as unknown as Record<string, unknown> }
     );
 
     return {
-      success: true,
-      data: result,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {
@@ -133,15 +135,16 @@ export const getSimilar = async (data: SimilarInput): Promise<RecommendationResp
   SimilarInputSchema.parse(data);
 
   try {
-    const result = await fetchClient<RecommendationResult>(
+    // Backend returns { success, data: RecommendationResult, error } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: RecommendationResult; error?: string }>(
       RECOMMENDATION_ENDPOINTS.SIMILAR,
       { method: 'POST', body: data as unknown as Record<string, unknown> }
     );
 
     return {
-      success: true,
-      data: result,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {

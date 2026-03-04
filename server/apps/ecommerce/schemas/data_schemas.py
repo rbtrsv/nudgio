@@ -93,7 +93,6 @@ class ConnectionStatsDetail(BaseModel):
     platform: str = Field(description="Ecommerce platform")
     products_count: int = Field(description="Total number of products")
     orders_count: int = Field(description="Total number of orders")
-    order_items_count: int = Field(description="Total number of order line items")
     last_sync: datetime | None = Field(default=None, description="When data was last synced")
     data_freshness_days: int | None = Field(default=None, description="How many days old the data is")
 

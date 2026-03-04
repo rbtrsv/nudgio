@@ -31,6 +31,33 @@ class ShopifyAdapter:
         """Get base URL for Shopify API"""
         return f"https://{self.store_domain}/admin/api/{self.api_version}"
 
+    async def get_product_count(self) -> int:
+        """Get total product count from Shopify Admin API via /products/count.json"""
+        async with aiohttp.ClientSession() as session:
+            url = f"{self._get_base_url()}/products/count.json"
+            params = {"status": "active"}
+            async with session.get(url, headers=self._get_headers(), params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data.get("count", 0)
+                return 0
+
+    async def get_order_count(self, lookback_days: int = 365) -> int:
+        """Get total order count from Shopify Admin API via /orders/count.json"""
+        since_date = (datetime.utcnow() - timedelta(days=lookback_days)).isoformat()
+        async with aiohttp.ClientSession() as session:
+            url = f"{self._get_base_url()}/orders/count.json"
+            params = {
+                "financial_status": "paid",
+                "created_at_min": since_date,
+                "status": "any",
+            }
+            async with session.get(url, headers=self._get_headers(), params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return data.get("count", 0)
+                return 0
+
     async def get_products(self, limit: int = 250) -> List[Dict[str, Any]]:
         """Get products from Shopify Admin API"""
         products = []

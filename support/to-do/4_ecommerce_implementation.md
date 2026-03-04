@@ -1,4 +1,4 @@
-# Nudgio — Platform Authentication Plan
+# Nudgio — Ecommerce Implementation
 
 ## MANDATORY RULES — Read Before Any Implementation
 
@@ -1430,21 +1430,55 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 
 ## What Remains
 
+### Performance (Built, Not Wired — Highest Priority)
+- ❌ Wire cache into recommendation + component subrouters — `cache_utils.py` is built (ABC + two backends) but not connected, biggest performance win
+- ❌ Wire rate limiting into router — `check_rate_limit()` exists in `rate_limiting_utils.py` but not used as a dependency
+- ❌ Wire monthly order limit enforcement — `get_org_monthly_order_count()` exists in `subscription_utils.py` but doesn't block when exceeded
+
 ### Production Deployment
-- [ ] Production DragonflyDB setup — switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"` in `cache_utils.py` and `rate_limiting_utils.py`, configure `DRAGONFLY_URL`
-- [ ] Production Stripe configuration — create real webhook endpoint in Stripe Dashboard for `server.nudgio.tech/accounts/subscriptions/webhook`, set production `STRIPE_WEBHOOK_SECRET` in Coolify env vars
-- [ ] Create Pro and Enterprise products in Stripe Dashboard with correct metadata (`tier=PRO`/`ENTERPRISE`, `tier_order=0`/`1`, features list)
-- [ ] Stripe Customer Portal — enable plan switching, add Pro + Enterprise as eligible products, enable cancellations
-- [ ] Clean up duplicate test subscriptions from Stripe Dashboard (2 Pro subscriptions created during testing)
+- ❌ Production DragonflyDB setup — switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"`, configure `DRAGONFLY_URL`
+- ❌ Production Stripe configuration — create real webhook endpoint for `server.nudgio.tech/accounts/subscriptions/webhook`, set production `STRIPE_WEBHOOK_SECRET` in Coolify env vars
+- ❌ Create Pro and Enterprise products in Stripe Dashboard with correct metadata (`tier=PRO`/`ENTERPRISE`, `tier_order=0`/`1`, features list)
+- ❌ Stripe Customer Portal — enable plan switching, add Pro + Enterprise as eligible products, enable cancellations
+- ❌ Clean up duplicate test subscriptions from Stripe Dashboard (2 Pro subscriptions created during testing)
+
+### Backend Improvements
+- ❌ HTTPS validation on `store_url` at create/update — reject `http://` URLs, require `https://`
+- ❌ Propagate HTTP status codes in adapter error messages — instead of generic "No products found", show actual error (401 Unauthorized, 403 Forbidden, etc.)
+- ❌ Different `test_connection()` response messages for API vs Database connections — currently same generic message for both
+- ❌ Data import endpoints — currently stubs only, need full implementation for bulk product/order data import
+- ✅ Efficient adapter count methods — `get_product_count()` and `get_order_count()` added to all 5 adapters (lightweight API calls / SQL COUNT)
+- ✅ Removed `order_items_count` from stats (no efficient count across platforms)
+- ✅ Settings endpoint returns defaults when no record exists (no more 404)
+- ✅ `pool_pre_ping=True` on DB engine (prevents stale connection errors)
+- ✅ Frontend service envelope unwrapping bug fixed across all services
+- ✅ Widget parameters (lookback_days, method, min_price_increase) passed through to engine
+- ✅ Product images in widget HTML (from adapter data, not placeholders)
+- ✅ ConnectionProvider `initialFetch={true}` (connections load on all pages)
+- ✅ Eye toggle on credential fields in connection detail page
 
 ### Shopify App Store Submission Blockers
-- [ ] GDPR webhooks — implement 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64, not hex)
-- [ ] GraphQL migration — migrate `ShopifyAdapter` from REST Admin API to GraphQL Admin API (REST rejected for new public apps since April 2025)
-- [ ] Shopify Billing API — if distributing through Shopify App Store, integrate Shopify's own billing (required, cannot use external billing for App Store apps)
-- [ ] Shopify Partner Dashboard — register app, set App URL + redirect URLs, get Client ID + Client Secret
-- [ ] `shopify.app.toml` configuration for webhooks and compliance endpoints
+- ❌ GDPR webhooks — implement 3 mandatory compliance endpoints with HMAC-SHA256 verification (Base64, not hex)
+- ❌ GraphQL migration — migrate `ShopifyAdapter` from REST to GraphQL Admin API (REST rejected for new public apps since April 2025)
+- ❌ Shopify Billing API — integrate Shopify's own billing (required for App Store apps, cannot use external billing)
+- ❌ Shopify Partner Dashboard — register app, set App URL + redirect URLs, get Client ID + Client Secret
+- ❌ `shopify.app.toml` configuration for webhooks and compliance endpoints
+
+### Shopify Embedded App UI
+- ❌ App Bridge integration — Shopify apps must render inside Shopify Admin as an iframe
+- ❌ Embedded dashboard pages — connection status, settings, widget preview, analytics, embed codes
+
+### WooCommerce WordPress Plugin (Distribution)
+- ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets
+- ❌ Submit to WordPress Plugin Directory (free listing)
+
+### Magento Adobe Commerce Extension (Distribution)
+- ❌ Magento extension for Adobe Commerce Marketplace — lower priority (smaller market)
+
+### Landing Page + Legal
+- ❌ Landing page — product description, pricing tiers, screenshots, demo, sign-up CTA
+- ❌ Privacy policy — required for all platforms
+- ❌ Terms of service — required for all platforms
 
 ### Nice to Have
-- [ ] Rate limiting integration — wire `check_rate_limit()` into recommendation subrouter or as a router-level dependency
-- [ ] Monthly order count enforcement — check `get_org_monthly_order_count()` against tier limits before processing recommendation requests
-- [ ] Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)
+- ❌ Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)

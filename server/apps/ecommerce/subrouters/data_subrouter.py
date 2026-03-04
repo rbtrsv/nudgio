@@ -158,22 +158,19 @@ async def get_connection_stats(
         # Validate user owns an active connection
         connection = await get_active_connection(connection_id, user.id, db)
 
-        # Get basic counts via adapter
+        # Get data counts via adapter (lightweight count queries, no full data fetch)
         adapter = get_adapter(connection)
-        products = await adapter.get_products(limit=1)
-        orders = await adapter.get_orders(limit=1, lookback_days=365)
-        order_items = await adapter.get_order_items(limit=1, lookback_days=365)
+        products_count = await adapter.get_product_count()
+        orders_count = await adapter.get_order_count(lookback_days=365)
 
-        # Note: Simplified implementation — in practice, use separate count queries
         return ConnectionStatsResponse(
             success=True,
             data=ConnectionStatsDetail(
                 connection_id=connection.id,
                 connection_name=connection.connection_name,
                 platform=connection.platform,
-                products_count=len(products) if products else 0,
-                orders_count=len(orders) if orders else 0,
-                order_items_count=len(order_items) if order_items else 0,
+                products_count=products_count,
+                orders_count=orders_count,
                 last_sync=connection.updated_at,
                 data_freshness_days=30,
             ),
@@ -206,11 +203,10 @@ async def sync_connection_data(
         connection.updated_at = connection.updated_at
         await db.commit()
 
-        # Return current stats
+        # Return current stats (lightweight count queries, no full data fetch)
         adapter = get_adapter(connection)
-        products = await adapter.get_products(limit=1)
-        orders = await adapter.get_orders(limit=1, lookback_days=365)
-        order_items = await adapter.get_order_items(limit=1, lookback_days=365)
+        products_count = await adapter.get_product_count()
+        orders_count = await adapter.get_order_count(lookback_days=365)
 
         return ConnectionStatsResponse(
             success=True,
@@ -218,9 +214,8 @@ async def sync_connection_data(
                 connection_id=connection.id,
                 connection_name=connection.connection_name,
                 platform=connection.platform,
-                products_count=len(products) if products else 0,
-                orders_count=len(orders) if orders else 0,
-                order_items_count=len(order_items) if order_items else 0,
+                products_count=products_count,
+                orders_count=orders_count,
                 last_sync=connection.updated_at,
                 data_freshness_days=30,
             ),

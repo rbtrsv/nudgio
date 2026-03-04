@@ -38,6 +38,50 @@ class MagentoApiAdapter:
             "Content-Type": "application/json",
         }
 
+    async def get_product_count(self) -> int:
+        """Get total product count from Magento REST API via total_count field"""
+        async with aiohttp.ClientSession() as session:
+            params = {
+                "searchCriteria[pageSize]": 1,
+                "searchCriteria[currentPage]": 1,
+                "searchCriteria[filterGroups][0][filters][0][field]": "type_id",
+                "searchCriteria[filterGroups][0][filters][0][value]": "simple,configurable,virtual,downloadable",
+                "searchCriteria[filterGroups][0][filters][0][conditionType]": "in",
+            }
+            async with session.get(
+                f"{self.base_url}/products",
+                headers=self._get_headers(),
+                params=params,
+            ) as response:
+                if response.status != 200:
+                    return 0
+                data = await response.json()
+                return data.get("total_count", 0)
+
+    async def get_order_count(self, lookback_days: int = 365) -> int:
+        """Get total order count from Magento REST API via total_count field"""
+        since_date = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).strftime("%Y-%m-%d %H:%M:%S")
+        async with aiohttp.ClientSession() as session:
+            params = {
+                "searchCriteria[pageSize]": 1,
+                "searchCriteria[currentPage]": 1,
+                "searchCriteria[filterGroups][0][filters][0][field]": "status",
+                "searchCriteria[filterGroups][0][filters][0][value]": "complete,processing",
+                "searchCriteria[filterGroups][0][filters][0][conditionType]": "in",
+                "searchCriteria[filterGroups][1][filters][0][field]": "created_at",
+                "searchCriteria[filterGroups][1][filters][0][value]": since_date,
+                "searchCriteria[filterGroups][1][filters][0][conditionType]": "gteq",
+            }
+            async with session.get(
+                f"{self.base_url}/orders",
+                headers=self._get_headers(),
+                params=params,
+            ) as response:
+                if response.status != 200:
+                    return 0
+                data = await response.json()
+                return data.get("total_count", 0)
+
     async def get_products(self, limit: int = 1000) -> List[Dict[str, Any]]:
         """
         Get products from Magento REST API.

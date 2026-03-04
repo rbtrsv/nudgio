@@ -16,16 +16,16 @@ interface FetchError extends Error {
  */
 export const getConnectionStats = async (connectionId: number): Promise<ConnectionStatsResponse> => {
   try {
-    // Backend returns ConnectionStats object directly
-    const data = await fetchClient<ConnectionStats>(
+    // Backend returns { success, data: ConnectionStats } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: ConnectionStats; error?: string }>(
       DATA_ENDPOINTS.STATS(connectionId),
       { method: 'GET' }
     );
 
     return {
-      success: true,
-      data,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {

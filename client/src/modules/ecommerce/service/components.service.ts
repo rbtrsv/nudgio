@@ -14,6 +14,9 @@ const buildWidgetQuery = (params: WidgetParams): string => {
   searchParams.set('connection_id', String(params.connection_id));
   if (params.product_id) searchParams.set('product_id', params.product_id);
   if (params.top !== undefined) searchParams.set('top', String(params.top));
+  if (params.lookback_days !== undefined) searchParams.set('lookback_days', String(params.lookback_days));
+  if (params.method) searchParams.set('method', params.method);
+  if (params.min_price_increase !== undefined) searchParams.set('min_price_increase_percent', String(params.min_price_increase));
   if (params.style) searchParams.set('style', params.style);
   if (params.device) searchParams.set('device', params.device);
   if (params.primary_color) searchParams.set('primary_color', params.primary_color);

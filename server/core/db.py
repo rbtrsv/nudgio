@@ -11,11 +11,12 @@ DATABASE_URL = settings.DATABASE_URL
 def unique_statement_name():
     return f"__asyncpg_{uuid4().hex}__"
 
-# Engine with minimal pgbouncer compatibility  
+# Engine with minimal pgbouncer compatibility
 engine = create_async_engine(
     DATABASE_URL,
     echo=settings.DEBUG,
     future=True,
+    pool_pre_ping=True,
     connect_args={
         "statement_cache_size": 0,
         "prepared_statement_cache_size": 0

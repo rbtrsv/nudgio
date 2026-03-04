@@ -25,7 +25,6 @@ export const ConnectionStatsSchema = z.object({
   platform: z.string(),
   products_count: z.number(),
   orders_count: z.number(),
-  order_items_count: z.number(),
   last_sync: z.string().nullable(),
   data_freshness_days: z.number().nullable(),
 });

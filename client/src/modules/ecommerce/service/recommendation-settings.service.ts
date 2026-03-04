@@ -23,16 +23,16 @@ interface FetchError extends Error {
  */
 export const getSettings = async (connectionId: number): Promise<SettingsResponse> => {
   try {
-    // Backend returns the settings object directly
-    const data = await fetchClient<RecommendationSettings>(
+    // Backend returns { success, data: RecommendationSettings } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: RecommendationSettings; error?: string }>(
       SETTINGS_ENDPOINTS.DETAIL(connectionId),
       { method: 'GET' }
     );
 
     return {
-      success: true,
-      data,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {
@@ -54,16 +54,16 @@ export const getSettings = async (connectionId: number): Promise<SettingsRespons
  */
 export const getAllSettings = async (): Promise<SettingsListResponse> => {
   try {
-    // Backend returns array of ConnectionSettings directly
-    const data = await fetchClient<ConnectionSettings[]>(
+    // Backend returns { success, data: ConnectionSettings[], count } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: ConnectionSettings[]; count: number; error?: string }>(
       SETTINGS_ENDPOINTS.LIST,
       { method: 'GET' }
     );
 
     return {
-      success: true,
-      data,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     if ((error as FetchError)?.status === 401) {
@@ -93,16 +93,16 @@ export const createOrUpdateSettings = async (
   CreateOrUpdateSettingsSchema.parse(data);
 
   try {
-    // Backend returns the settings object directly
-    const settings = await fetchClient<RecommendationSettings>(
+    // Backend returns { success, data: RecommendationSettings } — unwrap the envelope
+    const response = await fetchClient<{ success: boolean; data: RecommendationSettings; error?: string }>(
       SETTINGS_ENDPOINTS.CREATE_OR_UPDATE(connectionId),
       { method: 'POST', body: data as unknown as Record<string, unknown> }
     );
 
     return {
-      success: true,
-      data: settings,
-      error: undefined,
+      success: response.success,
+      data: response.data,
+      error: response.error,
     };
   } catch (error) {
     return {

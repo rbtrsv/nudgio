@@ -8,6 +8,7 @@ from apps.accounts.models import User
 from apps.accounts.utils.auth_utils import get_current_user
 from ..models import EcommerceConnection, RecommendationSettings
 from ..schemas.ecommerce_connection_schemas import PlatformType
+from ..schemas.recommendation_schemas import BestsellerMethod
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
 from ..utils.dependency_utils import get_active_connection
@@ -49,6 +50,8 @@ def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[Re
 async def get_bestsellers_component(
     connection_id: int = Query(..., description="Connection ID to use for recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
+    lookback_days: int = Query(30, description="Number of days to look back for order data"),
+    method: str = Query("volume", description="Bestseller calculation method: volume, value, or balanced"),
     style: str = Query("card", description="Component style: card, carousel, list"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
@@ -61,7 +64,7 @@ async def get_bestsellers_component(
     """Get bestsellers HTML component"""
     try:
         connection = await get_active_connection(connection_id, current_user.id, session)
-        
+
         # Get shop URL settings
         settings_result = await session.execute(
             select(RecommendationSettings).where(
@@ -69,14 +72,16 @@ async def get_bestsellers_component(
             )
         )
         settings = settings_result.scalar_one_or_none()
-        
+
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
-        
+
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
-        
-        recs = await engine.get_bestsellers(limit=top)
+
+        # Map method string to enum
+        method_enum = BestsellerMethod(method) if method in [m.value for m in BestsellerMethod] else BestsellerMethod.VOLUME
+        recs = await engine.get_bestsellers(limit=top, lookback_days=lookback_days, method=method_enum)
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -104,6 +109,7 @@ async def get_cross_sell_component(
     connection_id: int = Query(..., description="Connection ID to use for recommendations"),
     product_id: str = Query(..., description="Product ID for cross-sell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
+    lookback_days: int = Query(30, description="Number of days to look back for order data"),
     style: str = Query("card", description="Component style: card, carousel, list"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
@@ -131,7 +137,7 @@ async def get_cross_sell_component(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
-        recs = await engine.get_cross_sell(product_id=product_id, limit=top)
+        recs = await engine.get_cross_sell(product_id=product_id, limit=top, lookback_days=lookback_days)
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -159,6 +165,7 @@ async def get_upsell_component(
     connection_id: int = Query(..., description="Connection ID to use for recommendations"),
     product_id: str = Query(..., description="Product ID for upsell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
+    min_price_increase_percent: int = Query(10, description="Minimum price increase percentage for upsell candidates"),
     style: str = Query("card", description="Component style: card, carousel, list"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
@@ -186,7 +193,7 @@ async def get_upsell_component(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
-        recs = await engine.get_upsell(product_id=product_id, limit=top)
+        recs = await engine.get_upsell(product_id=product_id, limit=top, min_price_increase_percent=min_price_increase_percent)
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -378,6 +385,7 @@ def generate_desktop_cards(recommendations: List[Dict], colors: Dict[str, str], 
         price = rec.get('price', '0.00')
         handle = rec.get('handle', '')
         position = rec.get('position', 1)
+        image_url = rec.get('image_url', '')
         
         # Build product URL
         if shop_urls.get("product_template") and shop_urls.get("base_url"):
@@ -394,7 +402,7 @@ def generate_desktop_cards(recommendations: List[Dict], colors: Dict[str, str], 
         <div class="w-full bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1" 
              style="border-radius: {border_radius}; background-color: {colors['bg']}">
             <div class="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-                <img src="https://via.placeholder.com/300x300?text=Product+Image" 
+                <img src="{image_url or 'https://via.placeholder.com/300x300?text=No+Image'}"
                      alt="{title}"
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                      loading="lazy">
@@ -433,6 +441,7 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
         price = rec.get('price', '0.00')
         handle = rec.get('handle', '')
         position = rec.get('position', 1)
+        image_url = rec.get('image_url', '')
         
         # Build product URL
         if shop_urls.get("product_template") and shop_urls.get("base_url"):
@@ -449,7 +458,7 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
         <div class="flex-none w-64 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300" 
              style="border-radius: {border_radius}; background-color: {colors['bg']}">
             <div class="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-                <img src="https://via.placeholder.com/250x250?text=Product" 
+                <img src="{image_url or 'https://via.placeholder.com/250x250?text=No+Image'}"
                      alt="{title}"
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
             </div>
@@ -503,7 +512,7 @@ def generate_mobile_cards(recommendations: List[Dict], colors: Dict[str, str], s
         <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
              style="background-color: {colors['bg']}">
             <div class="aspect-square bg-gray-100 overflow-hidden">
-                <img src="https://via.placeholder.com/200x200?text=Product" 
+                <img src="{image_url or 'https://via.placeholder.com/200x200?text=No+Image'}"
                      alt="{title}"
                      class="w-full h-full object-cover">
             </div>
