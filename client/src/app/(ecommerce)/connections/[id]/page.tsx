@@ -96,6 +96,7 @@ export default function ConnectionDetailPage() {
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{connection.connection_name}</h1>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="secondary" className="capitalize">{connection.platform}</Badge>
+              <Badge variant="outline" className="uppercase">{connection.connection_method}</Badge>
               <Badge variant={connection.is_active ? 'default' : 'secondary'}>
                 {connection.is_active ? 'Active' : 'Inactive'}
               </Badge>
@@ -112,25 +113,41 @@ export default function ConnectionDetailPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-sm text-muted-foreground">Host</p>
-              <p className="font-medium">{connection.db_host}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Port</p>
-              <p className="font-medium">{connection.db_port}</p>
-            </div>
-            {connection.db_name && (
+            {/* API connection fields */}
+            {connection.connection_method === 'api' && connection.store_url && (
               <div>
-                <p className="text-sm text-muted-foreground">Database</p>
-                <p className="font-medium">{connection.db_name}</p>
+                <p className="text-sm text-muted-foreground">Store URL</p>
+                <p className="font-medium">{connection.store_url}</p>
               </div>
             )}
-            {connection.db_user && (
-              <div>
-                <p className="text-sm text-muted-foreground">User</p>
-                <p className="font-medium">{connection.db_user}</p>
-              </div>
+            {/* Database connection fields */}
+            {connection.connection_method === 'database' && (
+              <>
+                {connection.db_host && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Database Host</p>
+                    <p className="font-medium">{connection.db_host}</p>
+                  </div>
+                )}
+                {connection.db_port && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Port</p>
+                    <p className="font-medium">{connection.db_port}</p>
+                  </div>
+                )}
+                {connection.db_name && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Database Name</p>
+                    <p className="font-medium">{connection.db_name}</p>
+                  </div>
+                )}
+                {connection.db_user && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Database User</p>
+                    <p className="font-medium">{connection.db_user}</p>
+                  </div>
+                )}
+              </>
             )}
             <div>
               <p className="text-sm text-muted-foreground">Created</p>
@@ -150,7 +167,7 @@ export default function ConnectionDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle>Test Connection</CardTitle>
-          <CardDescription>Verify database connectivity and sample data</CardDescription>
+          <CardDescription>Verify connectivity and sample data</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {testResult && (

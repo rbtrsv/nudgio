@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
@@ -9,15 +10,38 @@ import { Badge } from '@/modules/shadcnui/components/ui/badge';
 import { PlugZap, Plus, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ConnectionsPage() {
+function ConnectionsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     connections,
     isLoading,
     error,
     activeConnection,
     setActiveConnection,
+    fetchConnections,
   } = useConnections();
+
+  // OAuth / auto-auth success message
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Detect OAuth/auth redirect params and show success alert
+  useEffect(() => {
+    const shopifyConnected = searchParams.get('shopify_connected');
+    const wcConnected = searchParams.get('wc_connected');
+
+    if (shopifyConnected === 'true') {
+      setSuccessMessage('Shopify store connected successfully!');
+      // Refresh connections list to include the new connection
+      fetchConnections();
+      // Clean up the URL
+      router.replace('/connections');
+    } else if (wcConnected === 'true') {
+      setSuccessMessage('WooCommerce store connected successfully!');
+      fetchConnections();
+      router.replace('/connections');
+    }
+  }, [searchParams, fetchConnections, router]);
 
   if (isLoading) {
     return (
@@ -51,6 +75,14 @@ export default function ConnectionsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* OAuth / auto-auth success alert */}
+      {successMessage && (
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
+      )}
 
       <div>
         {connections.length === 0 ? (
@@ -91,17 +123,30 @@ export default function ConnectionsPage() {
                     <PlugZap className="h-5 w-5" />
                     {conn.connection_name}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="flex gap-2">
                     <Badge variant="secondary" className="capitalize">
                       {conn.platform}
+                    </Badge>
+                    <Badge variant="outline" className="uppercase">
+                      {conn.connection_method}
                     </Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <div className="text-sm">
-                      <span className="text-muted-foreground">Host: </span>
-                      {conn.db_host}
+                      {/* Show store_url for API connections, db_host for database connections */}
+                      {conn.connection_method === 'api' ? (
+                        <>
+                          <span className="text-muted-foreground">Store: </span>
+                          {conn.store_url || '—'}
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-muted-foreground">Host: </span>
+                          {conn.db_host || '—'}
+                        </>
+                      )}
                     </div>
                     <div className="text-sm">
                       <span className="text-muted-foreground">Status: </span>
@@ -135,5 +180,18 @@ export default function ConnectionsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Suspense boundary required by Next.js for useSearchParams()
+export default function ConnectionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <ConnectionsPageContent />
+    </Suspense>
   );
 }

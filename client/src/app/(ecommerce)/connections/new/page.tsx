@@ -1,52 +1,198 @@
 'use client';
 
-import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
-import { CreateConnectionSchema, type PlatformType } from '@/modules/ecommerce/schemas/ecommerce-connections.schema';
+import { type PlatformType } from '@/modules/ecommerce/schemas/ecommerce-connections.schema';
+import { initiateShopifyOAuth, initiateWooCommerceAuth } from '@/modules/ecommerce/service/ecommerce-connections.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';
 import { Label } from '@/modules/shadcnui/components/ui/label';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/modules/shadcnui/components/ui/tabs';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+// Default connection method tab per platform
+const DEFAULT_TAB: Record<PlatformType, string> = {
+  shopify: 'oauth',
+  woocommerce: 'auto-auth',
+  magento: 'api',
+};
+
 export default function CreateConnectionPage() {
   const router = useRouter();
-  const { createConnection, error: storeError } = useConnections();
+  const { createConnection, error: storeError, clearError } = useConnections();
 
-  const form = useForm({
-    defaultValues: {
-      connection_name: '',
-      platform: 'shopify' as PlatformType,
-      db_host: '',
-      db_name: '',
-      db_user: '',
-      db_password: '',
-      db_port: 443,
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        // Validate with Zod
-        const validation = CreateConnectionSchema.safeParse(value);
-        if (!validation.success) {
-          return;
-        }
+  // Platform & connection method tab
+  const [platform, setPlatform] = useState<PlatformType>('shopify');
+  const [activeTab, setActiveTab] = useState('oauth');
 
-        const success = await createConnection(value);
+  // OAuth / Auto-Auth state
+  const [oauthStore, setOauthStore] = useState('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
-        if (success) {
-          router.push('/connections');
-        }
-        // Error is handled by store and displayed via storeError
-      } catch {
-        // Swallow — ensures TanStack Form resets isSubmitting on unhandled errors
+  // Manual / Database form state
+  const [connectionName, setConnectionName] = useState('');
+  const [storeUrl, setStoreUrl] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [apiSecret, setApiSecret] = useState('');
+  const [dbHost, setDbHost] = useState('');
+  const [dbName, setDbName] = useState('');
+  const [dbUser, setDbUser] = useState('');
+  const [dbPassword, setDbPassword] = useState('');
+  const [dbPort, setDbPort] = useState(3306);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Reset form when platform changes
+  const handlePlatformChange = (newPlatform: PlatformType) => {
+    setPlatform(newPlatform);
+    setActiveTab(DEFAULT_TAB[newPlatform]);
+    setOauthStore('');
+    setOauthError(null);
+    setConnectionName('');
+    setStoreUrl('');
+    setApiKey('');
+    setApiSecret('');
+    setDbHost('');
+    setDbName('');
+    setDbUser('');
+    setDbPassword('');
+    setDbPort(3306);
+    setValidationError(null);
+    clearError();
+  };
+
+  // Clear errors when switching tabs
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setValidationError(null);
+    setOauthError(null);
+  };
+
+  // Handle Shopify OAuth redirect
+  const handleShopifyOAuth = async () => {
+    if (!oauthStore.trim()) {
+      setOauthError('Store domain is required');
+      return;
+    }
+    setOauthError(null);
+    setIsRedirecting(true);
+    try {
+      const result = await initiateShopifyOAuth(oauthStore.trim());
+      if (result.success && result.auth_url) {
+        // Redirect merchant to Shopify consent screen
+        window.location.href = result.auth_url;
+      } else {
+        setOauthError(result.error || 'Failed to initiate Shopify OAuth');
+        setIsRedirecting(false);
       }
-    },
-  });
+    } catch {
+      setOauthError('An unexpected error occurred');
+      setIsRedirecting(false);
+    }
+  };
+
+  // Handle WooCommerce auto-auth redirect
+  const handleWooCommerceAuth = async () => {
+    if (!oauthStore.trim()) {
+      setOauthError('Store URL is required');
+      return;
+    }
+    setOauthError(null);
+    setIsRedirecting(true);
+    try {
+      const result = await initiateWooCommerceAuth(oauthStore.trim());
+      if (result.success && result.auth_url) {
+        // Redirect merchant to WooCommerce permission screen
+        window.location.href = result.auth_url;
+      } else {
+        setOauthError(result.error || 'Failed to initiate WooCommerce auth');
+        setIsRedirecting(false);
+      }
+    } catch {
+      setOauthError('An unexpected error occurred');
+      setIsRedirecting(false);
+    }
+  };
+
+  // Handle manual form submission (API or Database connection methods)
+  const handleManualSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+
+    // Validate connection name
+    if (connectionName.trim().length < 3) {
+      setValidationError('Connection name must be at least 3 characters');
+      return;
+    }
+
+    const isDatabase = activeTab === 'database';
+
+    // Validate fields based on connection method
+    if (isDatabase) {
+      if (!dbHost.trim()) {
+        setValidationError('Database host is required');
+        return;
+      }
+      if (!dbPassword) {
+        setValidationError('Database password is required');
+        return;
+      }
+    } else {
+      if (!storeUrl.trim()) {
+        setValidationError('Store URL is required');
+        return;
+      }
+      // WooCommerce API requires both consumer_key and consumer_secret
+      if (platform === 'woocommerce' && !apiKey) {
+        setValidationError('Consumer key is required');
+        return;
+      }
+      if (!apiSecret) {
+        setValidationError(
+          platform === 'woocommerce' ? 'Consumer secret is required' : 'Access token is required'
+        );
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+    try {
+      const success = await createConnection({
+        connection_name: connectionName.trim(),
+        platform,
+        connection_method: isDatabase ? 'database' : 'api',
+        // API fields (null when database)
+        store_url: isDatabase ? null : storeUrl.trim() || null,
+        api_key: isDatabase ? null : apiKey || null,
+        api_secret: isDatabase ? null : apiSecret || null,
+        // Database fields (null when API)
+        db_host: isDatabase ? dbHost.trim() : null,
+        db_name: isDatabase ? dbName || null : null,
+        db_user: isDatabase ? dbUser || null : null,
+        db_password: isDatabase ? dbPassword || null : null,
+        db_port: isDatabase ? dbPort : null,
+      });
+
+      if (success) {
+        router.push('/connections');
+      }
+      // Error is handled by store and displayed via storeError
+    } catch {
+      // Swallow — store handles error display
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Combined error display
+  const displayError = oauthError || validationError || storeError;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 px-4 sm:px-0">
@@ -63,253 +209,533 @@ export default function CreateConnectionPage() {
         </p>
       </div>
 
-      {storeError && (
+      {displayError && (
         <Alert variant="destructive">
-          <AlertDescription>{storeError}</AlertDescription>
+          <AlertDescription>{displayError}</AlertDescription>
         </Alert>
       )}
 
+      {/* Platform Selector */}
       <Card>
         <CardHeader>
-          <CardTitle>Connection Details</CardTitle>
-          <CardDescription>
-            Enter your ecommerce platform connection details
-          </CardDescription>
+          <CardTitle>Platform</CardTitle>
+          <CardDescription>Select your ecommerce platform</CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              form.handleSubmit();
-            }}
+          <Select
+            value={platform}
+            onValueChange={(value) => handlePlatformChange(value as PlatformType)}
           >
-            <div className="space-y-4">
-              {/* Connection Name */}
-              <form.Field
-                name="connection_name"
-                validators={{
-                  onChange: ({ value }) => {
-                    if (value.length < 3) return 'Connection name must be at least 3 characters';
-                    return undefined;
-                  },
-                }}
-              >
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>Connection Name</Label>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="e.g., My Shopify Store"
-                      disabled={form.state.isSubmitting}
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive">
-                        {field.state.meta.errors[0]}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </form.Field>
-
-              {/* Platform */}
-              <form.Field name="platform">
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>Platform</Label>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => {
-                        field.handleChange(value as PlatformType);
-                        // Update default port based on platform
-                        if (value === 'shopify') {
-                          form.setFieldValue('db_port', 443);
-                        } else {
-                          form.setFieldValue('db_port', 3306);
-                        }
-                      }}
-                      disabled={form.state.isSubmitting}
-                    >
-                      <SelectTrigger id={field.name}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="shopify">Shopify</SelectItem>
-                        <SelectItem value="woocommerce">WooCommerce</SelectItem>
-                        <SelectItem value="magento">Magento</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </form.Field>
-
-              {/* Host */}
-              <form.Field
-                name="db_host"
-                validators={{
-                  onChange: ({ value }) => {
-                    if (!value) return 'Host is required';
-                    return undefined;
-                  },
-                }}
-              >
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>
-                      {form.getFieldValue('platform') === 'shopify' ? 'Store Domain' : 'Database Host'}
-                    </Label>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder={
-                        form.getFieldValue('platform') === 'shopify'
-                          ? 'mystore.myshopify.com'
-                          : 'localhost or IP address'
-                      }
-                      disabled={form.state.isSubmitting}
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive">
-                        {field.state.meta.errors[0]}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </form.Field>
-
-              {/* Database Name — hidden for Shopify */}
-              {form.getFieldValue('platform') !== 'shopify' && (
-                <form.Field name="db_name">
-                  {(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name}>Database Name</Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="e.g., woocommerce_db"
-                        disabled={form.state.isSubmitting}
-                      />
-                    </div>
-                  )}
-                </form.Field>
-              )}
-
-              {/* Database User — hidden for Shopify */}
-              {form.getFieldValue('platform') !== 'shopify' && (
-                <form.Field name="db_user">
-                  {(field) => (
-                    <div className="space-y-2">
-                      <Label htmlFor={field.name}>Database User</Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="e.g., db_user"
-                        disabled={form.state.isSubmitting}
-                      />
-                    </div>
-                  )}
-                </form.Field>
-              )}
-
-              {/* Password / Access Token */}
-              <form.Field
-                name="db_password"
-                validators={{
-                  onChange: ({ value }) => {
-                    if (!value) return 'Password / access token is required';
-                    return undefined;
-                  },
-                }}
-              >
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>
-                      {form.getFieldValue('platform') === 'shopify' ? 'Access Token' : 'Database Password'}
-                    </Label>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder={
-                        form.getFieldValue('platform') === 'shopify'
-                          ? 'shpat_xxxxxxxx'
-                          : 'Database password'
-                      }
-                      disabled={form.state.isSubmitting}
-                    />
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive">
-                        {field.state.meta.errors[0]}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </form.Field>
-
-              {/* Port */}
-              <form.Field name="db_port">
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor={field.name}>Port</Label>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="number"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(parseInt(e.target.value) || 0)}
-                      disabled={form.state.isSubmitting}
-                    />
-                  </div>
-                )}
-              </form.Field>
-
-              <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row">
-                <Button
-                  type="submit"
-                  disabled={form.state.isSubmitting}
-                  className="flex-1"
-                >
-                  {form.state.isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create Connection'
-                  )}
-                </Button>
-                <Link href="/connections" className="flex-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={form.state.isSubmitting}
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </form>
+            <SelectTrigger className="w-full sm:w-80">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="shopify">Shopify</SelectItem>
+              <SelectItem value="woocommerce">WooCommerce</SelectItem>
+              <SelectItem value="magento">Magento</SelectItem>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
+
+      {/* ==========================================
+          Shopify — OAuth (Recommended) | Manual API
+          ========================================== */}
+      {platform === 'shopify' && (
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="oauth">OAuth (Recommended)</TabsTrigger>
+            <TabsTrigger value="api">Manual API</TabsTrigger>
+          </TabsList>
+
+          {/* Shopify OAuth */}
+          <TabsContent value="oauth">
+            <Card>
+              <CardHeader>
+                <CardTitle>Connect with Shopify</CardTitle>
+                <CardDescription>
+                  Authorize Nudgio via Shopify OAuth. You will be redirected to Shopify to approve access.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="shopify-oauth-store">Store Domain</Label>
+                  <Input
+                    id="shopify-oauth-store"
+                    value={oauthStore}
+                    onChange={(e) => setOauthStore(e.target.value)}
+                    placeholder="mystore.myshopify.com"
+                    disabled={isRedirecting}
+                  />
+                </div>
+                <Button onClick={handleShopifyOAuth} disabled={isRedirecting}>
+                  {isRedirecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Redirecting to Shopify...
+                    </>
+                  ) : (
+                    'Connect with Shopify'
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Shopify Manual API */}
+          <TabsContent value="api">
+            <Card>
+              <CardHeader>
+                <CardTitle>Manual API Setup</CardTitle>
+                <CardDescription>
+                  Enter your Shopify store domain and access token manually.
+                  Get your access token from Shopify Admin &rarr; Apps &rarr; Develop apps.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="shopify-api-name">Connection Name</Label>
+                    <Input
+                      id="shopify-api-name"
+                      value={connectionName}
+                      onChange={(e) => setConnectionName(e.target.value)}
+                      placeholder="e.g., My Shopify Store"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="shopify-api-store-url">Store Domain</Label>
+                    <Input
+                      id="shopify-api-store-url"
+                      value={storeUrl}
+                      onChange={(e) => setStoreUrl(e.target.value)}
+                      placeholder="mystore.myshopify.com"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="shopify-api-secret">Access Token</Label>
+                    <Input
+                      id="shopify-api-secret"
+                      type="password"
+                      value={apiSecret}
+                      onChange={(e) => setApiSecret(e.target.value)}
+                      placeholder="shpat_xxxxxxxx"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Connection'
+                      )}
+                    </Button>
+                    <Link href="/connections" className="flex-1">
+                      <Button type="button" variant="outline" disabled={isSubmitting} className="w-full">
+                        Cancel
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {/* ==========================================
+          WooCommerce — Auto-Auth | REST API | Database
+          ========================================== */}
+      {platform === 'woocommerce' && (
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="auto-auth">Auto-Auth</TabsTrigger>
+            <TabsTrigger value="api">REST API</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
+          </TabsList>
+
+          {/* WooCommerce Auto-Auth */}
+          <TabsContent value="auto-auth">
+            <Card>
+              <CardHeader>
+                <CardTitle>Connect WooCommerce</CardTitle>
+                <CardDescription>
+                  Authorize Nudgio directly from your WooCommerce store.
+                  You will be redirected to your store to approve access.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="wc-auth-store-url">Store URL</Label>
+                  <Input
+                    id="wc-auth-store-url"
+                    value={oauthStore}
+                    onChange={(e) => setOauthStore(e.target.value)}
+                    placeholder="https://mystore.com"
+                    disabled={isRedirecting}
+                  />
+                </div>
+                <Button onClick={handleWooCommerceAuth} disabled={isRedirecting}>
+                  {isRedirecting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Redirecting to WooCommerce...
+                    </>
+                  ) : (
+                    'Connect WooCommerce'
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* WooCommerce Manual REST API */}
+          <TabsContent value="api">
+            <Card>
+              <CardHeader>
+                <CardTitle>Manual REST API Setup</CardTitle>
+                <CardDescription>
+                  Enter your WooCommerce REST API credentials.
+                  Get them from WooCommerce &rarr; Settings &rarr; Advanced &rarr; REST API &rarr; Add Key.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-api-name">Connection Name</Label>
+                    <Input
+                      id="wc-api-name"
+                      value={connectionName}
+                      onChange={(e) => setConnectionName(e.target.value)}
+                      placeholder="e.g., My WooCommerce Store"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-api-store-url">Store URL</Label>
+                    <Input
+                      id="wc-api-store-url"
+                      value={storeUrl}
+                      onChange={(e) => setStoreUrl(e.target.value)}
+                      placeholder="https://mystore.com"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-api-key">Consumer Key</Label>
+                    <Input
+                      id="wc-api-key"
+                      value={apiKey}
+                      onChange={(e) => setApiKey(e.target.value)}
+                      placeholder="ck_xxxxxxxx"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-api-secret">Consumer Secret</Label>
+                    <Input
+                      id="wc-api-secret"
+                      type="password"
+                      value={apiSecret}
+                      onChange={(e) => setApiSecret(e.target.value)}
+                      placeholder="cs_xxxxxxxx"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Connection'
+                      )}
+                    </Button>
+                    <Link href="/connections" className="flex-1">
+                      <Button type="button" variant="outline" disabled={isSubmitting} className="w-full">
+                        Cancel
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* WooCommerce Database */}
+          <TabsContent value="database">
+            <Card>
+              <CardHeader>
+                <CardTitle>Database Connection</CardTitle>
+                <CardDescription>
+                  Connect directly to your WooCommerce MySQL database. Advanced option for power users.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-db-conn-name">Connection Name</Label>
+                    <Input
+                      id="wc-db-conn-name"
+                      value={connectionName}
+                      onChange={(e) => setConnectionName(e.target.value)}
+                      placeholder="e.g., My WooCommerce Store (DB)"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-db-host">Database Host</Label>
+                    <Input
+                      id="wc-db-host"
+                      value={dbHost}
+                      onChange={(e) => setDbHost(e.target.value)}
+                      placeholder="localhost or IP address"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-db-name">Database Name</Label>
+                    <Input
+                      id="wc-db-name"
+                      value={dbName}
+                      onChange={(e) => setDbName(e.target.value)}
+                      placeholder="e.g., woocommerce_db"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-db-user">Database User</Label>
+                    <Input
+                      id="wc-db-user"
+                      value={dbUser}
+                      onChange={(e) => setDbUser(e.target.value)}
+                      placeholder="e.g., db_user"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-db-password">Database Password</Label>
+                    <Input
+                      id="wc-db-password"
+                      type="password"
+                      value={dbPassword}
+                      onChange={(e) => setDbPassword(e.target.value)}
+                      placeholder="Database password"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="wc-db-port">Port</Label>
+                    <Input
+                      id="wc-db-port"
+                      type="number"
+                      value={dbPort}
+                      onChange={(e) => setDbPort(parseInt(e.target.value) || 3306)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Connection'
+                      )}
+                    </Button>
+                    <Link href="/connections" className="flex-1">
+                      <Button type="button" variant="outline" disabled={isSubmitting} className="w-full">
+                        Cancel
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {/* ==========================================
+          Magento — REST API (Recommended) | Database
+          ========================================== */}
+      {platform === 'magento' && (
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="api">REST API (Recommended)</TabsTrigger>
+            <TabsTrigger value="database">Database</TabsTrigger>
+          </TabsList>
+
+          {/* Magento REST API */}
+          <TabsContent value="api">
+            <Card>
+              <CardHeader>
+                <CardTitle>REST API Setup</CardTitle>
+                <CardDescription>
+                  Enter your Magento store URL and integration access token.
+                  Get it from Magento Admin &rarr; System &rarr; Integrations &rarr; Add New &rarr; Activate.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-api-name">Connection Name</Label>
+                    <Input
+                      id="mg-api-name"
+                      value={connectionName}
+                      onChange={(e) => setConnectionName(e.target.value)}
+                      placeholder="e.g., My Magento Store"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-api-store-url">Store URL</Label>
+                    <Input
+                      id="mg-api-store-url"
+                      value={storeUrl}
+                      onChange={(e) => setStoreUrl(e.target.value)}
+                      placeholder="https://mymagento.com"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-api-secret">Access Token</Label>
+                    <Input
+                      id="mg-api-secret"
+                      type="password"
+                      value={apiSecret}
+                      onChange={(e) => setApiSecret(e.target.value)}
+                      placeholder="Integration access token"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Connection'
+                      )}
+                    </Button>
+                    <Link href="/connections" className="flex-1">
+                      <Button type="button" variant="outline" disabled={isSubmitting} className="w-full">
+                        Cancel
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Magento Database */}
+          <TabsContent value="database">
+            <Card>
+              <CardHeader>
+                <CardTitle>Database Connection</CardTitle>
+                <CardDescription>
+                  Connect directly to your Magento MySQL database. Advanced option for power users.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-db-conn-name">Connection Name</Label>
+                    <Input
+                      id="mg-db-conn-name"
+                      value={connectionName}
+                      onChange={(e) => setConnectionName(e.target.value)}
+                      placeholder="e.g., My Magento Store (DB)"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-db-host">Database Host</Label>
+                    <Input
+                      id="mg-db-host"
+                      value={dbHost}
+                      onChange={(e) => setDbHost(e.target.value)}
+                      placeholder="localhost or IP address"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-db-name">Database Name</Label>
+                    <Input
+                      id="mg-db-name"
+                      value={dbName}
+                      onChange={(e) => setDbName(e.target.value)}
+                      placeholder="e.g., magento_db"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-db-user">Database User</Label>
+                    <Input
+                      id="mg-db-user"
+                      value={dbUser}
+                      onChange={(e) => setDbUser(e.target.value)}
+                      placeholder="e.g., db_user"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-db-password">Database Password</Label>
+                    <Input
+                      id="mg-db-password"
+                      type="password"
+                      value={dbPassword}
+                      onChange={(e) => setDbPassword(e.target.value)}
+                      placeholder="Database password"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="mg-db-port">Port</Label>
+                    <Input
+                      id="mg-db-port"
+                      type="number"
+                      value={dbPort}
+                      onChange={(e) => setDbPort(parseInt(e.target.value) || 3306)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                    <Button type="submit" disabled={isSubmitting} className="flex-1">
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create Connection'
+                      )}
+                    </Button>
+                    <Link href="/connections" className="flex-1">
+                      <Button type="button" variant="outline" disabled={isSubmitting} className="w-full">
+                        Cancel
+                      </Button>
+                    </Link>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }

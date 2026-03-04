@@ -83,8 +83,10 @@ Same if/elif/elif block creating adapters exists in:
 
 ### Frontend (`client/src/`)
 
-- `modules/ecommerce/schemas/connection.schema.ts` — `platformTypeEnum`, `CreateConnectionSchema` with `db_*` fields
-- `app/(ecommerce)/connections/new/page.tsx` — TanStack Form, shows different labels per platform (Shopify: "Store Domain"/"Access Token", others: "Database Host"/"Database Password"), hides `db_name`/`db_user` for Shopify
+- `modules/ecommerce/schemas/ecommerce-connections.schema.ts` — `platformTypeEnum`, `connectionMethodEnum`, `CreateConnectionSchema` with API + DB fields
+- `modules/ecommerce/utils/api.endpoints.ts` — Shopify OAuth + WooCommerce auth endpoints added
+- `modules/ecommerce/service/ecommerce-connections.service.ts` — `initiateShopifyOAuth()` + `initiateWooCommerceAuth()` added
+- `app/(ecommerce)/connections/new/page.tsx` — TanStack Form, shows different labels per platform (Shopify: "Store Domain"/"Access Token", others: "Database Host"/"Database Password"), hides `db_name`/`db_user` for Shopify — **needs redesign for G10**
 
 ---
 
@@ -1118,7 +1120,7 @@ ecommerce_router.include_router(shopify_oauth_router)
 
 ### Phase G: Frontend Updates
 
-#### G1. Update `client/src/modules/ecommerce/schemas/connection.schema.ts`
+#### G1. Update `client/src/modules/ecommerce/schemas/ecommerce-connections.schema.ts`
 
 Add `connectionMethodEnum` (`api`, `database`).
 Add `connection_method`, `store_url` to `ConnectionSchema`.
@@ -1152,7 +1154,7 @@ Show different fields based on platform + connection method:
 - REST API mode: `store_url`, `api_secret` (integration access token)
 - Database mode: `db_host`, `db_name`, `db_user`, `db_password`, `db_port`
 
-#### G4. Update `client/src/modules/ecommerce/service/connections.service.ts`
+#### G4. Update `client/src/modules/ecommerce/service/ecommerce-connections.service.ts`
 
 Add `initiateShopifyOAuth(shop: string)` → calls auth endpoint → returns auth URL.
 
@@ -1166,9 +1168,9 @@ Show `store_url` instead of `db_host` for API connections.
 Add success alert when redirected from Shopify OAuth with `?shopify_connected=true`.
 
 #### Files:
-- `client/src/modules/ecommerce/schemas/connection.schema.ts`
+- `client/src/modules/ecommerce/schemas/ecommerce-connections.schema.ts`
 - `client/src/modules/ecommerce/utils/api.endpoints.ts`
-- `client/src/modules/ecommerce/service/connections.service.ts`
+- `client/src/modules/ecommerce/service/ecommerce-connections.service.ts`
 - `client/src/app/(ecommerce)/connections/new/page.tsx`
 - `client/src/app/(ecommerce)/connections/[id]/page.tsx`
 - `client/src/app/(ecommerce)/connections/page.tsx`
@@ -1189,9 +1191,9 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 10. `server/apps/ecommerce/subrouters/shopify_oauth_subrouter.py` — Shopify OAuth flow endpoints
 11. `server/apps/ecommerce/subrouters/woocommerce_auth_subrouter.py` — WooCommerce auto-auth callback
 12. `server/apps/ecommerce/router.py` — register both new subrouters
-13. `client/src/modules/ecommerce/schemas/connection.schema.ts` — add connectionMethod + API fields
+13. `client/src/modules/ecommerce/schemas/ecommerce-connections.schema.ts` — add connectionMethod + API fields
 14. `client/src/modules/ecommerce/utils/api.endpoints.ts` — add Shopify OAuth + WooCommerce auth endpoints
-15. `client/src/modules/ecommerce/service/connections.service.ts` — add initiateShopifyOAuth + initiateWooCommerceAuth
+15. `client/src/modules/ecommerce/service/ecommerce-connections.service.ts` — add initiateShopifyOAuth + initiateWooCommerceAuth
 16. `client/src/app/(ecommerce)/connections/new/page.tsx` — redesign form per platform
 17. `client/src/app/(ecommerce)/connections/[id]/page.tsx` — show connection_method badge
 18. `client/src/app/(ecommerce)/connections/page.tsx` — OAuth/auth success handling for both Shopify + WooCommerce
@@ -1284,9 +1286,15 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - [x] F4. Register Shopify OAuth subrouter in `router.py`
 
 ### Phase G: Frontend Updates
-- [ ] G1. Update `schemas/connection.schema.ts` — add `connectionMethodEnum` (`api`, `database`), add `connection_method`, `store_url`, `api_key`, `api_secret` fields
-- [ ] G2. Update `utils/api.endpoints.ts` — add Shopify OAuth + WooCommerce auth endpoints
-- [ ] G3. Update `service/connections.service.ts` — add `initiateShopifyOAuth(shop)` + `initiateWooCommerceAuth(store_url)`
-- [ ] G4. Redesign `connections/new/page.tsx` — different fields per platform + connection method (Shopify: OAuth button + manual toggle; WooCommerce: auto-auth button + manual API + database; Magento: API default + database toggle)
-- [ ] G5. Update `connections/[id]/page.tsx` — show `connection_method` badge (API/Database), show `store_url` for API connections
-- [ ] G6. Update `connections/page.tsx` — handle OAuth/auth success redirects (`?shopify_connected=true`, `?wc_connected=true`)
+- [x] G1. Update `schemas/ecommerce-connections.schema.ts` — add `connectionMethodEnum` (`api`, `database`), add `connection_method`, `store_url`, `api_key`, `api_secret` fields
+- [x] G2. Update `utils/api.endpoints.ts` — add Shopify OAuth + WooCommerce auth endpoints
+- [x] G3. Update `service/ecommerce-connections.service.ts` — add `initiateShopifyOAuth(shop)` + `initiateWooCommerceAuth(store_url)`
+- [x] G4. Rename all frontend files to mirror backend model names (21 files via `git mv`: schemas, services, hooks, stores, providers)
+- [x] G5. Update all imports across 22+ files to use new file names
+- [x] G6. Fix `recommendation-settings.schema.ts` — rewrite to match backend `RecommendationSettingsDetail` (removed 8 wrong fields, added correct ones)
+- [x] G7. Fix `recommendations.schema.ts` — `total` → `count` to match backend `RecommendationResult`
+- [x] G8. Rewrite `settings/page.tsx` to use correct field names from fixed schema
+- [x] G9. Fix `recommendations/page.tsx` — `result.total` → `result.count`
+- [x] G10. Redesign `connections/new/page.tsx` — different fields per platform + connection method (Shopify: OAuth button + manual toggle; WooCommerce: auto-auth button + manual API + database; Magento: API default + database toggle)
+- [x] G11. Update `connections/[id]/page.tsx` — show `connection_method` badge (API/Database), show `store_url` for API connections, show different info fields per method
+- [x] G12. Update `connections/page.tsx` — handle OAuth/auth success redirects (`?shopify_connected=true`, `?wc_connected=true`), show `store_url`/`db_host` per method, add method badge
