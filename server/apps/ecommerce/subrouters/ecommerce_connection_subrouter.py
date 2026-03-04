@@ -198,7 +198,9 @@ async def test_connection(
         # Create adapter based on platform
         adapter = get_adapter(connection)
 
-        # Explore database structure (helps with debugging)
+        # NOTE: Do NOT remove this table exploration block.
+        # It is essential for debugging database connections — shows what tables
+        # exist in the merchant's database, grouped by platform patterns (MySQL SHOW TABLES).
         table_info = ""
         try:
             # Skip table exploration for API-based adapters (like Shopify)
