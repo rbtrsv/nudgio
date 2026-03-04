@@ -1,6 +1,6 @@
 'use client';
 
-import { ConnectionStats, ConnectionStatsResponse } from '../schemas/data.schema';
+import { ConnectionStats, ConnectionStatsResponse } from '../schemas/data.schemas';
 import { DATA_ENDPOINTS } from '../utils/api.endpoints';
 import { fetchClient } from '@/modules/accounts/utils/fetch.client';
 

@@ -13,10 +13,38 @@ from core.db import Base
 
 
 # ==========================================
+# BASE MIXIN — Every Domain Model Gets This
+# ==========================================
+
+class BaseMixin:
+    """
+    Universal fields for all domain models.
+    Provides: timestamps, soft delete, user audit.
+
+    Usage:
+        class EcommerceConnection(BaseMixin, Base):
+            __tablename__ = "ecommerce_connections"
+            ...
+    """
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+
+    # Soft delete — NULL = active, SET = deleted (timestamp records when)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    deleted_by: Mapped[int | None] = mapped_column(Integer, nullable=True)  # User ID who deleted
+
+    # User audit — loose coupling to accounts.User (not FK)
+    created_by: Mapped[int | None] = mapped_column(Integer, nullable=True)  # User ID who created
+    updated_by: Mapped[int | None] = mapped_column(Integer, nullable=True)  # User ID who last modified
+
+
+# ==========================================
 # 1. PLATFORM CONNECTIONS
 # ==========================================
 
-class EcommerceConnection(Base):
+class EcommerceConnection(BaseMixin, Base):
     """
     Purpose: Stores credentials and configuration for connecting to a merchant's ecommerce platform.
     Scope: Multi-platform (Shopify, WooCommerce, Magento).
@@ -44,8 +72,6 @@ class EcommerceConnection(Base):
     db_port: Mapped[int | None] = mapped_column(Integer, nullable=True, default=3306)
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     settings: Mapped[Optional["RecommendationSettings"]] = relationship(back_populates="connection", uselist=False, cascade="all, delete-orphan")
@@ -57,7 +83,7 @@ class EcommerceConnection(Base):
 # 2. RECOMMENDATION SETTINGS
 # ==========================================
 
-class RecommendationSettings(Base):
+class RecommendationSettings(BaseMixin, Base):
     """
     Purpose: Per-connection configuration for recommendation algorithms.
     Scope: Controls bestseller method, lookback windows, upsell thresholds, shop URLs.
@@ -78,9 +104,6 @@ class RecommendationSettings(Base):
     # Shop URL configuration for HTML components
     shop_base_url: Mapped[str | None] = mapped_column(String(500), nullable=True)  # "https://myshop.myshopify.com"
     product_url_template: Mapped[str | None] = mapped_column(String(500), nullable=True)  # "/products/{handle}"
-
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
     connection: Mapped["EcommerceConnection"] = relationship(back_populates="settings")

@@ -4,7 +4,7 @@ Nudgio Schemas — Recommendation Settings
 Per-connection recommendation algorithm configuration schemas.
 """
 
-from pydantic import BaseModel, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 from .recommendation_schemas import BestsellerMethod
 
@@ -15,13 +15,13 @@ from .recommendation_schemas import BestsellerMethod
 
 class RecommendationSettingsCreate(BaseModel):
     """Schema for creating recommendation settings"""
-    bestseller_method: BestsellerMethod = BestsellerMethod.VOLUME
-    bestseller_lookback_days: int = 30
-    crosssell_lookback_days: int = 30
-    max_recommendations: int = 10
-    min_price_increase_percent: int = 10  # Upsell threshold
-    shop_base_url: str | None = None  # "https://myshop.myshopify.com"
-    product_url_template: str | None = None  # "/products/{handle}"
+    bestseller_method: BestsellerMethod = Field(default=BestsellerMethod.VOLUME, description="Bestseller calculation method: volume, value, or balanced")
+    bestseller_lookback_days: int = Field(default=30, description="Number of days to look back for bestseller calculations (1-365)")
+    crosssell_lookback_days: int = Field(default=30, description="Number of days to look back for cross-sell calculations (1-365)")
+    max_recommendations: int = Field(default=10, description="Maximum number of recommendations to return (1-100)")
+    min_price_increase_percent: int = Field(default=10, description="Minimum price increase percentage for upsell recommendations (0-1000)")
+    shop_base_url: str | None = Field(default=None, description="Shop base URL, e.g. https://myshop.myshopify.com")
+    product_url_template: str | None = Field(default=None, description="Product URL template, e.g. /products/{handle}")
 
     @field_validator('bestseller_lookback_days', 'crosssell_lookback_days')
     @classmethod
@@ -46,14 +46,14 @@ class RecommendationSettingsCreate(BaseModel):
 
 
 class RecommendationSettingsUpdate(BaseModel):
-    """Schema for updating recommendation settings"""
-    bestseller_method: BestsellerMethod | None = None
-    bestseller_lookback_days: int | None = None
-    crosssell_lookback_days: int | None = None
-    max_recommendations: int | None = None
-    min_price_increase_percent: int | None = None
-    shop_base_url: str | None = None
-    product_url_template: str | None = None
+    """Schema for updating recommendation settings — all fields optional (partial update)"""
+    bestseller_method: BestsellerMethod | None = Field(default=None, description="Bestseller calculation method: volume, value, or balanced")
+    bestseller_lookback_days: int | None = Field(default=None, description="Number of days to look back for bestseller calculations (1-365)")
+    crosssell_lookback_days: int | None = Field(default=None, description="Number of days to look back for cross-sell calculations (1-365)")
+    max_recommendations: int | None = Field(default=None, description="Maximum number of recommendations to return (1-100)")
+    min_price_increase_percent: int | None = Field(default=None, description="Minimum price increase percentage for upsell recommendations (0-1000)")
+    shop_base_url: str | None = Field(default=None, description="Shop base URL, e.g. https://myshop.myshopify.com")
+    product_url_template: str | None = Field(default=None, description="Product URL template, e.g. /products/{handle}")
 
 
 # ==========================================
@@ -62,46 +62,46 @@ class RecommendationSettingsUpdate(BaseModel):
 
 class RecommendationSettingsDetail(BaseModel):
     """Schema for recommendation settings details"""
-    id: int
-    connection_id: int
-    bestseller_method: BestsellerMethod
-    bestseller_lookback_days: int
-    crosssell_lookback_days: int
-    max_recommendations: int
-    min_price_increase_percent: int
-    shop_base_url: str | None = None
-    product_url_template: str | None = None
-    created_at: datetime
-    updated_at: datetime | None = None
+    id: int = Field(description="Settings ID")
+    connection_id: int = Field(description="ID of the associated connection")
+    bestseller_method: BestsellerMethod = Field(description="Bestseller calculation method")
+    bestseller_lookback_days: int = Field(description="Bestseller lookback window in days")
+    crosssell_lookback_days: int = Field(description="Cross-sell lookback window in days")
+    max_recommendations: int = Field(description="Maximum number of recommendations")
+    min_price_increase_percent: int = Field(description="Minimum upsell price increase percentage")
+    shop_base_url: str | None = Field(default=None, description="Shop base URL")
+    product_url_template: str | None = Field(default=None, description="Product URL template")
+    created_at: datetime = Field(description="When the settings were created")
+    updated_at: datetime | None = Field(default=None, description="When the settings were last updated")
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class RecommendationSettingsResponse(BaseModel):
     """Response schema for single recommendation settings operations"""
-    success: bool
-    data: RecommendationSettingsDetail | None = None
-    error: str | None = None
+    success: bool = Field(description="Whether the operation succeeded")
+    data: RecommendationSettingsDetail | None = Field(default=None, description="Settings details")
+    error: str | None = Field(default=None, description="Error message if operation failed")
 
 
 class ConnectionSettingsDetail(BaseModel):
     """Schema for connection with its settings"""
-    connection_id: int
-    connection_name: str
-    platform: str
-    settings: RecommendationSettingsDetail | None = None
+    connection_id: int = Field(description="ID of the connection")
+    connection_name: str = Field(description="Connection name")
+    platform: str = Field(description="Ecommerce platform")
+    settings: RecommendationSettingsDetail | None = Field(default=None, description="Settings for this connection, null if not configured")
 
 
 class RecommendationSettingsListResponse(BaseModel):
     """Response schema for listing recommendation settings across connections"""
-    success: bool
-    data: list[ConnectionSettingsDetail] | None = None
-    count: int = 0
-    error: str | None = None
+    success: bool = Field(description="Whether the operation succeeded")
+    data: list[ConnectionSettingsDetail] | None = Field(default=None, description="List of connections with their settings")
+    count: int = Field(default=0, description="Total number of connections")
+    error: str | None = Field(default=None, description="Error message if operation failed")
 
 
 class MessageResponse(BaseModel):
     """Simple message response"""
-    success: bool
-    message: str | None = None
-    error: str | None = None
+    success: bool = Field(description="Whether the operation succeeded")
+    message: str | None = Field(default=None, description="Response message")
+    error: str | None = Field(default=None, description="Error message if operation failed")

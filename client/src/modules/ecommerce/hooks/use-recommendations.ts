@@ -7,7 +7,7 @@ import {
   type CrossSellInput,
   type UpsellInput,
   type SimilarInput,
-} from '../schemas/recommendations.schema';
+} from '../schemas/recommendations.schemas';
 import {
   getBestsellers as apiBestsellers,
   getCrossSell as apiCrossSell,

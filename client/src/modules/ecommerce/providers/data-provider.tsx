@@ -3,7 +3,7 @@
 import React, { createContext, useEffect, useMemo } from 'react';
 import { useAnalyticsStore } from '../store/data.store';
 import { useConnectionStore } from '../store/ecommerce-connections.store';
-import { type ConnectionStats } from '../schemas/data.schema';
+import { type ConnectionStats } from '../schemas/data.schemas';
 
 /**
  * Context type for the analytics provider
@@ -28,8 +28,10 @@ export const AnalyticsContext = createContext<AnalyticsContextType | null>(null)
  */
 export function AnalyticsProvider({
   children,
+  initialFetch = true,
 }: {
   children: React.ReactNode;
+  initialFetch?: boolean;
 }) {
   // Get state and actions from the store
   const {

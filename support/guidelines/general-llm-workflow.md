@@ -461,6 +461,7 @@ This grouping applies to both backend (`schemas/`, `subrouters/`) and frontend (
 7. **Providers composed in `{app}-providers.tsx`** — finpy/nudgio use `initialFetch={false}`, nexotype uses permission-gated booleans
 8. **Response wrapper pattern** consistent everywhere: `{ success: boolean; data?: T; count?: number; error?: string; }`
 9. **LLM never runs migrations** — only the human runs `python manage.py makemigrations` / `migrate`
+10. **Frontend import rules** — `@` alias for cross-module and page imports (`import { fetchClient } from '@/modules/accounts/...'`), relative paths for intra-module imports (`import { HoldingSchema } from '../schemas/...'`). The `@` maps to `client/src/` via tsconfig paths. Never deep relative paths that escape the module (`../../../modules/accounts/...`).
 
 ---
 

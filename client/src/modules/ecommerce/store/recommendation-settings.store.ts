@@ -6,8 +6,8 @@ import { immer } from 'zustand/middleware/immer';
 import {
   RecommendationSettings,
   ConnectionSettings,
-  CreateOrUpdateSettingsInput,
-} from '../schemas/recommendation-settings.schema';
+  CreateOrUpdateSettings,
+} from '../schemas/recommendation-settings.schemas';
 import {
   getSettings,
   getAllSettings,
@@ -31,7 +31,7 @@ export interface SettingsState {
   initialize: () => Promise<void>;
   fetchAllSettings: () => Promise<boolean>;
   fetchSettings: (connectionId: number) => Promise<RecommendationSettings | null>;
-  createOrUpdateSettings: (connectionId: number, data: CreateOrUpdateSettingsInput) => Promise<boolean>;
+  createOrUpdateSettings: (connectionId: number, data: CreateOrUpdateSettings) => Promise<boolean>;
   deleteSettings: (connectionId: number) => Promise<boolean>;
   resetSettings: (connectionId: number) => Promise<boolean>;
   clearError: () => void;

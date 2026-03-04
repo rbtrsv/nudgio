@@ -2,7 +2,7 @@
 
 import React, { createContext, useEffect, useMemo } from 'react';
 import { useConnectionStore } from '../store/ecommerce-connections.store';
-import { type Connection } from '../schemas/ecommerce-connections.schema';
+import { type Connection } from '../schemas/ecommerce-connections.schemas';
 
 /**
  * Context type for the connections provider

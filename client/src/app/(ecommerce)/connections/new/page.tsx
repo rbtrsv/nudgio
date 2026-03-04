@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
-import { type PlatformType } from '@/modules/ecommerce/schemas/ecommerce-connections.schema';
+import { type PlatformType } from '@/modules/ecommerce/schemas/ecommerce-connections.schemas';
 import { initiateShopifyOAuth, initiateWooCommerceAuth } from '@/modules/ecommerce/service/ecommerce-connections.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';

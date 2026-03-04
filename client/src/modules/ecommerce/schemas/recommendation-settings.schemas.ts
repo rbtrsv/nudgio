@@ -1,18 +1,41 @@
+/**
+ * Recommendation Settings Schemas
+ *
+ * Zod validation schemas for RecommendationSettings model.
+ * Field names and validation rules match backend exactly (snake_case).
+ *
+ * Backend sources:
+ * - Model: /server/apps/ecommerce/models.py → RecommendationSettings
+ * - Schema: /server/apps/ecommerce/schemas/recommendation_settings_schemas.py
+ * - Router: /server/apps/ecommerce/subrouters/recommendation_settings_subrouter.py
+ */
+
 import { z } from 'zod';
 
 // ==========================================
-// Enums & Types
+// Enums
 // ==========================================
-export const bestsellerMethodEnum = z.enum(['volume', 'value', 'balanced']);
-export type BestsellerMethod = z.infer<typeof bestsellerMethodEnum>;
+
+/**
+ * Bestseller method options - matches backend BestsellerMethod enum
+ * Backend: class BestsellerMethod(str, Enum)
+ */
+export const BestsellerMethodEnum = z.enum(['volume', 'value', 'balanced']);
 
 // ==========================================
-// Entity Schemas
+// Settings Schema (Full Representation)
 // ==========================================
+
+/**
+ * Recommendation settings schema - full representation
+ * Used for GET operations (single and list)
+ *
+ * Backend equivalent: class RecommendationSettingsDetail(BaseModel)
+ */
 export const RecommendationSettingsSchema = z.object({
   id: z.number(),
   connection_id: z.number(),
-  bestseller_method: bestsellerMethodEnum,
+  bestseller_method: BestsellerMethodEnum,
   bestseller_lookback_days: z.number(),
   crosssell_lookback_days: z.number(),
   max_recommendations: z.number(),
@@ -26,9 +49,16 @@ export const RecommendationSettingsSchema = z.object({
 // ==========================================
 // Input Schemas
 // ==========================================
+
+/**
+ * Schema for creating or updating recommendation settings (PUT)
+ * connection_id is passed in the URL path, not in the body
+ *
+ * Backend equivalent: class RecommendationSettingsCreateOrUpdate(BaseModel)
+ */
 export const CreateOrUpdateSettingsSchema = z.object({
   // connection_id is passed in the URL path, not in the body
-  bestseller_method: bestsellerMethodEnum.default('volume'),
+  bestseller_method: BestsellerMethodEnum.default('volume'),
   bestseller_lookback_days: z.number().min(1).max(365).default(30),
   crosssell_lookback_days: z.number().min(1).max(365).default(30),
   max_recommendations: z.number().min(1).max(100).default(10),
@@ -40,12 +70,19 @@ export const CreateOrUpdateSettingsSchema = z.object({
 // ==========================================
 // Type Exports
 // ==========================================
+
+export type BestsellerMethod = z.infer<typeof BestsellerMethodEnum>;
 export type RecommendationSettings = z.infer<typeof RecommendationSettingsSchema>;
-export type CreateOrUpdateSettingsInput = z.infer<typeof CreateOrUpdateSettingsSchema>;
+export type CreateOrUpdateSettings = z.infer<typeof CreateOrUpdateSettingsSchema>;
 
 // ==========================================
 // Connection Settings (list response item)
 // ==========================================
+
+/**
+ * Connection settings schema - used in list response
+ * Shows connection info alongside its settings
+ */
 export const ConnectionSettingsSchema = z.object({
   connection_id: z.number(),
   connection_name: z.string(),
@@ -57,12 +94,21 @@ export type ConnectionSettings = z.infer<typeof ConnectionSettingsSchema>;
 // ==========================================
 // Response Types
 // ==========================================
+
+/**
+ * Response containing a single settings object
+ * Backend equivalent: class RecommendationSettingsResponse(BaseModel)
+ */
 export type SettingsResponse = {
   success: boolean;
   data?: RecommendationSettings;
   error?: string;
 };
 
+/**
+ * Response containing list of connection settings
+ * Backend equivalent: class RecommendationSettingsListResponse(BaseModel)
+ */
 export type SettingsListResponse = {
   success: boolean;
   data?: ConnectionSettings[];

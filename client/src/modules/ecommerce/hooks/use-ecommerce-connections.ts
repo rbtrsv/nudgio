@@ -3,7 +3,7 @@
 import { useContext } from 'react';
 import { ConnectionContext, ConnectionContextType } from '../providers/ecommerce-connections-provider';
 import { useConnectionStore } from '../store/ecommerce-connections.store';
-import { type Connection } from '../schemas/ecommerce-connections.schema';
+import { type Connection } from '../schemas/ecommerce-connections.schemas';
 
 /**
  * Hook to use the connection context

@@ -22,9 +22,9 @@ interface EcommerceProvidersProps {
  */
 export function EcommerceProviders({ children }: EcommerceProvidersProps) {
   return (
-    <ConnectionProvider>
-      <SettingsProvider>
-        <AnalyticsProvider>
+    <ConnectionProvider initialFetch={false}>
+      <SettingsProvider initialFetch={false}>
+        <AnalyticsProvider initialFetch={false}>
           {children}
         </AnalyticsProvider>
       </SettingsProvider>

@@ -1,3 +1,23 @@
+"""
+Nudgio Utils — Credential Encryption
+
+Fernet symmetric encryption (AES-128-CBC) for storing sensitive credentials
+in the EcommerceConnection model: Shopify access tokens, WooCommerce API secrets,
+and database passwords.
+
+Key is derived from settings.SECRET_KEY via SHA-256.
+
+Usage:
+    - encrypt_password() — call before saving credentials to the database
+    - decrypt_password() — call when reading credentials from the database for adapter use
+
+Integration points:
+    - ecommerce_connection_subrouter.py — encrypt on create/update, decrypt on test connection
+    - adapters (shopify, woocommerce, magento) — decrypt before API/DB calls
+
+Status: Not yet integrated — credentials currently saved as plain text.
+"""
+
 from cryptography.fernet import Fernet
 from core.config import settings
 import base64

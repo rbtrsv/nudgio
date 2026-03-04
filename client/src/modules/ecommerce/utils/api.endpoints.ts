@@ -1,11 +1,15 @@
 /**
  * API endpoints for the ecommerce module
+ *
+ * All endpoints under /ecommerce prefix.
+ * Backend router: /server/apps/ecommerce/router.py
  */
 
 import { API_BASE_URL } from '@/modules/accounts/utils/api.endpoints';
 
 /**
  * API endpoints for connections
+ * Backend: /server/apps/ecommerce/subrouters/ecommerce_connection_subrouter.py
  */
 export const CONNECTION_ENDPOINTS = {
   LIST: `${API_BASE_URL}/ecommerce/connections/`,
@@ -18,6 +22,7 @@ export const CONNECTION_ENDPOINTS = {
 
 /**
  * API endpoints for recommendation settings
+ * Backend: /server/apps/ecommerce/subrouters/recommendation_settings_subrouter.py
  */
 export const SETTINGS_ENDPOINTS = {
   CREATE_OR_UPDATE: (connId: number) => `${API_BASE_URL}/ecommerce/settings/${connId}`,
@@ -29,6 +34,7 @@ export const SETTINGS_ENDPOINTS = {
 
 /**
  * API endpoints for recommendations
+ * Backend: /server/apps/ecommerce/subrouters/recommendation_subrouter.py
  */
 export const RECOMMENDATION_ENDPOINTS = {
   BESTSELLERS: `${API_BASE_URL}/ecommerce/recommendations/bestsellers`,
@@ -39,6 +45,7 @@ export const RECOMMENDATION_ENDPOINTS = {
 
 /**
  * API endpoints for embeddable HTML components
+ * Backend: /server/apps/ecommerce/subrouters/components_subrouter.py
  */
 export const COMPONENT_ENDPOINTS = {
   BESTSELLERS: `${API_BASE_URL}/ecommerce/components/bestsellers`,
@@ -49,6 +56,7 @@ export const COMPONENT_ENDPOINTS = {
 
 /**
  * API endpoints for data and analytics
+ * Backend: /server/apps/ecommerce/subrouters/data_subrouter.py
  */
 export const DATA_ENDPOINTS = {
   STATS: (connId: number) => `${API_BASE_URL}/ecommerce/data/stats/${connId}`,
@@ -56,6 +64,7 @@ export const DATA_ENDPOINTS = {
 
 /**
  * API endpoints for Shopify OAuth
+ * Backend: /server/apps/ecommerce/subrouters/shopify_oauth_subrouter.py
  */
 export const SHOPIFY_OAUTH_ENDPOINTS = {
   AUTH: (shop: string) => `${API_BASE_URL}/ecommerce/shopify/auth?shop=${encodeURIComponent(shop)}`,
@@ -63,6 +72,7 @@ export const SHOPIFY_OAUTH_ENDPOINTS = {
 
 /**
  * API endpoints for WooCommerce auto-auth
+ * Backend: /server/apps/ecommerce/subrouters/woocommerce_auth_subrouter.py
  */
 export const WOOCOMMERCE_AUTH_ENDPOINTS = {
   AUTH: (storeUrl: string) => `${API_BASE_URL}/ecommerce/woocommerce/auth?store_url=${encodeURIComponent(storeUrl)}`,

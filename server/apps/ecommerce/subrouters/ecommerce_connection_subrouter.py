@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, text
@@ -10,6 +12,7 @@ from ..models import EcommerceConnection
 from ..schemas.ecommerce_connection_schemas import (
     PlatformType,
     EcommerceConnectionCreate,
+    EcommerceConnectionUpdate,
     EcommerceConnectionDetail,
     EcommerceConnectionResponse,
     EcommerceConnectionListResponse,
@@ -17,6 +20,7 @@ from ..schemas.ecommerce_connection_schemas import (
     MessageResponse,
 )
 from ..adapters.factory import get_adapter
+from ..utils.dependency_utils import get_user_connection
 
 # ==========================================
 # Ecommerce Connections Router
@@ -52,12 +56,13 @@ async def create_connection(
                 detail="User must belong to an organization"
             )
 
-        # Check if connection name already exists for this user
+        # Check if connection name already exists for this user (exclude soft-deleted)
         existing = await db.execute(
             select(EcommerceConnection).where(
                 and_(
                     EcommerceConnection.user_id == user.id,
-                    EcommerceConnection.connection_name == payload.connection_name
+                    EcommerceConnection.connection_name == payload.connection_name,
+                    EcommerceConnection.deleted_at == None,
                 )
             )
         )
@@ -83,6 +88,7 @@ async def create_connection(
             db_password=payload.db_password,
             db_port=payload.db_port,
             is_active=False,
+            created_by=user.id,
         )
         db.add(new_connection)
         await db.commit()
@@ -112,10 +118,13 @@ async def list_connections(
     2. Returns a paginated list ordered by creation date
     """
     try:
-        # Get all connections for the user
+        # Get all active connections for the user (exclude soft-deleted)
         result = await db.execute(
             select(EcommerceConnection).where(
-                EcommerceConnection.user_id == user.id
+                and_(
+                    EcommerceConnection.user_id == user.id,
+                    EcommerceConnection.deleted_at == None,
+                )
             ).order_by(EcommerceConnection.created_at.desc())
         )
         connections = result.scalars().all()
@@ -143,21 +152,7 @@ async def get_connection(
     2. Returns the connection details
     """
     try:
-        # Get connection owned by the user
-        result = await db.execute(
-            select(EcommerceConnection).where(
-                and_(
-                    EcommerceConnection.id == connection_id,
-                    EcommerceConnection.user_id == user.id
-                )
-            )
-        )
-        connection = result.scalar_one_or_none()
-        if not connection:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Connection not found"
-            )
+        connection = await get_user_connection(connection_id, user.id, db)
 
         return EcommerceConnectionResponse(
             success=True,
@@ -185,21 +180,7 @@ async def test_connection(
     4. Fetches sample products to verify connectivity
     5. Marks the connection as active on success
     """
-    # Get connection owned by the user
-    result = await db.execute(
-        select(EcommerceConnection).where(
-            and_(
-                EcommerceConnection.id == connection_id,
-                EcommerceConnection.user_id == user.id
-            )
-        )
-    )
-    connection = result.scalar_one_or_none()
-    if not connection:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Connection not found"
-        )
+    connection = await get_user_connection(connection_id, user.id, db)
 
     try:
         # Create adapter based on platform
@@ -292,7 +273,7 @@ async def test_connection(
 @router.put("/{connection_id}", response_model=EcommerceConnectionResponse)
 async def update_connection(
     connection_id: int,
-    payload: EcommerceConnectionCreate,
+    payload: EcommerceConnectionUpdate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
@@ -302,35 +283,25 @@ async def update_connection(
     This endpoint:
     1. Retrieves the connection by ID (enforces ownership)
     2. Checks for duplicate connection names (excluding self)
-    3. Updates all connection fields
-    4. Resets active status (user must re-test)
+    3. Updates only provided fields (partial update)
+    4. Resets active status if connection details changed (user must re-test)
     5. Returns the updated connection details
     """
     try:
-        # Get connection owned by the user
-        result = await db.execute(
-            select(EcommerceConnection).where(
-                and_(
-                    EcommerceConnection.id == connection_id,
-                    EcommerceConnection.user_id == user.id
-                )
-            )
-        )
-        connection = result.scalar_one_or_none()
-        if not connection:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Connection not found"
-            )
+        connection = await get_user_connection(connection_id, user.id, db)
 
-        # Check if new connection name conflicts with existing ones (excluding self)
-        if payload.connection_name != connection.connection_name:
+        # Only update fields that were actually provided
+        update_data = payload.model_dump(exclude_unset=True)
+
+        # Check if new connection name conflicts with existing ones (excluding self and soft-deleted)
+        if "connection_name" in update_data and update_data["connection_name"] != connection.connection_name:
             existing = await db.execute(
                 select(EcommerceConnection).where(
                     and_(
                         EcommerceConnection.user_id == user.id,
-                        EcommerceConnection.connection_name == payload.connection_name,
-                        EcommerceConnection.id != connection_id
+                        EcommerceConnection.connection_name == update_data["connection_name"],
+                        EcommerceConnection.id != connection_id,
+                        EcommerceConnection.deleted_at == None,
                     )
                 )
             )
@@ -340,19 +311,15 @@ async def update_connection(
                     detail="Connection name already exists"
                 )
 
-        # Update fields
-        connection.connection_name = payload.connection_name
-        connection.platform = payload.platform.value
-        connection.connection_method = payload.connection_method.value
-        connection.store_url = payload.store_url
-        connection.api_key = payload.api_key
-        connection.api_secret = payload.api_secret
-        connection.db_host = payload.db_host
-        connection.db_name = payload.db_name
-        connection.db_user = payload.db_user
-        connection.db_password = payload.db_password
-        connection.db_port = payload.db_port
-        connection.is_active = False  # Reset active status, user needs to test again
+        # Apply updates — convert enum values to their string representation
+        for field, value in update_data.items():
+            if hasattr(value, 'value'):
+                value = value.value
+            setattr(connection, field, value)
+
+        # Reset active status when connection details change (user must re-test)
+        connection.is_active = False
+        connection.updated_by = user.id
 
         await db.commit()
         await db.refresh(connection)
@@ -375,33 +342,22 @@ async def delete_connection(
     db: AsyncSession = Depends(get_session),
 ):
     """
-    Delete an ecommerce connection
+    Soft-delete an ecommerce connection
 
     This endpoint:
     1. Retrieves the connection by ID (enforces ownership)
-    2. Deletes the connection (cascades to settings, usage, analytics)
-    3. Returns a success message
+    2. Sets deleted_at and deleted_by (soft delete — record preserved in DB)
+    3. Deactivates the connection
+    4. Returns a success message
     """
     try:
-        # Get connection owned by the user
-        result = await db.execute(
-            select(EcommerceConnection).where(
-                and_(
-                    EcommerceConnection.id == connection_id,
-                    EcommerceConnection.user_id == user.id
-                )
-            )
-        )
-        connection = result.scalar_one_or_none()
-        if not connection:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Connection not found"
-            )
+        connection = await get_user_connection(connection_id, user.id, db)
 
-        # Delete connection (will cascade to settings, usage tracking, analytics)
+        # Soft delete — mark as deleted, preserve record in DB
         label = connection.connection_name
-        await db.delete(connection)
+        connection.deleted_at = datetime.now(timezone.utc)
+        connection.deleted_by = user.id
+        connection.is_active = False
         await db.commit()
 
         return MessageResponse(

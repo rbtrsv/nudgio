@@ -5,9 +5,11 @@ import {
   ConnectionResponse,
   ConnectionsResponse,
   ConnectionTestResponse,
-  CreateConnectionInput,
+  CreateConnection,
   CreateConnectionSchema,
-} from '../schemas/ecommerce-connections.schema';
+  UpdateConnection,
+  UpdateConnectionSchema,
+} from '../schemas/ecommerce-connections.schemas';
 import { CONNECTION_ENDPOINTS, SHOPIFY_OAUTH_ENDPOINTS, WOOCOMMERCE_AUTH_ENDPOINTS } from '../utils/api.endpoints';
 import { fetchClient } from '@/modules/accounts/utils/fetch.client';
 
@@ -86,7 +88,7 @@ export const getConnection = async (id: number): Promise<ConnectionResponse> => 
  * @param data Connection creation data
  * @returns Promise with connection response
  */
-export const createConnection = async (data: CreateConnectionInput): Promise<ConnectionResponse> => {
+export const createConnection = async (data: CreateConnection): Promise<ConnectionResponse> => {
   // Validate request data
   CreateConnectionSchema.parse(data);
 
@@ -116,9 +118,9 @@ export const createConnection = async (data: CreateConnectionInput): Promise<Con
  * @param data Connection update data
  * @returns Promise with connection response
  */
-export const updateConnection = async (id: number, data: CreateConnectionInput): Promise<ConnectionResponse> => {
+export const updateConnection = async (id: number, data: UpdateConnection): Promise<ConnectionResponse> => {
   // Validate request data
-  CreateConnectionSchema.parse(data);
+  UpdateConnectionSchema.parse(data);
 
   try {
     const response = await fetchClient<{ success: boolean; data: Connection; error?: string }>(

@@ -3,7 +3,7 @@
 import React, { createContext, useEffect, useMemo } from 'react';
 import { useSettingsStore } from '../store/recommendation-settings.store';
 import { useConnectionStore } from '../store/ecommerce-connections.store';
-import { type RecommendationSettings, type ConnectionSettings } from '../schemas/recommendation-settings.schema';
+import { type RecommendationSettings, type ConnectionSettings } from '../schemas/recommendation-settings.schemas';
 
 /**
  * Context type for the settings provider
@@ -31,8 +31,10 @@ export const SettingsContext = createContext<SettingsContextType | null>(null);
  */
 export function SettingsProvider({
   children,
+  initialFetch = true,
 }: {
   children: React.ReactNode;
+  initialFetch?: boolean;
 }) {
   // Get state and actions from the store
   const {
@@ -49,11 +51,11 @@ export function SettingsProvider({
   // Get active connection from connection store
   const activeConnectionId = useConnectionStore((state) => state.activeConnectionId);
 
-  // Initialize settings on mount
+  // Initialize settings on mount if initialFetch is true
   useEffect(() => {
     let isMounted = true;
 
-    if (!isInitialized) {
+    if (initialFetch && !isInitialized) {
       initialize().catch((initError) => {
         if (isMounted) {
           console.error('Error initializing settings:', initError);
@@ -64,7 +66,7 @@ export function SettingsProvider({
     return () => {
       isMounted = false;
     };
-  }, [isInitialized, initialize]);
+  }, [initialFetch, isInitialized, initialize]);
 
   // Auto-fetch settings when activeConnectionId changes
   useEffect(() => {

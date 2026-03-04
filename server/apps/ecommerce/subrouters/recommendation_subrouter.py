@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
 from datetime import datetime
 
 from core.db import get_session
 from apps.accounts.models import User
 from apps.accounts.utils.auth_utils import get_current_user
 
-from ..models import EcommerceConnection
 from ..schemas.recommendation_schemas import (
     BestsellerRequest,
     CrossSellRequest,
@@ -18,32 +16,13 @@ from ..schemas.recommendation_schemas import (
 )
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
+from ..utils.dependency_utils import get_active_connection
 
 # ==========================================
 # Product Recommendations Router
 # ==========================================
 
 router = APIRouter(prefix="/recommendations", tags=["Product Recommendations"])
-
-
-async def get_active_connection(connection_id: int, user_id: int, db: AsyncSession):
-    """Helper to get and validate user owns an active connection"""
-    result = await db.execute(
-        select(EcommerceConnection).where(
-            and_(
-                EcommerceConnection.id == connection_id,
-                EcommerceConnection.user_id == user_id,
-                EcommerceConnection.is_active == True
-            )
-        )
-    )
-    connection = result.scalar_one_or_none()
-    if not connection:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Active connection not found"
-        )
-    return connection
 
 
 @router.post("/bestsellers", response_model=RecommendationResponse)

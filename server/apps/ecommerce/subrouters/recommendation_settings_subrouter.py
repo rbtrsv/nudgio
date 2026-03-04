@@ -15,31 +15,13 @@ from ..schemas.recommendation_settings_schemas import (
     RecommendationSettingsListResponse,
     MessageResponse,
 )
+from ..utils.dependency_utils import get_user_connection
 
 # ==========================================
 # Recommendation Settings Router
 # ==========================================
 
 router = APIRouter(prefix="/settings", tags=["Recommendation Settings"])
-
-
-async def get_user_connection(connection_id: int, user_id: int, db: AsyncSession):
-    """Helper to get and validate user owns the connection"""
-    result = await db.execute(
-        select(EcommerceConnection).where(
-            and_(
-                EcommerceConnection.id == connection_id,
-                EcommerceConnection.user_id == user_id
-            )
-        )
-    )
-    connection = result.scalar_one_or_none()
-    if not connection:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Connection not found"
-        )
-    return connection
 
 
 @router.post("/{connection_id}", response_model=RecommendationSettingsResponse)
@@ -71,14 +53,12 @@ async def create_or_update_settings(
         existing_settings = existing_result.scalar_one_or_none()
 
         if existing_settings:
-            # Update existing settings
-            existing_settings.bestseller_method = payload.bestseller_method.value
-            existing_settings.bestseller_lookback_days = payload.bestseller_lookback_days
-            existing_settings.crosssell_lookback_days = payload.crosssell_lookback_days
-            existing_settings.max_recommendations = payload.max_recommendations
-            existing_settings.min_price_increase_percent = payload.min_price_increase_percent
-            existing_settings.shop_base_url = payload.shop_base_url
-            existing_settings.product_url_template = payload.product_url_template
+            # Update only fields that were explicitly provided (partial update)
+            update_data = payload.model_dump(exclude_unset=True)
+            for field, value in update_data.items():
+                if hasattr(value, 'value'):
+                    value = value.value
+                setattr(existing_settings, field, value)
 
             await db.commit()
             await db.refresh(existing_settings)
@@ -167,10 +147,13 @@ async def list_connection_settings(
     3. Returns a list of connections with their settings
     """
     try:
-        # Get all user connections
+        # Get all user connections (exclude soft-deleted)
         connections_result = await db.execute(
             select(EcommerceConnection).where(
-                EcommerceConnection.user_id == user.id
+                and_(
+                    EcommerceConnection.user_id == user.id,
+                    EcommerceConnection.deleted_at == None,
+                )
             ).order_by(EcommerceConnection.created_at.desc())
         )
         connections = connections_result.scalars().all()

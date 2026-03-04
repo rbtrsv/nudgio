@@ -4,7 +4,7 @@ Nudgio Schemas — Ecommerce Connection
 Platform connection CRUD schemas, platform/method enums, test response.
 """
 
-from pydantic import BaseModel, field_validator, model_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 from datetime import datetime
 from enum import Enum
 
@@ -32,19 +32,19 @@ class ConnectionMethod(str, Enum):
 
 class EcommerceConnectionCreate(BaseModel):
     """Schema for creating a new ecommerce connection"""
-    connection_name: str
-    platform: PlatformType
-    connection_method: ConnectionMethod = ConnectionMethod.API  # API (REST) or DATABASE (direct SQL)
+    connection_name: str = Field(description="Human-readable name for this connection")
+    platform: PlatformType = Field(description="Ecommerce platform: shopify, woocommerce, magento")
+    connection_method: ConnectionMethod = Field(default=ConnectionMethod.API, description="API (REST) or DATABASE (direct SQL)")
     # API-based fields
-    store_url: str | None = None  # "https://mystore.myshopify.com" or "https://mystore.com"
-    api_key: str | None = None  # WooCommerce: consumer_key (ck_xxx)
-    api_secret: str | None = None  # WooCommerce: consumer_secret (cs_xxx), Magento/Shopify: access token
+    store_url: str | None = Field(default=None, description="Store URL, e.g. https://mystore.myshopify.com")
+    api_key: str | None = Field(default=None, description="API key. WooCommerce: consumer_key (ck_xxx)")
+    api_secret: str | None = Field(default=None, description="API secret. WooCommerce: consumer_secret, Magento/Shopify: access token")
     # Database-based fields (only needed for connection_method=database)
-    db_host: str | None = None
-    db_name: str | None = None
-    db_user: str | None = None
-    db_password: str | None = None
-    db_port: int | None = None
+    db_host: str | None = Field(default=None, description="Database host address")
+    db_name: str | None = Field(default=None, description="Database name")
+    db_user: str | None = Field(default=None, description="Database username")
+    db_password: str | None = Field(default=None, description="Database password")
+    db_port: int | None = Field(default=None, description="Database port (default: 3306 for MySQL, 443 for API)")
 
     @field_validator('connection_name')
     @classmethod
@@ -81,18 +81,18 @@ class EcommerceConnectionCreate(BaseModel):
 
 
 class EcommerceConnectionUpdate(BaseModel):
-    """Schema for updating an ecommerce connection"""
-    connection_name: str | None = None
-    platform: PlatformType | None = None
-    connection_method: ConnectionMethod | None = None
-    store_url: str | None = None
-    api_key: str | None = None
-    api_secret: str | None = None
-    db_host: str | None = None
-    db_name: str | None = None
-    db_user: str | None = None
-    db_password: str | None = None
-    db_port: int | None = None
+    """Schema for updating an ecommerce connection — all fields optional (partial update)"""
+    connection_name: str | None = Field(default=None, description="Human-readable name for this connection")
+    platform: PlatformType | None = Field(default=None, description="Ecommerce platform: shopify, woocommerce, magento")
+    connection_method: ConnectionMethod | None = Field(default=None, description="API (REST) or DATABASE (direct SQL)")
+    store_url: str | None = Field(default=None, description="Store URL, e.g. https://mystore.myshopify.com")
+    api_key: str | None = Field(default=None, description="API key. WooCommerce: consumer_key (ck_xxx)")
+    api_secret: str | None = Field(default=None, description="API secret. WooCommerce: consumer_secret, Magento/Shopify: access token")
+    db_host: str | None = Field(default=None, description="Database host address")
+    db_name: str | None = Field(default=None, description="Database name")
+    db_user: str | None = Field(default=None, description="Database username")
+    db_password: str | None = Field(default=None, description="Database password")
+    db_port: int | None = Field(default=None, description="Database port")
 
 
 # ==========================================
@@ -101,48 +101,48 @@ class EcommerceConnectionUpdate(BaseModel):
 
 class EcommerceConnectionDetail(BaseModel):
     """Schema for ecommerce connection details"""
-    id: int
-    connection_name: str
-    platform: PlatformType
-    connection_method: ConnectionMethod
+    id: int = Field(description="Connection ID")
+    connection_name: str = Field(description="Human-readable name for this connection")
+    platform: PlatformType = Field(description="Ecommerce platform")
+    connection_method: ConnectionMethod = Field(description="Connection method: api or database")
     # API fields (api_key/api_secret intentionally excluded — never expose secrets)
-    store_url: str | None = None
+    store_url: str | None = Field(default=None, description="Store URL")
     # Database fields (db_password intentionally excluded — never expose secrets)
-    db_host: str | None = None
-    db_name: str | None = None
-    db_user: str | None = None
-    db_port: int | None = None
-    is_active: bool
-    created_at: datetime
-    updated_at: datetime | None = None
+    db_host: str | None = Field(default=None, description="Database host address")
+    db_name: str | None = Field(default=None, description="Database name")
+    db_user: str | None = Field(default=None, description="Database username")
+    db_port: int | None = Field(default=None, description="Database port")
+    is_active: bool = Field(description="Whether connection has been tested and is active")
+    created_at: datetime = Field(description="When the connection was created")
+    updated_at: datetime | None = Field(default=None, description="When the connection was last updated")
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class EcommerceConnectionResponse(BaseModel):
     """Response schema for single ecommerce connection operations"""
-    success: bool
-    data: EcommerceConnectionDetail | None = None
-    error: str | None = None
+    success: bool = Field(description="Whether the operation succeeded")
+    data: EcommerceConnectionDetail | None = Field(default=None, description="Connection details")
+    error: str | None = Field(default=None, description="Error message if operation failed")
 
 
 class EcommerceConnectionListResponse(BaseModel):
     """Response schema for listing ecommerce connections"""
-    success: bool
-    data: list[EcommerceConnectionDetail] | None = None
-    count: int = 0
-    error: str | None = None
+    success: bool = Field(description="Whether the operation succeeded")
+    data: list[EcommerceConnectionDetail] | None = Field(default=None, description="List of connections")
+    count: int = Field(default=0, description="Total number of connections")
+    error: str | None = Field(default=None, description="Error message if operation failed")
 
 
 class EcommerceConnectionTestResponse(BaseModel):
     """Response schema for connection test results"""
-    success: bool
-    message: str
-    sample_products_count: int = 0
+    success: bool = Field(description="Whether the connection test succeeded")
+    message: str = Field(description="Test result message with details")
+    sample_products_count: int = Field(default=0, description="Number of sample products retrieved")
 
 
 class MessageResponse(BaseModel):
     """Simple message response"""
-    success: bool
-    message: str | None = None
-    error: str | None = None
+    success: bool = Field(description="Whether the operation succeeded")
+    message: str | None = Field(default=None, description="Response message")
+    error: str | None = Field(default=None, description="Error message if operation failed")

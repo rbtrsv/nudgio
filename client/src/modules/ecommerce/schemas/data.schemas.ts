@@ -1,8 +1,24 @@
+/**
+ * Data / Analytics Schemas
+ *
+ * Zod validation schemas for connection data statistics.
+ * Field names and validation rules match backend exactly (snake_case).
+ *
+ * Backend sources:
+ * - Schema: /server/apps/ecommerce/schemas/data_schemas.py
+ * - Router: /server/apps/ecommerce/subrouters/data_subrouter.py
+ */
+
 import { z } from 'zod';
 
 // ==========================================
-// Entity Schemas
+// Connection Stats Schema (Full Representation)
 // ==========================================
+
+/**
+ * Connection statistics schema - imported data summary
+ * Backend equivalent: class ConnectionStatsDetail(BaseModel)
+ */
 export const ConnectionStatsSchema = z.object({
   connection_id: z.number(),
   connection_name: z.string(),
@@ -17,11 +33,17 @@ export const ConnectionStatsSchema = z.object({
 // ==========================================
 // Type Exports
 // ==========================================
+
 export type ConnectionStats = z.infer<typeof ConnectionStatsSchema>;
 
 // ==========================================
 // Response Types
 // ==========================================
+
+/**
+ * Response containing connection statistics
+ * Backend equivalent: class ConnectionStatsResponse(BaseModel)
+ */
 export type ConnectionStatsResponse = {
   success: boolean;
   data?: ConnectionStats;

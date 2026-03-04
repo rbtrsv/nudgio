@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select
 from typing import Optional, List, Dict
 from core.db import get_session
 from apps.accounts.models import User
@@ -10,30 +10,9 @@ from ..models import EcommerceConnection, RecommendationSettings
 from ..schemas.ecommerce_connection_schemas import PlatformType
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
+from ..utils.dependency_utils import get_active_connection
 
 router = APIRouter(prefix="/components", tags=["Product Component Recommendations"])
-
-
-async def get_user_connection(connection_id: int, user_id: int, session: AsyncSession):
-    """Helper to get and validate user connection"""
-    result = await session.execute(
-        select(EcommerceConnection).where(
-            and_(
-                EcommerceConnection.id == connection_id,
-                EcommerceConnection.user_id == user_id,
-                EcommerceConnection.is_active == True
-            )
-        )
-    )
-    
-    connection = result.scalar_one_or_none()
-    if not connection:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Active connection not found"
-        )
-    
-    return connection
 
 
 def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[RecommendationSettings]) -> Dict[str, str]:
@@ -81,7 +60,7 @@ async def get_bestsellers_component(
 ):
     """Get bestsellers HTML component"""
     try:
-        connection = await get_user_connection(connection_id, current_user.id, session)
+        connection = await get_active_connection(connection_id, current_user.id, session)
         
         # Get shop URL settings
         settings_result = await session.execute(
@@ -136,7 +115,7 @@ async def get_cross_sell_component(
 ):
     """Get cross-sell HTML component"""
     try:
-        connection = await get_user_connection(connection_id, current_user.id, session)
+        connection = await get_active_connection(connection_id, current_user.id, session)
         
         # Get shop URL settings
         settings_result = await session.execute(
@@ -191,7 +170,7 @@ async def get_upsell_component(
 ):
     """Get upsell HTML component"""
     try:
-        connection = await get_user_connection(connection_id, current_user.id, session)
+        connection = await get_active_connection(connection_id, current_user.id, session)
         
         # Get shop URL settings
         settings_result = await session.execute(
@@ -246,7 +225,7 @@ async def get_similar_component(
 ):
     """Get similar products HTML component"""
     try:
-        connection = await get_user_connection(connection_id, current_user.id, session)
+        connection = await get_active_connection(connection_id, current_user.id, session)
         
         # Get shop URL settings
         settings_result = await session.execute(

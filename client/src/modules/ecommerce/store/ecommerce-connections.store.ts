@@ -5,9 +5,10 @@ import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import {
   Connection,
-  CreateConnectionInput,
+  CreateConnection,
+  UpdateConnection,
   ConnectionTestResponse,
-} from '../schemas/ecommerce-connections.schema';
+} from '../schemas/ecommerce-connections.schemas';
 import {
   getConnections,
   getConnection,
@@ -32,8 +33,8 @@ export interface ConnectionState {
   initialize: () => Promise<void>;
   fetchConnections: () => Promise<boolean>;
   fetchConnection: (id: number) => Promise<Connection | null>;
-  createConnection: (data: CreateConnectionInput) => Promise<boolean>;
-  updateConnection: (id: number, data: CreateConnectionInput) => Promise<boolean>;
+  createConnection: (data: CreateConnection) => Promise<boolean>;
+  updateConnection: (id: number, data: UpdateConnection) => Promise<boolean>;
   deleteConnection: (id: number) => Promise<boolean>;
   testConnection: (id: number) => Promise<ConnectionTestResponse>;
   setActiveConnection: (connectionId: number | null) => void;
