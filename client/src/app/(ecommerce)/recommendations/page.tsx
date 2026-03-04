@@ -271,7 +271,7 @@ export default function RecommendationsPage() {
           <CardHeader>
             <CardTitle>Results</CardTitle>
             <CardDescription>
-              {result.total} recommendations found
+              {result.count} recommendations found
               {result.method && <> &middot; Method: <Badge variant="secondary">{result.method}</Badge></>}
               {result.base_product_id && <> &middot; Base Product: {result.base_product_id}</>}
               {' '}&middot; Lookback: {result.lookback_days} days

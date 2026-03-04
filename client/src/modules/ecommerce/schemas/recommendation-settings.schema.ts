@@ -12,15 +12,11 @@ export type BestsellerMethod = z.infer<typeof bestsellerMethodEnum>;
 export const RecommendationSettingsSchema = z.object({
   id: z.number(),
   connection_id: z.number(),
-  default_limit: z.number(),
-  default_lookback_days: z.number(),
   bestseller_method: bestsellerMethodEnum,
-  cross_sell_enabled: z.boolean(),
-  upsell_enabled: z.boolean(),
-  similar_products_enabled: z.boolean(),
-  min_upsell_price_increase: z.number(),
-  cache_recommendations: z.boolean(),
-  cache_duration_minutes: z.number(),
+  bestseller_lookback_days: z.number(),
+  crosssell_lookback_days: z.number(),
+  max_recommendations: z.number(),
+  min_price_increase_percent: z.number(),
   shop_base_url: z.string().nullable(),
   product_url_template: z.string().nullable(),
   created_at: z.string(),
@@ -31,16 +27,12 @@ export const RecommendationSettingsSchema = z.object({
 // Input Schemas
 // ==========================================
 export const CreateOrUpdateSettingsSchema = z.object({
-  connection_id: z.number(),
-  default_limit: z.number().min(1).max(100).default(10),
-  default_lookback_days: z.number().min(1).max(365).default(30),
+  // connection_id is passed in the URL path, not in the body
   bestseller_method: bestsellerMethodEnum.default('volume'),
-  cross_sell_enabled: z.boolean().default(true),
-  upsell_enabled: z.boolean().default(true),
-  similar_products_enabled: z.boolean().default(true),
-  min_upsell_price_increase: z.number().min(0).max(1000).default(10),
-  cache_recommendations: z.boolean().default(true),
-  cache_duration_minutes: z.number().default(60),
+  bestseller_lookback_days: z.number().min(1).max(365).default(30),
+  crosssell_lookback_days: z.number().min(1).max(365).default(30),
+  max_recommendations: z.number().min(1).max(100).default(10),
+  min_price_increase_percent: z.number().min(0).max(1000).default(10),
   shop_base_url: z.string().nullable().optional(),
   product_url_template: z.string().nullable().optional(),
 });

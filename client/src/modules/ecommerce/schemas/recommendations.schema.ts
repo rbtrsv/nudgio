@@ -31,7 +31,7 @@ export const ProductRecommendationSchema = z.object({
 
 export const RecommendationResultSchema = z.object({
   recommendations: z.array(ProductRecommendationSchema),
-  total: z.number(),
+  count: z.number(),
   method: z.string().nullable(),
   base_product_id: z.string().nullable(),
   lookback_days: z.number(),

@@ -5,8 +5,11 @@
 1. **Read 2-3 reference files BEFORE creating or modifying ANY file.** Read from nexotype, accounts, assetmanager, or finpy — both frontend and backend — to understand exact patterns, naming, comments, structure.
 
 2. **File naming mirrors model names.** The backend model name dictates the file name across the ENTIRE stack:
-   - Model: `EcommerceConnection` → backend: `ecommerce_connection_schemas.py`, `ecommerce_connection_subrouter.py` → frontend: `connection.schema.ts`, `connections.service.ts`, `connections.store.ts`, `connections-provider.tsx`, `use-connections.ts`
-   - Model: `RecommendationSettings` → backend: `recommendation_settings_schemas.py`, `recommendation_settings_subrouter.py` → frontend: `settings.schema.ts`, `settings.service.ts`, `settings.store.ts`, `settings-provider.tsx`, `use-settings.ts`
+   - Model: `EcommerceConnection` → backend: `ecommerce_connection_schemas.py`, `ecommerce_connection_subrouter.py` → frontend: `ecommerce-connections.schema.ts`, `ecommerce-connections.service.ts`, `ecommerce-connections.store.ts`, `ecommerce-connections-provider.tsx`, `use-ecommerce-connections.ts`
+   - Model: `RecommendationSettings` → backend: `recommendation_settings_schemas.py`, `recommendation_settings_subrouter.py` → frontend: `recommendation-settings.schema.ts`, `recommendation-settings.service.ts`, `recommendation-settings.store.ts`, `recommendation-settings-provider.tsx`, `use-recommendation-settings.ts`
+   - Model: `RecommendationResult` → backend: `recommendation_schemas.py`, `recommendation_subrouter.py` → frontend: `recommendations.schema.ts`, `recommendations.service.ts`, `use-recommendations.ts`
+   - Model: `ConnectionStats` → backend: `data_schemas.py`, `data_subrouter.py` → frontend: `data.schema.ts`, `data.service.ts`, `data.store.ts`, `data-provider.tsx`, `use-data.ts`
+   - Model: components → backend: `components_subrouter.py` → frontend: `components.schema.ts`, `components.service.ts`, `use-components.ts`
    - This applies to ALL file types: schemas, subrouters, services, stores, providers, hooks, pages.
 
 3. **Frontend schema fields MUST match backend response fields exactly.** Same field names (snake_case), same types, same enum values. Check `EcommerceConnectionDetail` (backend) → `ConnectionSchema` (frontend).

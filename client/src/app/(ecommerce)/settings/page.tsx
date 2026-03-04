@@ -10,7 +10,6 @@ import { Input } from '@/modules/shadcnui/components/ui/input';
 import { Label } from '@/modules/shadcnui/components/ui/label';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
-import { Checkbox } from '@/modules/shadcnui/components/ui/checkbox';
 import { Loader2, Settings } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -24,16 +23,12 @@ export default function SettingsPage() {
     resetSettings,
   } = useSettings();
 
-  // Local form state
-  const [defaultLimit, setDefaultLimit] = useState(10);
-  const [defaultLookbackDays, setDefaultLookbackDays] = useState(30);
+  // Local form state — matches backend RecommendationSettings model fields
   const [bestsellerMethod, setBestsellerMethod] = useState<BestsellerMethod>('volume');
-  const [crossSellEnabled, setCrossSellEnabled] = useState(true);
-  const [upsellEnabled, setUpsellEnabled] = useState(true);
-  const [similarProductsEnabled, setSimilarProductsEnabled] = useState(true);
-  const [minUpsellPriceIncrease, setMinUpsellPriceIncrease] = useState(10);
-  const [cacheRecommendations, setCacheRecommendations] = useState(true);
-  const [cacheDurationMinutes, setCacheDurationMinutes] = useState(60);
+  const [bestsellerLookbackDays, setBestsellerLookbackDays] = useState(30);
+  const [crosssellLookbackDays, setCrosssellLookbackDays] = useState(30);
+  const [maxRecommendations, setMaxRecommendations] = useState(10);
+  const [minPriceIncreasePercent, setMinPriceIncreasePercent] = useState(10);
   const [shopBaseUrl, setShopBaseUrl] = useState('');
   const [productUrlTemplate, setProductUrlTemplate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -43,15 +38,11 @@ export default function SettingsPage() {
   // Populate form when settings are loaded
   useEffect(() => {
     if (currentSettings) {
-      setDefaultLimit(currentSettings.default_limit);
-      setDefaultLookbackDays(currentSettings.default_lookback_days);
       setBestsellerMethod(currentSettings.bestseller_method);
-      setCrossSellEnabled(currentSettings.cross_sell_enabled);
-      setUpsellEnabled(currentSettings.upsell_enabled);
-      setSimilarProductsEnabled(currentSettings.similar_products_enabled);
-      setMinUpsellPriceIncrease(currentSettings.min_upsell_price_increase);
-      setCacheRecommendations(currentSettings.cache_recommendations);
-      setCacheDurationMinutes(currentSettings.cache_duration_minutes);
+      setBestsellerLookbackDays(currentSettings.bestseller_lookback_days);
+      setCrosssellLookbackDays(currentSettings.crosssell_lookback_days);
+      setMaxRecommendations(currentSettings.max_recommendations);
+      setMinPriceIncreasePercent(currentSettings.min_price_increase_percent);
       setShopBaseUrl(currentSettings.shop_base_url || '');
       setProductUrlTemplate(currentSettings.product_url_template || '');
     }
@@ -71,17 +62,13 @@ export default function SettingsPage() {
     setSaveSuccess(false);
 
     try {
+      // connection_id is passed via URL path, not in the body
       const success = await createOrUpdateSettings(activeConnectionId, {
-        connection_id: activeConnectionId,
-        default_limit: defaultLimit,
-        default_lookback_days: defaultLookbackDays,
         bestseller_method: bestsellerMethod,
-        cross_sell_enabled: crossSellEnabled,
-        upsell_enabled: upsellEnabled,
-        similar_products_enabled: similarProductsEnabled,
-        min_upsell_price_increase: minUpsellPriceIncrease,
-        cache_recommendations: cacheRecommendations,
-        cache_duration_minutes: cacheDurationMinutes,
+        bestseller_lookback_days: bestsellerLookbackDays,
+        crosssell_lookback_days: crosssellLookbackDays,
+        max_recommendations: maxRecommendations,
+        min_price_increase_percent: minPriceIncreasePercent,
         shop_base_url: shopBaseUrl || null,
         product_url_template: productUrlTemplate || null,
       });
@@ -169,134 +156,84 @@ export default function SettingsPage() {
       {/* Settings Form */}
       {activeConnectionId && !isLoading && (
         <>
+          {/* Algorithm Configuration */}
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>Default parameters for recommendations</CardDescription>
+              <CardTitle>Algorithm Configuration</CardTitle>
+              <CardDescription>Configure recommendation algorithm parameters</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="default-limit">Default Limit (1-100)</Label>
+                  <Label htmlFor="bestseller-method">Bestseller Method</Label>
+                  <Select
+                    value={bestsellerMethod}
+                    onValueChange={(value) => setBestsellerMethod(value as BestsellerMethod)}
+                  >
+                    <SelectTrigger id="bestseller-method">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="volume">Volume (sales count)</SelectItem>
+                      <SelectItem value="value">Value (revenue)</SelectItem>
+                      <SelectItem value="balanced">Balanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="max-recommendations">Max Recommendations (1-100)</Label>
                   <Input
-                    id="default-limit"
+                    id="max-recommendations"
                     type="number"
                     min={1}
                     max={100}
-                    value={defaultLimit}
-                    onChange={(e) => setDefaultLimit(parseInt(e.target.value) || 10)}
+                    value={maxRecommendations}
+                    onChange={(e) => setMaxRecommendations(parseInt(e.target.value) || 10)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="default-lookback">Lookback Days (1-365)</Label>
+                  <Label htmlFor="bestseller-lookback">Bestseller Lookback Days (1-365)</Label>
                   <Input
-                    id="default-lookback"
+                    id="bestseller-lookback"
                     type="number"
                     min={1}
                     max={365}
-                    value={defaultLookbackDays}
-                    onChange={(e) => setDefaultLookbackDays(parseInt(e.target.value) || 30)}
+                    value={bestsellerLookbackDays}
+                    onChange={(e) => setBestsellerLookbackDays(parseInt(e.target.value) || 30)}
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bestseller-method">Bestseller Method</Label>
-                <Select
-                  value={bestsellerMethod}
-                  onValueChange={(value) => setBestsellerMethod(value as BestsellerMethod)}
-                >
-                  <SelectTrigger id="bestseller-method" className="w-full sm:w-60">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="volume">Volume (sales count)</SelectItem>
-                    <SelectItem value="value">Value (revenue)</SelectItem>
-                    <SelectItem value="balanced">Balanced</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Recommendation Types</CardTitle>
-              <CardDescription>Enable or disable recommendation types</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="cross-sell"
-                  checked={crossSellEnabled}
-                  onCheckedChange={(checked) => setCrossSellEnabled(checked === true)}
-                />
-                <Label htmlFor="cross-sell">Cross-sell recommendations</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="upsell"
-                  checked={upsellEnabled}
-                  onCheckedChange={(checked) => setUpsellEnabled(checked === true)}
-                />
-                <Label htmlFor="upsell">Upsell recommendations</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="similar"
-                  checked={similarProductsEnabled}
-                  onCheckedChange={(checked) => setSimilarProductsEnabled(checked === true)}
-                />
-                <Label htmlFor="similar">Similar product recommendations</Label>
-              </div>
-              <div className="space-y-2 pt-2">
-                <Label htmlFor="min-upsell">Min Upsell Price Increase (%)</Label>
-                <Input
-                  id="min-upsell"
-                  type="number"
-                  min={0}
-                  max={1000}
-                  value={minUpsellPriceIncrease}
-                  onChange={(e) => setMinUpsellPriceIncrease(parseInt(e.target.value) || 0)}
-                  className="w-full sm:w-40"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Caching</CardTitle>
-              <CardDescription>Control recommendation caching behavior</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="cache"
-                  checked={cacheRecommendations}
-                  onCheckedChange={(checked) => setCacheRecommendations(checked === true)}
-                />
-                <Label htmlFor="cache">Cache recommendations</Label>
-              </div>
-              {cacheRecommendations && (
                 <div className="space-y-2">
-                  <Label htmlFor="cache-duration">Cache Duration (minutes)</Label>
+                  <Label htmlFor="crosssell-lookback">Cross-sell Lookback Days (1-365)</Label>
                   <Input
-                    id="cache-duration"
+                    id="crosssell-lookback"
                     type="number"
                     min={1}
-                    value={cacheDurationMinutes}
-                    onChange={(e) => setCacheDurationMinutes(parseInt(e.target.value) || 60)}
-                    className="w-full sm:w-40"
+                    max={365}
+                    value={crosssellLookbackDays}
+                    onChange={(e) => setCrosssellLookbackDays(parseInt(e.target.value) || 30)}
                   />
                 </div>
-              )}
+                <div className="space-y-2">
+                  <Label htmlFor="min-price-increase">Min Upsell Price Increase (%)</Label>
+                  <Input
+                    id="min-price-increase"
+                    type="number"
+                    min={0}
+                    max={1000}
+                    value={minPriceIncreasePercent}
+                    onChange={(e) => setMinPriceIncreasePercent(parseInt(e.target.value) || 0)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
 
+          {/* Shop URLs */}
           <Card>
             <CardHeader>
               <CardTitle>Shop URLs</CardTitle>
-              <CardDescription>Configure product URL generation</CardDescription>
+              <CardDescription>Configure product URL generation for HTML components</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
