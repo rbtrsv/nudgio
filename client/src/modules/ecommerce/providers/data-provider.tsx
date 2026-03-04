@@ -45,14 +45,8 @@ export function AnalyticsProvider({
   // Get active connection from connection store
   const activeConnectionId = useConnectionStore((state) => state.activeConnectionId);
 
-  // Auto-fetch stats when activeConnectionId changes
-  useEffect(() => {
-    if (activeConnectionId) {
-      fetchConnectionStats(activeConnectionId).catch((fetchError) => {
-        console.error('Error fetching connection stats:', fetchError);
-      });
-    }
-  }, [activeConnectionId, fetchConnectionStats]);
+  // Stats are fetched explicitly by pages that need them (e.g. connection detail page)
+  // Not auto-fetched here to avoid 404 errors for connections without data yet
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo<AnalyticsContextType>(

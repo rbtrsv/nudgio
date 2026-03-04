@@ -2,13 +2,19 @@
 Ecommerce Dependency Utilities
 
 Shared helper functions for validating connection ownership across subrouters.
+Also provides router-level subscription enforcement dependency.
 """
 
-from fastapi import HTTPException, status
+from typing import Optional
+from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
 from ..models import EcommerceConnection
+from .subscription_utils import is_service_active
+from apps.accounts.models import User, OrganizationMember
+from apps.accounts.utils.auth_utils import get_current_user
+from core.db import get_session
 
 
 # ==========================================
@@ -83,3 +89,58 @@ async def get_active_connection(connection_id: int, user_id: int, db: AsyncSessi
             detail="Active connection not found"
         )
     return connection
+
+
+# ==========================================
+# Organization Helpers
+# ==========================================
+
+async def get_user_organization_id(user_id: int, session: AsyncSession) -> Optional[int]:
+    """
+    Get the user's organization ID from their membership.
+
+    Args:
+        user_id: User ID
+        session: Database session
+
+    Returns:
+        Organization ID or None if user has no organization
+    """
+    result = await session.execute(
+        select(OrganizationMember.organization_id)
+        .filter(OrganizationMember.user_id == user_id)
+        .limit(1)
+    )
+    org_membership = result.scalar_one_or_none()
+    return org_membership
+
+
+# ==========================================
+# Subscription Dependencies
+# ==========================================
+
+async def require_active_subscription(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session)
+):
+    """
+    Router-level dependency — covers all gated ecommerce subrouters.
+
+    Blocks ALL requests (reads + writes) when service is inactive.
+    Unlike finpy/nexotype which only gate writes, Nudgio blocks everything
+    after grace period — widgets show nothing (not broken, just empty).
+
+    Args:
+        user: Current authenticated user (resolved by get_current_user)
+        session: Database session
+    """
+    org_id = await get_user_organization_id(user.id, session)
+    if not org_id:
+        # No org = no connections = nothing to gate
+        return
+
+    if not await is_service_active(org_id, session):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your subscription has expired. Reactivate to restore access."
+        )

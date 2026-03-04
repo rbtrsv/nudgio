@@ -25,6 +25,11 @@ function ConnectionsPageContent() {
   // OAuth / auto-auth success message
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Fetch connections on mount
+  useEffect(() => {
+    fetchConnections();
+  }, [fetchConnections]);
+
   // Detect OAuth/auth redirect params and show success alert
   useEffect(() => {
     const shopifyConnected = searchParams.get('shopify_connected');

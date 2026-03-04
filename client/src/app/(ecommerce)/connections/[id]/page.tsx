@@ -49,6 +49,11 @@ export default function ConnectionDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
+  // Fetch connections on mount (store may be empty on direct navigation)
+  useEffect(() => {
+    fetchConnections();
+  }, [fetchConnections]);
+
   // Fetch stats for this connection
   useEffect(() => {
     if (connectionId) {

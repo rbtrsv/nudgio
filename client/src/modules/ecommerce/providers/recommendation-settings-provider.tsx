@@ -68,14 +68,8 @@ export function SettingsProvider({
     };
   }, [initialFetch, isInitialized, initialize]);
 
-  // Auto-fetch settings when activeConnectionId changes
-  useEffect(() => {
-    if (activeConnectionId) {
-      fetchSettings(activeConnectionId).catch((fetchError) => {
-        console.error('Error fetching settings for connection:', fetchError);
-      });
-    }
-  }, [activeConnectionId, fetchSettings]);
+  // Settings are fetched explicitly by pages that need them (e.g. settings page)
+  // Not auto-fetched here to avoid 404 errors for connections without settings yet
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo<SettingsContextType>(

@@ -45,48 +45,106 @@ This is not user-friendly. Most merchants are non-technical and cannot provide d
 
 ---
 
-## Current State
+## Current State (Updated 2026-03-04, Session 2)
 
 ### Model (`server/apps/ecommerce/models.py`)
 
 ```python
-class PlatformType(str, Enum):
-    SHOPIFY = "shopify"
-    WOOCOMMERCE = "woocommerce"
-    MAGENTO = "magento"
+class BaseMixin:
+    """Universal fields for all domain models. Provides: timestamps, soft delete, user audit."""
+    created_at, updated_at                    # Timestamps
+    deleted_at, deleted_by                    # Soft delete (NULL = active, SET = deleted)
+    created_by, updated_by                    # User audit (loose coupling, no FK)
 
-class EcommerceConnection(Base):
+class EcommerceConnection(BaseMixin, Base):
     __tablename__ = "ecommerce_connections"
     id, user_id, organization_id, platform, connection_name
-    db_host       # Shopify: store domain (e.g., "m0stv8-wr.myshopify.com")
-    db_name       # Shopify: unused
-    db_user       # Shopify: unused
-    db_password   # Shopify: access token (e.g., "shpat_...")
-    db_port       # Shopify: 443, others: 3306
-    is_active, created_at, updated_at
+    connection_method                         # "api" (default) or "database"
+    # API-based connection fields
+    store_url                                 # "https://mystore.myshopify.com"
+    api_key                                   # WooCommerce: consumer_key
+    api_secret                                # WooCommerce: consumer_secret, Magento/Shopify: access token
+    # Database-based connection fields
+    db_host, db_name, db_user, db_password, db_port
+    is_active
+    # Relationships: settings, usage_tracking, analytics
+
+class RecommendationSettings(BaseMixin, Base):
+    __tablename__ = "recommendation_settings"
+    id, connection_id (unique, FK → ecommerce_connections)
+    bestseller_method, bestseller_lookback_days, crosssell_lookback_days
+    max_recommendations, min_price_increase_percent
+    shop_base_url, product_url_template
+
+class APIUsageTracking(Base):                 # No BaseMixin (append-only log)
+    id, organization_id, connection_id, endpoint, timestamp, response_time_ms, status_code
+
+class RecommendationAnalytics(Base):          # No BaseMixin (append-only log)
+    id, connection_id, recommendation_type, product_id, recommended_product_id
+    position, event_type, timestamp, user_agent, ip_address
 ```
 
 ### Adapters (`server/apps/ecommerce/adapters/`)
 
-- `base.py` — `PlatformAdapter` ABC, creates SQLAlchemy async engine (MySQL/PostgreSQL), `test_connection()` via `SELECT 1`
-- `shopify.py` — `ShopifyAdapter` (standalone, NOT inheriting PlatformAdapter), uses aiohttp, REST Admin API v2023-10, reads `db_host` as domain and `db_password` as access token
-- `woocommerce.py` — `WooCommerceAdapter(PlatformAdapter)`, direct MySQL queries on `wp_posts`, `wp_postmeta`, `wp_wc_orders`, `wp_wc_order_product_lookup`
-- `magento.py` — `MagentoAdapter(PlatformAdapter)`, direct MySQL queries on `catalog_product_entity`, `sales_order`, `sales_order_item`, EAV attribute tables
+```
+adapters/
+├── __init__.py
+├── base.py           → PlatformAdapter ABC (SQLAlchemy async engine, test_connection via SELECT 1)
+├── factory.py        → get_adapter(connection) — routes by platform + connection_method
+├── shopify/
+│   ├── __init__.py
+│   └── api.py        → ShopifyAdapter (aiohttp, REST Admin API, store_url + api_secret)
+├── woocommerce/
+│   ├── __init__.py
+│   ├── api.py        → WooCommerceApiAdapter (aiohttp, REST API v3, HTTP Basic Auth)
+│   └── database.py   → WooCommerceAdapter(PlatformAdapter) (direct MySQL queries)
+└── magento/
+    ├── __init__.py
+    ├── api.py        → MagentoApiAdapter (aiohttp, REST API, Bearer token, 2.4.4+ error detection)
+    └── database.py   → MagentoAdapter(PlatformAdapter) (direct MySQL queries, EAV)
+```
 
-### Adapter Factory (duplicated in 4 subrouters)
+### Subrouters (`server/apps/ecommerce/subrouters/`)
 
-Same if/elif/elif block creating adapters exists in:
-- `subrouters/connections_subrouter.py` (lines 185-195)
-- `subrouters/data_subrouter.py` (lines 50-55)
-- `subrouters/recommendations_subrouter.py` (lines 50-55)
-- `subrouters/components_subrouter.py` (lines 73-78)
+- `ecommerce_connection_subrouter.py` — CRUD + test connection (soft delete, shared helpers, user audit)
+- `recommendation_settings_subrouter.py` — CRUD per connection (partial update via `model_dump(exclude_unset=True)`)
+- `recommendation_subrouter.py` — bestsellers, cross-sell, up-sell, similar products
+- `components_subrouter.py` — HTML widget generation
+- `data_subrouter.py` — raw product/order data
+- `shopify_oauth_subrouter.py` — Shopify OAuth 2.0 flow (`/shopify/auth` + `/shopify/callback`)
+- `woocommerce_auth_subrouter.py` — WooCommerce auto-auth (`/woocommerce/auth` + `/woocommerce/callback`)
+
+### Utils (`server/apps/ecommerce/utils/`)
+
+- `dependency_utils.py` — `get_user_connection()`, `get_active_connection()` (ownership + soft delete filter), `require_active_subscription()` (router-level subscription gate), `get_user_organization_id()` (query OrganizationMember for org_id)
+- `subscription_utils.py` — tier constants (FREE/PRO/ENTERPRISE), tier limits (connections, monthly orders, rate limits), grace period, query helpers (`get_org_subscription`, `get_org_connection_count`, `get_org_monthly_order_count`), logic helpers (`get_org_tier`, `tier_is_sufficient`, `get_tier_limits`, `is_over_connection_limit`, `is_service_active`)
+- `cache_utils.py` — recommendation caching with ABC + two backends: `InMemoryCacheBackend` (development) + `DragonflyCacheBackend` (production). Switch via `CACHE_BACKEND` constant in file.
+- `encryption_utils.py` — Fernet symmetric encryption (AES-128-CBC) for credentials. Integrated: encrypt on create/update, decrypt in adapter factory.
+- `rate_limiting_utils.py` — API rate limiting per organization with ABC + two backends: `InMemoryRateLimitBackend` (development) + `DragonflyRateLimitBackend` (production). Reads limits from `subscription_utils.TIER_LIMITS`. Switch via `RATE_LIMIT_BACKEND` constant in file.
+
+### Schemas (`server/apps/ecommerce/schemas/`)
+
+- `ecommerce_connection_schemas.py` — `PlatformType`, `ConnectionMethod` enums + Create, Update, Detail, Response, ListResponse, MessageResponse
+- `recommendation_settings_schemas.py` — `BestsellerMethod` enum + Create, Detail, Response, ListResponse, MessageResponse
+- `recommendation_schemas.py` — `RecommendationType` enum + Response schemas
+- `data_schemas.py` — Product, Order, OrderItem data schemas
+
+All schema fields have `Field(description="...")`.
+
+### Router (`server/apps/ecommerce/router.py`)
+
+Prefix: `/ecommerce`. Split into ungated and gated groups:
+- **Ungated**: Shopify OAuth + WooCommerce auth callbacks (merchant connecting for first time, no subscription check needed)
+- **Gated**: Everything else via `APIRouter(dependencies=[Depends(require_active_subscription)])` — connections, settings, recommendations, components, data. All endpoints return 403 when subscription is inactive.
+
+7 subrouters, 28 routes total.
 
 ### Frontend (`client/src/`)
 
-- `modules/ecommerce/schemas/ecommerce-connections.schema.ts` — `platformTypeEnum`, `connectionMethodEnum`, `CreateConnectionSchema` with API + DB fields
-- `modules/ecommerce/utils/api.endpoints.ts` — Shopify OAuth + WooCommerce auth endpoints added
-- `modules/ecommerce/service/ecommerce-connections.service.ts` — `initiateShopifyOAuth()` + `initiateWooCommerceAuth()` added
-- `app/(ecommerce)/connections/new/page.tsx` — TanStack Form, shows different labels per platform (Shopify: "Store Domain"/"Access Token", others: "Database Host"/"Database Password"), hides `db_name`/`db_user` for Shopify — **needs redesign for G10**
+Fully built (31+ files). All pages working. File names mirror backend model names.
+- Connection form: different fields per platform + connection_method (Shopify OAuth / WooCommerce auto-auth / Manual API / Database)
+- Settings page: matches backend `RecommendationSettingsDetail`
+- Recommendations, components, analytics, data pages: all functional
 
 ---
 
@@ -1298,3 +1356,95 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - [x] G10. Redesign `connections/new/page.tsx` — different fields per platform + connection method (Shopify: OAuth button + manual toggle; WooCommerce: auto-auth button + manual API + database; Magento: API default + database toggle)
 - [x] G11. Update `connections/[id]/page.tsx` — show `connection_method` badge (API/Database), show `store_url` for API connections, show different info fields per method
 - [x] G12. Update `connections/page.tsx` — handle OAuth/auth success redirects (`?shopify_connected=true`, `?wc_connected=true`), show `store_url`/`db_host` per method, add method badge
+
+### Phase H: Backend Audit Fixes (2026-03-04)
+- [x] H1. Add `BaseMixin` class to `models.py` — timestamps (`created_at`, `updated_at`), soft delete (`deleted_at`, `deleted_by`), user audit (`created_by`, `updated_by`)
+- [x] H2. Apply `BaseMixin` to `EcommerceConnection` and `RecommendationSettings` (not log tables — append-only)
+- [x] H3. Generate + run migration (`Add BaseMixin fields`) — 8 new columns (4 per table)
+- [x] H4. Create `utils/dependency_utils.py` — shared `get_user_connection()` and `get_active_connection()` with soft delete filter
+- [x] H5. Refactor `ecommerce_connection_subrouter.py` — use shared helpers (DRY), soft delete on delete endpoint, `created_by`/`updated_by` audit fields, soft delete filter on all queries
+- [x] H6. Fix `recommendation_settings_subrouter.py` — partial update via `model_dump(exclude_unset=True)`, soft delete filter on list query
+- [x] H7. Add `Field(description="...")` to all schema fields in all 4 schema files
+- [x] H8. Add docstring and section comments to `router.py`
+- [x] H9. Add docstring to `encryption.py` — Fernet two-way encryption for credentials, integration points documented
+- [x] H10. Add `cryptography` package to `pyproject.toml` via `uv add cryptography`
+
+### Phase I: Subscription System + Credential Encryption + Cache/Rate Limiting Backends (2026-03-04)
+
+#### I1–I3: Utils Renames
+- [x] I1. Rename `cache.py` → `cache_utils.py` (git mv)
+- [x] I2. Rename `encryption.py` → `encryption_utils.py` (git mv)
+- [x] I3. Rename `rate_limiting.py` → `rate_limiting_utils.py` (git mv)
+
+#### I4: Subscription Utils
+- [x] I4. Create `utils/subscription_utils.py` — complete subscription tier system:
+  - Constants: `TIER_ORDER` (FREE/PRO/ENTERPRISE), `GRACE_PERIOD_DAYS` (7), `TIER_LIMITS` (connections, monthly orders, requests/min, requests/hour)
+  - Pricing: FREE €0/mo, PRO €12/mo, ENTERPRISE €36/mo
+  - Query helpers: `get_org_subscription()`, `get_org_connection_count()`, `get_org_monthly_order_count()` (counts APIUsageTracking records for recommendations in current month)
+  - Logic helpers: `get_org_tier()`, `tier_is_sufficient()`, `get_tier_limits()`, `is_over_connection_limit()`, `is_service_active()` (main check: FREE limits, ACTIVE/TRIALING, grace period, manual_override)
+  - Stripe Dashboard setup instructions in docstring (products, metadata, features, portal config)
+
+#### I5: Subscription Dependency
+- [x] I5. Add `require_active_subscription` + `get_user_organization_id` to `utils/dependency_utils.py`
+  - `require_active_subscription`: router-level dependency, blocks ALL requests when `is_service_active()` returns False (403)
+  - `get_user_organization_id`: queries `OrganizationMember` for user's org_id
+
+#### I6: Router Split (Gated/Ungated)
+- [x] I6. Rewrite `router.py` — split into ungated (Shopify OAuth + WooCommerce auth callbacks) and gated (everything else with `Depends(require_active_subscription)`)
+
+#### I7: Connection Limit + Credential Encryption
+- [x] I7. Update `ecommerce_connection_subrouter.py`:
+  - Connection limit check on create: `is_over_connection_limit()` → 403 if over tier limit
+  - Encrypt credentials on create: `encrypt_password()` for `api_key`, `api_secret`, `db_password`
+  - Encrypt credentials on update: same for sensitive fields that were updated
+- [x] I8. Update `adapters/factory.py` — decrypt credentials before adapter init: `decrypt_password()` for `api_key`, `api_secret`, `db_password`. Single decryption point, adapters receive plaintext. `decrypt_password()` handles non-encrypted values gracefully (returns input if decryption fails).
+
+#### I9: Cache Backend Rewrite
+- [x] I9. Rewrite `cache_utils.py` — ABC (`CacheBackend`) + two implementations:
+  - `InMemoryCacheBackend`: Python dict with TTL (development, single worker)
+  - `DragonflyCacheBackend`: DragonflyDB/Redis via `redis.asyncio` (production, multi-worker)
+  - Factory: `CACHE_BACKEND = "memory"` constant in file, switch to `"dragonfly"` for production
+  - Helper functions: `get_cached_recommendations()`, `set_cached_recommendations()`
+
+#### I10: Rate Limiting Backend Rewrite
+- [x] I10. Rewrite `rate_limiting_utils.py` — ABC (`RateLimitBackend`) + two implementations:
+  - `InMemoryRateLimitBackend`: Python dict with sliding window (development)
+  - `DragonflyRateLimitBackend`: DragonflyDB/Redis sorted sets (production)
+  - Reads limits from `subscription_utils.TIER_LIMITS` instead of hardcoding
+  - Factory: `RATE_LIMIT_BACKEND = "memory"` constant in file
+  - Main function: `check_rate_limit(org_id, tier)` — checks minute + hour windows
+
+#### I11: Stripe Configuration + Testing
+- [x] I11. Configure Stripe for nudgio sandbox:
+  - API key: `sk_test_51T7GFC...` (separate sandbox from nexotype `51ShB2t` and finpy `51MEJyv`)
+  - Webhook secret: `whsec_8049dafa...` (generated by `stripe listen --api-key`)
+  - Stripe listen command: `stripe listen --api-key sk_test_51T7GFC... --forward-to localhost:8002/accounts/subscriptions/webhook`
+  - Updated `support/commands.txt` with correct nudgio stripe command + sandbox explanation
+  - Tested: Pro subscription created via Stripe Checkout → webhook received → Subscription record in DB
+
+#### I12: Frontend Provider Fixes
+- [x] I12. Fix `data-provider.tsx` — removed auto-fetch useEffect on `activeConnectionId` change (was causing 404 "Active connection not found" for connections without data). Architecture preserved (imports, destructuring, store connection).
+- [x] I13. Fix `recommendation-settings-provider.tsx` — removed auto-fetch useEffect on `activeConnectionId` change (was causing 404 "Settings not found for this connection"). Initialize useEffect for `initialFetch && !isInitialized` kept. Architecture preserved.
+
+---
+
+## What Remains
+
+### Production Deployment
+- [ ] Production DragonflyDB setup — switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"` in `cache_utils.py` and `rate_limiting_utils.py`, configure `DRAGONFLY_URL`
+- [ ] Production Stripe configuration — create real webhook endpoint in Stripe Dashboard for `server.nudgio.tech/accounts/subscriptions/webhook`, set production `STRIPE_WEBHOOK_SECRET` in Coolify env vars
+- [ ] Create Pro and Enterprise products in Stripe Dashboard with correct metadata (`tier=PRO`/`ENTERPRISE`, `tier_order=0`/`1`, features list)
+- [ ] Stripe Customer Portal — enable plan switching, add Pro + Enterprise as eligible products, enable cancellations
+- [ ] Clean up duplicate test subscriptions from Stripe Dashboard (2 Pro subscriptions created during testing)
+
+### Shopify App Store Submission Blockers
+- [ ] GDPR webhooks — implement 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64, not hex)
+- [ ] GraphQL migration — migrate `ShopifyAdapter` from REST Admin API to GraphQL Admin API (REST rejected for new public apps since April 2025)
+- [ ] Shopify Billing API — if distributing through Shopify App Store, integrate Shopify's own billing (required, cannot use external billing for App Store apps)
+- [ ] Shopify Partner Dashboard — register app, set App URL + redirect URLs, get Client ID + Client Secret
+- [ ] `shopify.app.toml` configuration for webhooks and compliance endpoints
+
+### Nice to Have
+- [ ] Rate limiting integration — wire `check_rate_limit()` into recommendation subrouter or as a router-level dependency
+- [ ] Monthly order count enforcement — check `get_org_monthly_order_count()` against tier limits before processing recommendation requests
+- [ ] Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)

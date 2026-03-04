@@ -2,9 +2,18 @@
 Nudgio Ecommerce Router
 
 Mounts all ecommerce subrouters under the /ecommerce prefix.
+
+Split into two groups:
+- Ungated: platform auth callbacks (Shopify OAuth, WooCommerce auth) — merchant
+  connecting for the first time, no subscription check needed.
+- Gated: everything else requires an active subscription. The
+  require_active_subscription dependency blocks ALL requests (reads + writes)
+  when the organization's service is inactive.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from .utils.dependency_utils import require_active_subscription
 
 # Connection management
 from .subrouters.ecommerce_connection_subrouter import router as connections_router
@@ -24,17 +33,23 @@ from .subrouters.woocommerce_auth_subrouter import router as woocommerce_auth_ro
 
 router = APIRouter(prefix="/ecommerce")
 
-# Connection management
-router.include_router(connections_router)
-router.include_router(settings_router)
-
-# Recommendation engine
-router.include_router(recommendations_router)
-router.include_router(components_router)
-
-# Data management
-router.include_router(data_router)
-
-# Platform auth flows
+# Ungated — auth callbacks (merchant connecting for first time)
 router.include_router(shopify_oauth_router)
 router.include_router(woocommerce_auth_router)
+
+# Gated — everything else requires active service
+# See require_active_subscription in dependency_utils.py for details.
+gated = APIRouter(dependencies=[Depends(require_active_subscription)])
+
+# Connection management
+gated.include_router(connections_router)
+gated.include_router(settings_router)
+
+# Recommendation engine
+gated.include_router(recommendations_router)
+gated.include_router(components_router)
+
+# Data management
+gated.include_router(data_router)
+
+router.include_router(gated)

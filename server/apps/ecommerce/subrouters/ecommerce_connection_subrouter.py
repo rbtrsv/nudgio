@@ -21,6 +21,8 @@ from ..schemas.ecommerce_connection_schemas import (
 )
 from ..adapters.factory import get_adapter
 from ..utils.dependency_utils import get_user_connection
+from ..utils.encryption_utils import encrypt_password
+from ..utils.subscription_utils import get_org_subscription, is_over_connection_limit
 
 # ==========================================
 # Ecommerce Connections Router
@@ -40,9 +42,11 @@ async def create_connection(
 
     This endpoint:
     1. Validates the user belongs to an organization
-    2. Checks for duplicate connection names
-    3. Creates the connection record
-    4. Returns the created connection details
+    2. Checks connection limit for the organization's tier
+    3. Checks for duplicate connection names
+    4. Encrypts sensitive credentials before saving
+    5. Creates the connection record
+    6. Returns the created connection details
     """
     try:
         # Get user's organization ID from membership
@@ -54,6 +58,14 @@ async def create_connection(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User must belong to an organization"
+            )
+
+        # Check connection limit for the organization's subscription tier
+        subscription = await get_org_subscription(membership.organization_id, db)
+        if await is_over_connection_limit(membership.organization_id, db, subscription):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Connection limit reached for your plan. Upgrade to add more connections."
             )
 
         # Check if connection name already exists for this user (exclude soft-deleted)
@@ -72,7 +84,7 @@ async def create_connection(
                 detail="Connection name already exists"
             )
 
-        # Create new connection
+        # Create new connection — encrypt sensitive fields before saving
         new_connection = EcommerceConnection(
             user_id=user.id,
             organization_id=membership.organization_id,
@@ -80,12 +92,12 @@ async def create_connection(
             platform=payload.platform.value,
             connection_method=payload.connection_method.value,
             store_url=payload.store_url,
-            api_key=payload.api_key,
-            api_secret=payload.api_secret,
+            api_key=encrypt_password(payload.api_key) if payload.api_key else None,
+            api_secret=encrypt_password(payload.api_secret) if payload.api_secret else None,
             db_host=payload.db_host,
             db_name=payload.db_name,
             db_user=payload.db_user,
-            db_password=payload.db_password,
+            db_password=encrypt_password(payload.db_password) if payload.db_password else None,
             db_port=payload.db_port,
             is_active=False,
             created_by=user.id,
@@ -283,9 +295,10 @@ async def update_connection(
     This endpoint:
     1. Retrieves the connection by ID (enforces ownership)
     2. Checks for duplicate connection names (excluding self)
-    3. Updates only provided fields (partial update)
-    4. Resets active status if connection details changed (user must re-test)
-    5. Returns the updated connection details
+    3. Encrypts sensitive fields if they were updated
+    4. Updates only provided fields (partial update)
+    5. Resets active status if connection details changed (user must re-test)
+    6. Returns the updated connection details
     """
     try:
         connection = await get_user_connection(connection_id, user.id, db)
@@ -310,6 +323,12 @@ async def update_connection(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Connection name already exists"
                 )
+
+        # Encrypt sensitive fields if they were updated
+        sensitive_fields = {"api_key", "api_secret", "db_password"}
+        for field in sensitive_fields:
+            if field in update_data and update_data[field]:
+                update_data[field] = encrypt_password(update_data[field])
 
         # Apply updates — convert enum values to their string representation
         for field, value in update_data.items():
