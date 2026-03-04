@@ -1,9 +1,9 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ConnectionProvider } from './connections-provider';
-import { SettingsProvider } from './settings-provider';
-import { AnalyticsProvider } from './analytics-provider';
+import { ConnectionProvider } from './ecommerce-connections-provider';
+import { SettingsProvider } from './recommendation-settings-provider';
+import { AnalyticsProvider } from './data-provider';
 
 /**
  * EcommerceProviders props

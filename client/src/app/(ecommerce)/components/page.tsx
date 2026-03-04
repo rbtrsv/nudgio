@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useConnections } from '@/modules/ecommerce/hooks/use-connections';
+import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
 import { useComponents, type WidgetType } from '@/modules/ecommerce/hooks/use-components';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';

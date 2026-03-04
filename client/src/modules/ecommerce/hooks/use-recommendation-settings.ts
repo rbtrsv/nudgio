@@ -1,8 +1,8 @@
 'use client';
 
 import { useContext } from 'react';
-import { SettingsContext, SettingsContextType } from '../providers/settings-provider';
-import { useSettingsStore } from '../store/settings.store';
+import { SettingsContext, SettingsContextType } from '../providers/recommendation-settings-provider';
+import { useSettingsStore } from '../store/recommendation-settings.store';
 
 /**
  * Hook to use the settings context

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { type WidgetParams } from '../schemas/component.schema';
+import { type WidgetParams } from '../schemas/components.schema';
 import {
   getBestsellersWidget,
   getCrossSellWidget,

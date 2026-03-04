@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useConnections } from '@/modules/ecommerce/hooks/use-connections';
-import { useSettings } from '@/modules/ecommerce/hooks/use-settings';
-import { type BestsellerMethod } from '@/modules/ecommerce/schemas/settings.schema';
+import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
+import { useSettings } from '@/modules/ecommerce/hooks/use-recommendation-settings';
+import { type BestsellerMethod } from '@/modules/ecommerce/schemas/recommendation-settings.schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';

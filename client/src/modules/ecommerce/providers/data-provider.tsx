@@ -1,9 +1,9 @@
 'use client';
 
 import React, { createContext, useEffect, useMemo } from 'react';
-import { useAnalyticsStore } from '../store/analytics.store';
-import { useConnectionStore } from '../store/connections.store';
-import { type ConnectionStats } from '../schemas/analytics.schema';
+import { useAnalyticsStore } from '../store/data.store';
+import { useConnectionStore } from '../store/ecommerce-connections.store';
+import { type ConnectionStats } from '../schemas/data.schema';
 
 /**
  * Context type for the analytics provider

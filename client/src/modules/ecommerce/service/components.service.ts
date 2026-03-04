@@ -1,6 +1,6 @@
 'use client';
 
-import { WidgetParams, WidgetResponse } from '../schemas/component.schema';
+import { WidgetParams, WidgetResponse } from '../schemas/components.schema';
 import { COMPONENT_ENDPOINTS } from '../utils/api.endpoints';
 import { getAuthHeaders } from '@/modules/accounts/utils/fetch.client';
 

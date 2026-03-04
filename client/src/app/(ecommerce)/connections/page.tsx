@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useConnections } from '@/modules/ecommerce/hooks/use-connections';
+import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';

@@ -13,11 +13,11 @@ class ShopifyAdapter:
 
     def __init__(self, connection: EcommerceConnection):
         self.connection = connection
-        # For Shopify, we store API credentials in the database fields:
-        # db_host = store domain (e.g., "m0stv8-wr.myshopify.com")
-        # db_password = access token (e.g., "shpat_...")
-        self.store_domain = connection.db_host
-        self.access_token = connection.db_password
+        # API credentials from EcommerceConnection:
+        # store_url = store domain (e.g., "m0stv8-wr.myshopify.com")
+        # api_secret = access token (e.g., "shpat_...")
+        self.store_domain = connection.store_url
+        self.access_token = connection.api_secret
         self.api_version = "2023-10"  # Shopify API version
 
     def _get_headers(self) -> Dict[str, str]:

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useEffect, useMemo } from 'react';
-import { useConnectionStore } from '../store/connections.store';
-import { type Connection } from '../schemas/connection.schema';
+import { useConnectionStore } from '../store/ecommerce-connections.store';
+import { type Connection } from '../schemas/ecommerce-connections.schema';
 
 /**
  * Context type for the connections provider

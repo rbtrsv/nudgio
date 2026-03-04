@@ -1,8 +1,8 @@
 'use client';
 
 import { useContext } from 'react';
-import { AnalyticsContext, AnalyticsContextType } from '../providers/analytics-provider';
-import { useAnalyticsStore } from '../store/analytics.store';
+import { AnalyticsContext, AnalyticsContextType } from '../providers/data-provider';
+import { useAnalyticsStore } from '../store/data.store';
 
 /**
  * Hook to use the analytics context

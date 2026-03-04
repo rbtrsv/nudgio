@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useConnections } from '@/modules/ecommerce/hooks/use-connections';
-import { useAnalytics } from '@/modules/ecommerce/hooks/use-analytics';
+import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
+import { useAnalytics } from '@/modules/ecommerce/hooks/use-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';

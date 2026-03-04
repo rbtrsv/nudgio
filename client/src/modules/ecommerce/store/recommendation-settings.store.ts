@@ -7,14 +7,14 @@ import {
   RecommendationSettings,
   ConnectionSettings,
   CreateOrUpdateSettingsInput,
-} from '../schemas/settings.schema';
+} from '../schemas/recommendation-settings.schema';
 import {
   getSettings,
   getAllSettings,
   createOrUpdateSettings as apiCreateOrUpdateSettings,
   deleteSettings as apiDeleteSettings,
   resetSettings as apiResetSettings,
-} from '../service/settings.service';
+} from '../service/recommendation-settings.service';
 
 /**
  * Settings store state interface

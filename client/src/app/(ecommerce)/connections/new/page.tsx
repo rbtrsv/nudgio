@@ -3,8 +3,8 @@
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'next/navigation';
 
-import { useConnections } from '@/modules/ecommerce/hooks/use-connections';
-import { CreateConnectionSchema, type PlatformType } from '@/modules/ecommerce/schemas/connection.schema';
+import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
+import { CreateConnectionSchema, type PlatformType } from '@/modules/ecommerce/schemas/ecommerce-connections.schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';

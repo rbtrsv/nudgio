@@ -1,9 +1,9 @@
 'use client';
 
 import { useContext } from 'react';
-import { ConnectionContext, ConnectionContextType } from '../providers/connections-provider';
-import { useConnectionStore } from '../store/connections.store';
-import { type Connection } from '../schemas/connection.schema';
+import { ConnectionContext, ConnectionContextType } from '../providers/ecommerce-connections-provider';
+import { useConnectionStore } from '../store/ecommerce-connections.store';
+import { type Connection } from '../schemas/ecommerce-connections.schema';
 
 /**
  * Hook to use the connection context

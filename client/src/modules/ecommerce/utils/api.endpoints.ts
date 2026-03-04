@@ -53,3 +53,17 @@ export const COMPONENT_ENDPOINTS = {
 export const DATA_ENDPOINTS = {
   STATS: (connId: number) => `${API_BASE_URL}/ecommerce/data/stats/${connId}`,
 };
+
+/**
+ * API endpoints for Shopify OAuth
+ */
+export const SHOPIFY_OAUTH_ENDPOINTS = {
+  AUTH: (shop: string) => `${API_BASE_URL}/ecommerce/shopify/auth?shop=${encodeURIComponent(shop)}`,
+};
+
+/**
+ * API endpoints for WooCommerce auto-auth
+ */
+export const WOOCOMMERCE_AUTH_ENDPOINTS = {
+  AUTH: (storeUrl: string) => `${API_BASE_URL}/ecommerce/woocommerce/auth?store_url=${encodeURIComponent(storeUrl)}`,
+};

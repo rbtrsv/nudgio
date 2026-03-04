@@ -7,7 +7,7 @@ import {
   Connection,
   CreateConnectionInput,
   ConnectionTestResponse,
-} from '../schemas/connection.schema';
+} from '../schemas/ecommerce-connections.schema';
 import {
   getConnections,
   getConnection,
@@ -15,7 +15,7 @@ import {
   updateConnection as apiUpdateConnection,
   deleteConnection as apiDeleteConnection,
   testConnection as apiTestConnection,
-} from '../service/connections.service';
+} from '../service/ecommerce-connections.service';
 
 /**
  * Connection store state interface

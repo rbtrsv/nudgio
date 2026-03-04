@@ -3,8 +3,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { ConnectionStats } from '../schemas/analytics.schema';
-import { getConnectionStats } from '../service/analytics.service';
+import { ConnectionStats } from '../schemas/data.schema';
+import { getConnectionStats } from '../service/data.service';
 
 /**
  * Analytics store state interface

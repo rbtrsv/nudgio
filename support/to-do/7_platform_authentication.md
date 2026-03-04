@@ -1,5 +1,20 @@
 # Nudgio — Platform Authentication Plan
 
+## MANDATORY RULES — Read Before Any Implementation
+
+1. **Read 2-3 reference files BEFORE creating or modifying ANY file.** Read from nexotype, accounts, assetmanager, or finpy — both frontend and backend — to understand exact patterns, naming, comments, structure.
+
+2. **File naming mirrors model names.** The backend model name dictates the file name across the ENTIRE stack:
+   - Model: `EcommerceConnection` → backend: `ecommerce_connection_schemas.py`, `ecommerce_connection_subrouter.py` → frontend: `connection.schema.ts`, `connections.service.ts`, `connections.store.ts`, `connections-provider.tsx`, `use-connections.ts`
+   - Model: `RecommendationSettings` → backend: `recommendation_settings_schemas.py`, `recommendation_settings_subrouter.py` → frontend: `settings.schema.ts`, `settings.service.ts`, `settings.store.ts`, `settings-provider.tsx`, `use-settings.ts`
+   - This applies to ALL file types: schemas, subrouters, services, stores, providers, hooks, pages.
+
+3. **Frontend schema fields MUST match backend response fields exactly.** Same field names (snake_case), same types, same enum values. Check `EcommerceConnectionDetail` (backend) → `ConnectionSchema` (frontend).
+
+4. **Never guess patterns.** If unsure how a file should look, find and read a working example first.
+
+---
+
 ## Context
 
 The ecommerce frontend module is fully built (31 files, all pages working). The current connection system requires:
@@ -1227,3 +1242,48 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 3. Create Magento REST API connection → fill store_url + access_token → test → verify products
 4. Click "Connect with Shopify" → verify OAuth redirect flow
 5. Verify all existing pages (recommendations, components, analytics, settings) work with API-based connections
+
+---
+
+## Progress Checklist
+
+### Phase A: Model + Migration
+- [x] A1. Add `ConnectionMethod` enum and `connection_method` column to `EcommerceConnection` model
+- [x] A2. Add API fields (`store_url`, `api_key`, `api_secret`) to model
+- [x] A3. Make `db_*` fields nullable
+- [x] A4. Rewrite `ecommerce_connection_schemas.py` (new fields, validation, nexotype patterns)
+- [x] A5. Generate + run Alembic migration (`91d861a1bea9`) — applied and verified
+- [x] A6. Rewrite all schema files to follow nexotype patterns (`recommendation_settings_schemas.py`, `recommendation_schemas.py`, `data_schemas.py`)
+- [x] A7. Rewrite all subrouters to follow nexotype patterns (section headers, docstrings, two-tier except, proper naming)
+- [x] A8. Rename subrouter files to mirror model names (`ecommerce_connection_subrouter.py`, `recommendation_settings_subrouter.py`, `recommendation_subrouter.py`)
+- [x] A9. Verify DB state — all columns correct (varchar not enum), old PG enum types dropped, all FKs have CASCADE
+
+### Phase B: Centralized Adapter Factory
+- [x] B1. Create `adapters/factory.py` with `get_adapter()` function
+- [x] B2. Replace duplicated factory logic in all subrouters with `from ..adapters.factory import get_adapter`
+- [x] B3. Update `factory.py` to route by `connection_method` (api vs database) — API is default, database only if explicitly set
+
+### Phase C: WooCommerce REST API Adapter + Auto-Auth
+- [x] C1. Create `adapters/woocommerce/api.py` — `WooCommerceApiAdapter` (HTTP Basic Auth, pagination, test_connection)
+- [x] C2. Create `subrouters/woocommerce_auth_subrouter.py` — auto-key generation via `/wc-auth/v1/authorize` + callback endpoint
+- [x] C3. Register WooCommerce auth subrouter in `router.py`
+
+### Phase D: Magento REST API Adapter
+- [x] D1. Create `adapters/magento/api.py` — `MagentoApiAdapter` (Bearer token, searchCriteria pagination, 2.4.4+ error detection)
+
+### Phase E: Update Shopify Adapter
+- [x] E1. Update `adapters/shopify/api.py` field mapping — use `store_url` and `api_secret` directly
+
+### Phase F: Shopify OAuth + Environment Config
+- [x] F1. Add Shopify env vars to `core/config.py` (`SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`, `SHOPIFY_SCOPES`, `SHOPIFY_REDIRECT_URI`)
+- [x] F2. Add Shopify env vars to `.env`, `.env.production`, `.env.example`
+- [x] F3. Create `subrouters/shopify_oauth_subrouter.py` — `/shopify/auth` (generate auth URL) + `/shopify/callback` (HMAC verify, exchange code for token, save connection)
+- [x] F4. Register Shopify OAuth subrouter in `router.py`
+
+### Phase G: Frontend Updates
+- [ ] G1. Update `schemas/connection.schema.ts` — add `connectionMethodEnum` (`api`, `database`), add `connection_method`, `store_url`, `api_key`, `api_secret` fields
+- [ ] G2. Update `utils/api.endpoints.ts` — add Shopify OAuth + WooCommerce auth endpoints
+- [ ] G3. Update `service/connections.service.ts` — add `initiateShopifyOAuth(shop)` + `initiateWooCommerceAuth(store_url)`
+- [ ] G4. Redesign `connections/new/page.tsx` — different fields per platform + connection method (Shopify: OAuth button + manual toggle; WooCommerce: auto-auth button + manual API + database; Magento: API default + database toggle)
+- [ ] G5. Update `connections/[id]/page.tsx` — show `connection_method` badge (API/Database), show `store_url` for API connections
+- [ ] G6. Update `connections/page.tsx` — handle OAuth/auth success redirects (`?shopify_connected=true`, `?wc_connected=true`)

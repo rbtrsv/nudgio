@@ -7,7 +7,7 @@ import {
   ConnectionSettings,
   CreateOrUpdateSettingsInput,
   CreateOrUpdateSettingsSchema,
-} from '../schemas/settings.schema';
+} from '../schemas/recommendation-settings.schema';
 import { SETTINGS_ENDPOINTS } from '../utils/api.endpoints';
 import { fetchClient } from '@/modules/accounts/utils/fetch.client';
 

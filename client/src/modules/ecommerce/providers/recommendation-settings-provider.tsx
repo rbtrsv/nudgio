@@ -1,9 +1,9 @@
 'use client';
 
 import React, { createContext, useEffect, useMemo } from 'react';
-import { useSettingsStore } from '../store/settings.store';
-import { useConnectionStore } from '../store/connections.store';
-import { type RecommendationSettings, type ConnectionSettings } from '../schemas/settings.schema';
+import { useSettingsStore } from '../store/recommendation-settings.store';
+import { useConnectionStore } from '../store/ecommerce-connections.store';
+import { type RecommendationSettings, type ConnectionSettings } from '../schemas/recommendation-settings.schema';
 
 /**
  * Context type for the settings provider

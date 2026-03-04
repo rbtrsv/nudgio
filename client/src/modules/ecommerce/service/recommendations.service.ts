@@ -11,7 +11,7 @@ import {
   CrossSellInputSchema,
   UpsellInputSchema,
   SimilarInputSchema,
-} from '../schemas/recommendation.schema';
+} from '../schemas/recommendations.schema';
 import { RECOMMENDATION_ENDPOINTS } from '../utils/api.endpoints';
 import { fetchClient } from '@/modules/accounts/utils/fetch.client';
 

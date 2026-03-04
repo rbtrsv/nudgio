@@ -7,8 +7,8 @@ import {
   ConnectionTestResponse,
   CreateConnectionInput,
   CreateConnectionSchema,
-} from '../schemas/connection.schema';
-import { CONNECTION_ENDPOINTS } from '../utils/api.endpoints';
+} from '../schemas/ecommerce-connections.schema';
+import { CONNECTION_ENDPOINTS, SHOPIFY_OAUTH_ENDPOINTS, WOOCOMMERCE_AUTH_ENDPOINTS } from '../utils/api.endpoints';
 import { fetchClient } from '@/modules/accounts/utils/fetch.client';
 
 // Type for errors thrown by fetchClient
@@ -22,8 +22,8 @@ interface FetchError extends Error {
  */
 export const getConnections = async (): Promise<ConnectionsResponse> => {
   try {
-    // Backend returns { success, data, total, error }
-    const response = await fetchClient<{ success: boolean; data: Connection[]; total: number; error?: string }>(
+    // Backend returns { success, data, count, error }
+    const response = await fetchClient<{ success: boolean; data: Connection[]; count: number; error?: string }>(
       CONNECTION_ENDPOINTS.LIST,
       { method: 'GET' }
     );
@@ -31,7 +31,7 @@ export const getConnections = async (): Promise<ConnectionsResponse> => {
     return {
       success: response.success,
       data: response.data,
-      total: response.total,
+      count: response.count,
       error: response.error,
     };
   } catch (error) {
@@ -166,7 +166,7 @@ export const deleteConnection = async (id: number): Promise<{ success: boolean; 
 };
 
 /**
- * Test a connection's database connectivity
+ * Test a connection's connectivity
  * @param id Connection ID
  * @returns Promise with test response
  */
@@ -182,6 +182,54 @@ export const testConnection = async (id: number): Promise<ConnectionTestResponse
     return {
       success: false,
       message: error instanceof Error ? error.message : `Failed to test connection with ID ${id}`,
+    };
+  }
+};
+
+/**
+ * Initiate Shopify OAuth flow
+ * @param shop Shopify store domain (e.g., "mystore.myshopify.com")
+ * @returns Promise with auth URL to redirect the merchant
+ */
+export const initiateShopifyOAuth = async (shop: string): Promise<{ success: boolean; auth_url?: string; error?: string }> => {
+  try {
+    const response = await fetchClient<{ auth_url: string }>(
+      SHOPIFY_OAUTH_ENDPOINTS.AUTH(shop),
+      { method: 'GET' }
+    );
+
+    return {
+      success: true,
+      auth_url: response.auth_url,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to initiate Shopify OAuth',
+    };
+  }
+};
+
+/**
+ * Initiate WooCommerce auto-auth flow
+ * @param storeUrl WooCommerce store URL (e.g., "https://mystore.com")
+ * @returns Promise with auth URL to redirect the merchant
+ */
+export const initiateWooCommerceAuth = async (storeUrl: string): Promise<{ success: boolean; auth_url?: string; error?: string }> => {
+  try {
+    const response = await fetchClient<{ auth_url: string }>(
+      WOOCOMMERCE_AUTH_ENDPOINTS.AUTH(storeUrl),
+      { method: 'GET' }
+    );
+
+    return {
+      success: true,
+      auth_url: response.auth_url,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to initiate WooCommerce auth',
     };
   }
 };
