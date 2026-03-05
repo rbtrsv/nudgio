@@ -92,7 +92,8 @@ class ShopifyAdapter:
                             "updated_at": product.get("updated_at")
                         })
                 else:
-                    print(f"Shopify API error: {response.status} - {await response.text()}")
+                    error_text = await response.text()
+                    raise Exception(f"Shopify API error {response.status}: {error_text}")
 
         return products
 
@@ -125,7 +126,8 @@ class ShopifyAdapter:
                             "order_date": order.get("created_at")
                         })
                 else:
-                    print(f"Shopify API error: {response.status} - {await response.text()}")
+                    error_text = await response.text()
+                    raise Exception(f"Shopify API error {response.status}: {error_text}")
 
         return orders
 
@@ -190,17 +192,18 @@ class ShopifyAdapter:
                             "inventory_quantity": variant.get("inventory_quantity", 0)
                         }
                 else:
-                    print(f"Shopify API error: {response.status} - {await response.text()}")
+                    error_text = await response.text()
+                    raise Exception(f"Shopify API error {response.status}: {error_text}")
 
         return {}
 
     async def test_connection(self) -> bool:
         """Test if Shopify API connection is working"""
-        try:
-            async with aiohttp.ClientSession() as session:
-                url = f"{self._get_base_url()}/shop.json"
+        async with aiohttp.ClientSession() as session:
+            url = f"{self._get_base_url()}/shop.json"
 
-                async with session.get(url, headers=self._get_headers()) as response:
-                    return response.status == 200
-        except Exception:
-            return False
+            async with session.get(url, headers=self._get_headers()) as response:
+                if response.status == 200:
+                    return True
+                error_text = await response.text()
+                raise Exception(f"Shopify API error {response.status}: {error_text}")

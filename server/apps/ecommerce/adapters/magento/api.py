@@ -111,8 +111,7 @@ class MagentoApiAdapter:
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(f"Magento API error: {response.status} - {error_text}")
-                        break
+                        raise Exception(f"Magento API error {response.status}: {error_text}")
 
                     data = await response.json()
                     items = data.get("items", [])
@@ -190,8 +189,7 @@ class MagentoApiAdapter:
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(f"Magento API error: {response.status} - {error_text}")
-                        break
+                        raise Exception(f"Magento API error {response.status}: {error_text}")
 
                     data = await response.json()
                     items = data.get("items", [])
@@ -254,8 +252,7 @@ class MagentoApiAdapter:
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(f"Magento API error: {response.status} - {error_text}")
-                        break
+                        raise Exception(f"Magento API error {response.status}: {error_text}")
 
                     data = await response.json()
                     orders = data.get("items", [])
@@ -338,7 +335,7 @@ class MagentoApiAdapter:
                         }
                 else:
                     error_text = await response.text()
-                    print(f"Magento API error: {response.status} - {error_text}")
+                    raise Exception(f"Magento API error {response.status}: {error_text}")
 
         return {}
 
@@ -354,29 +351,21 @@ class MagentoApiAdapter:
         Stores > Configuration > Services > OAuth >
         "Allow OAuth Access Tokens to be used as standalone Bearer tokens" > Yes
         """
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.base_url}/store/storeConfigs",
-                    headers=self._get_headers(),
-                ) as response:
-                    if response.status == 200:
-                        return True
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{self.base_url}/store/storeConfigs",
+                headers=self._get_headers(),
+            ) as response:
+                if response.status == 200:
+                    return True
 
-                    # Detect Magento 2.4.4+ Bearer token disabled error
-                    if response.status == 401:
-                        try:
-                            error_data = await response.json()
-                            error_msg = error_data.get("message", "")
-                            if "consumer isn't authorized" in error_msg.lower():
-                                print(
-                                    "Magento 2.4.4+ detected: Bearer token auth is disabled. "
-                                    "Merchant must enable: Stores > Configuration > Services > OAuth > "
-                                    '"Allow OAuth Access Tokens to be used as standalone Bearer tokens" > Yes'
-                                )
-                        except Exception:
-                            pass
+                # Detect Magento 2.4.4+ Bearer token disabled error
+                error_text = await response.text()
+                if response.status == 401 and "consumer isn't authorized" in error_text.lower():
+                    raise Exception(
+                        "Magento 2.4.4+ Bearer token auth is disabled. "
+                        "Enable in: Stores > Configuration > Services > OAuth > "
+                        '"Allow OAuth Access Tokens to be used as standalone Bearer tokens" > Yes'
+                    )
 
-                    return False
-        except Exception:
-            return False
+                raise Exception(f"Magento API error {response.status}: {error_text}")

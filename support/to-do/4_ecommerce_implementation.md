@@ -1436,17 +1436,17 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Wire monthly order limit enforcement
 
 ### Production Deployment
-- ❌ Production DragonflyDB setup — switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"`, configure `DRAGONFLY_URL`
-- ❌ Production Stripe configuration — create real webhook endpoint for `server.nudgio.tech/accounts/subscriptions/webhook`, set production `STRIPE_WEBHOOK_SECRET` in Coolify env vars
-- ❌ Create Pro and Enterprise products in Stripe Dashboard with correct metadata (`tier=PRO`/`ENTERPRISE`, `tier_order=0`/`1`, features list)
-- ❌ Stripe Customer Portal — enable plan switching, add Pro + Enterprise as eligible products, enable cancellations
-- ❌ Clean up duplicate test subscriptions from Stripe Dashboard (2 Pro subscriptions created during testing)
+- ⏸️ Production DragonflyDB setup — switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"`, configure `DRAGONFLY_URL` (ON HOLD — DragonflyDB not yet provisioned in Coolify)
+- ✅ Production Stripe configuration — webhook endpoint created (`https://server.nudgio.tech/accounts/subscriptions/webhook`), `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` set in Coolify env vars
+- ✅ Create Pro and Enterprise products in Stripe Dashboard with correct metadata (`tier=PRO`/`ENTERPRISE`, `tier_order=0`/`1`, features list)
+- ✅ Stripe Customer Portal — enable plan switching, add Pro + Enterprise as eligible products, enable cancellations
+- ~~Clean up duplicate test subscriptions from Stripe Dashboard~~ (test mode, irrelevant to production)
 
 ### Backend Improvements
-- ❌ HTTPS validation on `store_url` at create/update — reject `http://` URLs, require `https://`
-- ❌ Propagate HTTP status codes in adapter error messages — instead of generic "No products found", show actual error (401 Unauthorized, 403 Forbidden, etc.)
-- ❌ Different `test_connection()` response messages for API vs Database connections — currently same generic message for both
-- ❌ Data import endpoints — currently stubs only, need full implementation for bulk product/order data import
+- ~~HTTPS validation on `store_url`~~ (skipped — would block test/dev shops on localhost or local network)
+- ✅ Propagate HTTP status codes in adapter error messages — adapters now raise with status code + response body instead of silently returning empty
+- ~~Different `test_connection()` response messages for API vs Database connections~~ (cosmetic, low priority)
+- ✅ Data endpoints — `data_subrouter.py` fetches products/orders/stats live from store APIs via adapters
 - ✅ Efficient adapter count methods — `get_product_count()` and `get_order_count()` added to all 5 adapters (lightweight API calls / SQL COUNT)
 - ✅ Removed `order_items_count` from stats (no efficient count across platforms)
 - ✅ Settings endpoint returns defaults when no record exists (no more 404)

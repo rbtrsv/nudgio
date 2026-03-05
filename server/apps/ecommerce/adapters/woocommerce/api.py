@@ -88,8 +88,7 @@ class WooCommerceApiAdapter:
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(f"WooCommerce API error: {response.status} - {error_text}")
-                        break
+                        raise Exception(f"WooCommerce API error {response.status}: {error_text}")
 
                     data = await response.json()
                     if not data:
@@ -151,8 +150,7 @@ class WooCommerceApiAdapter:
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(f"WooCommerce API error: {response.status} - {error_text}")
-                        break
+                        raise Exception(f"WooCommerce API error {response.status}: {error_text}")
 
                     data = await response.json()
                     if not data:
@@ -205,8 +203,7 @@ class WooCommerceApiAdapter:
                 ) as response:
                     if response.status != 200:
                         error_text = await response.text()
-                        print(f"WooCommerce API error: {response.status} - {error_text}")
-                        break
+                        raise Exception(f"WooCommerce API error {response.status}: {error_text}")
 
                     data = await response.json()
                     if not data:
@@ -263,7 +260,7 @@ class WooCommerceApiAdapter:
                     }
                 else:
                     error_text = await response.text()
-                    print(f"WooCommerce API error: {response.status} - {error_text}")
+                    raise Exception(f"WooCommerce API error {response.status}: {error_text}")
 
         return {}
 
@@ -273,12 +270,12 @@ class WooCommerceApiAdapter:
         Uses GET /wp-json/wc/v3/system_status which also verifies
         WooCommerce version and plugin status.
         """
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{self.base_url}/system_status",
-                    auth=self._get_auth(),
-                ) as response:
-                    return response.status == 200
-        except Exception:
-            return False
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{self.base_url}/system_status",
+                auth=self._get_auth(),
+            ) as response:
+                if response.status == 200:
+                    return True
+                error_text = await response.text()
+                raise Exception(f"WooCommerce API error {response.status}: {error_text}")
