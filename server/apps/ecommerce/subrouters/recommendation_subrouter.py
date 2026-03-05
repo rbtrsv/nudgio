@@ -16,14 +16,18 @@ from ..schemas.recommendation_schemas import (
 )
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
-from ..utils.dependency_utils import get_active_connection
+from ..utils.dependency_utils import get_active_connection, enforce_monthly_order_limit
 from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
 
 # ==========================================
 # Product Recommendations Router
 # ==========================================
 
-router = APIRouter(prefix="/recommendations", tags=["Product Recommendations"])
+router = APIRouter(
+    prefix="/recommendations",
+    tags=["Product Recommendations"],
+    dependencies=[Depends(enforce_monthly_order_limit)],
+)
 
 
 @router.post("/bestsellers", response_model=RecommendationResponse)

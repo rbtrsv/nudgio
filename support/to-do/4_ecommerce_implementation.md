@@ -1432,8 +1432,8 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 
 ### Performance (Built, Not Wired — Highest Priority)
 - ✅ Wire cache into recommendation + component subrouters
-- ❌ Wire rate limiting into router — `check_rate_limit()` exists in `rate_limiting_utils.py` but not used as a dependency
-- ❌ Wire monthly order limit enforcement — `get_org_monthly_order_count()` exists in `subscription_utils.py` but doesn't block when exceeded
+- ✅ Wire rate limiting into router
+- ✅ Wire monthly order limit enforcement
 
 ### Production Deployment
 - ❌ Production DragonflyDB setup — switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"`, configure `DRAGONFLY_URL`

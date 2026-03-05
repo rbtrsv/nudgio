@@ -1,8 +1,21 @@
 """
 Ecommerce Dependency Utilities
 
-Shared helper functions for validating connection ownership across subrouters.
-Also provides router-level subscription enforcement dependency.
+Shared helper functions and FastAPI dependencies for the ecommerce module.
+
+Connection Ownership Helpers:
+    - get_user_connection: ownership + soft-delete filtered lookup (any connection)
+    - get_active_connection: same + is_active check (for recommendation/data endpoints)
+
+Organization Helpers:
+    - get_user_organization_id: resolve user → organization via OrganizationMember
+
+Router-Level Dependencies (applied to gated router — all gated endpoints):
+    - require_active_subscription: blocks all requests when service is inactive (403)
+    - enforce_rate_limit: per-org per-minute and per-hour request caps (429)
+
+Subrouter-Level Dependencies (applied to recommendation + component routers only):
+    - enforce_monthly_order_limit: blocks when monthly order quota exceeded (403)
 """
 
 from typing import Optional
@@ -11,7 +24,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
 from ..models import EcommerceConnection
-from .subscription_utils import is_service_active
+from .subscription_utils import (
+    is_service_active,
+    get_org_subscription,
+    get_org_tier,
+    get_tier_limits,
+    get_org_monthly_order_count,
+)
+from .rate_limiting_utils import check_rate_limit
 from apps.accounts.models import User, OrganizationMember
 from apps.accounts.utils.auth_utils import get_current_user
 from core.db import get_session
@@ -143,4 +163,55 @@ async def require_active_subscription(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your subscription has expired. Reactivate to restore access."
+        )
+
+
+async def enforce_rate_limit(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Router-level dependency — enforces per-org rate limits on all gated endpoints.
+
+    Checks per-minute and per-hour request limits based on subscription tier.
+    Raises HTTP 429 if either limit is exceeded.
+    """
+    org_id = await get_user_organization_id(user.id, session)
+    if not org_id:
+        # No org = FREE tier defaults
+        await check_rate_limit(0, "FREE")
+        return
+
+    subscription = await get_org_subscription(org_id, session)
+    tier = get_org_tier(subscription)
+    await check_rate_limit(org_id, tier)
+
+
+async def enforce_monthly_order_limit(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Endpoint-level dependency — blocks recommendation requests when monthly order quota is exceeded.
+
+    Only applied to recommendation and component subrouters (not connections, settings, or data).
+    Raises HTTP 403 if the organization has exceeded their monthly order limit for their tier.
+    """
+    org_id = await get_user_organization_id(user.id, session)
+    if not org_id:
+        return
+
+    subscription = await get_org_subscription(org_id, session)
+    tier = get_org_tier(subscription)
+    limits = get_tier_limits(tier)
+
+    # None = unlimited (ENTERPRISE)
+    if limits["max_monthly_orders"] is None:
+        return
+
+    current_count = await get_org_monthly_order_count(org_id, session)
+    if current_count >= limits["max_monthly_orders"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Monthly order limit exceeded: {limits['max_monthly_orders']} requests/month for {tier} plan. Upgrade to increase your limit."
         )

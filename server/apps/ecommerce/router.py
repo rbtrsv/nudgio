@@ -13,7 +13,7 @@ Split into two groups:
 
 from fastapi import APIRouter, Depends
 
-from .utils.dependency_utils import require_active_subscription
+from .utils.dependency_utils import require_active_subscription, enforce_rate_limit
 
 # Connection management
 from .subrouters.ecommerce_connection_subrouter import router as connections_router
@@ -39,7 +39,7 @@ router.include_router(woocommerce_auth_router)
 
 # Gated — everything else requires active service
 # See require_active_subscription in dependency_utils.py for details.
-gated = APIRouter(dependencies=[Depends(require_active_subscription)])
+gated = APIRouter(dependencies=[Depends(require_active_subscription), Depends(enforce_rate_limit)])
 
 # Connection management
 gated.include_router(connections_router)

@@ -11,10 +11,14 @@ from ..schemas.ecommerce_connection_schemas import PlatformType
 from ..schemas.recommendation_schemas import BestsellerMethod
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
-from ..utils.dependency_utils import get_active_connection
+from ..utils.dependency_utils import get_active_connection, enforce_monthly_order_limit
 from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
 
-router = APIRouter(prefix="/components", tags=["Product Component Recommendations"])
+router = APIRouter(
+    prefix="/components",
+    tags=["Product Component Recommendations"],
+    dependencies=[Depends(enforce_monthly_order_limit)],
+)
 
 
 def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[RecommendationSettings]) -> Dict[str, str]:
