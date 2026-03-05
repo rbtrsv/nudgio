@@ -24,8 +24,6 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Impact.com affiliate network site verification */}
-        <meta name='impact-site-verification' content='33c1983a-0cff-4777-ac53-2317815501bc' />
       </head>
       <body className='h-full bg-white text-black dark:bg-black dark:text-white'>
         {children}
