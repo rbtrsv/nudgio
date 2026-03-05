@@ -12,7 +12,7 @@ const HeroSectionAnimated: React.FC = () => {
           data-content='Unparalleled.'
           className='before:animate-gradient-background-1 relative mx-[-0.25rem] inline-block before:absolute before:top-0 before:bottom-0 before:left-0 before:z-0 before:block before:w-full before:px-2 before:text-center before:text-black before:content-[attr(data-content)] dark:before:text-white'
         >
-          <span className='animate-gradient-foreground-1 from-[#c517ff] to-[#2631f7] bg-gradient-to-r bg-clip-text px-2 text-transparent'>
+          <span className='animate-gradient-foreground-1 from-[#c517ff] to-[#2631f7] bg-linear-to-r bg-clip-text px-2 text-transparent'>
             Unparalleled.
           </span>
         </span>
@@ -20,7 +20,7 @@ const HeroSectionAnimated: React.FC = () => {
           data-content='Commerce.'
           className='before:animate-gradient-background-2 relative mx-[-0.25rem] inline-block before:absolute before:top-0 before:bottom-0 before:left-0 before:z-0 before:block before:w-full before:px-2 before:text-center before:text-black before:content-[attr(data-content)] dark:before:text-white'
         >
-          <span className='animate-gradient-foreground-2 from-[#007cf0] to-[#00dfd8] bg-gradient-to-r bg-clip-text px-2 text-transparent'>
+          <span className='animate-gradient-foreground-2 from-[#007cf0] to-[#00dfd8] bg-linear-to-r bg-clip-text px-2 text-transparent'>
             Commerce.
           </span>
         </span>
@@ -28,7 +28,7 @@ const HeroSectionAnimated: React.FC = () => {
           data-content='Solutions.'
           className='before:animate-gradient-background-3 relative mx-[-0.25rem] inline-block before:absolute before:top-0 before:bottom-0 before:left-0 before:z-0 before:block before:w-full before:px-2 before:text-center before:text-black before:content-[attr(data-content)] dark:before:text-white'
         >
-          <span className='animate-gradient-foreground-3 from-[#7928ca] to-[#ff0080] bg-gradient-to-r bg-clip-text px-2 text-transparent'>
+          <span className='animate-gradient-foreground-3 from-[#7928ca] to-[#ff0080] bg-linear-to-r bg-clip-text px-2 text-transparent'>
             Solutions.
           </span>
         </span>

@@ -45,7 +45,7 @@ export default function HowItWorks() {
           <div className='hidden md:block'>
             <div className='relative flex items-start justify-between'>
               {/* Connecting line behind the circles */}
-              <div className='absolute top-8 right-12 left-12 h-0.5 bg-gradient-to-r from-[#17FFFD] to-[#2631f7]' />
+              <div className='absolute top-8 right-12 left-12 h-0.5 bg-linear-to-r from-[#17FFFD] to-[#2631f7]' />
 
               {steps.map((step) => {
                 const Icon = step.icon;
@@ -77,7 +77,7 @@ export default function HowItWorks() {
           <div className='md:hidden'>
             <div className='relative'>
               {/* Vertical connecting line */}
-              <div className='absolute top-8 bottom-8 left-8 w-0.5 bg-gradient-to-b from-[#17FFFD] to-[#2631f7]' />
+              <div className='absolute top-8 bottom-8 left-8 w-0.5 bg-linear-to-b from-[#17FFFD] to-[#2631f7]' />
 
               <div className='space-y-10'>
                 {steps.map((step) => {
