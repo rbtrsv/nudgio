@@ -276,3 +276,49 @@ async def is_service_active(org_id: int, session: AsyncSession) -> bool:
 
     # All other statuses → inactive
     return False
+
+
+async def is_service_active_with_subscription(
+    subscription: Subscription | None, org_id: int, session: AsyncSession
+) -> bool:
+    """
+    Same logic as is_service_active but accepts a pre-resolved subscription.
+
+    Used by require_active_subscription (via OrgContext) to avoid re-querying
+    get_org_subscription when the subscription is already resolved.
+
+    Only hits the DB for FREE tier (get_org_connection_count check).
+
+    Args:
+        subscription: Pre-resolved subscription from OrgContext (or None for FREE tier)
+        org_id: Organization ID (needed for connection count on FREE tier)
+        session: Database session (needed for connection count on FREE tier)
+
+    Returns:
+        True if service is active (requests allowed), False if blocked
+    """
+    # No subscription record → FREE tier
+    if not subscription:
+        # FREE tier is active as long as within limits
+        connection_count = await get_org_connection_count(org_id, session)
+        free_limits = get_tier_limits("FREE")
+        return connection_count <= free_limits["max_connections"]
+
+    # Manual override bypasses Stripe status checks (invoice/bank transfer clients)
+    if subscription.manual_override:
+        return True
+
+    # Active or trialing subscription → service active
+    if subscription.subscription_status in ("ACTIVE", "TRIALING"):
+        return True
+
+    # Canceled/past_due/unpaid — check grace period
+    if subscription.subscription_status in ("CANCELED", "PAST_DUE", "UNPAID"):
+        if subscription.end_date:
+            from datetime import timedelta
+            grace_deadline = subscription.end_date + timedelta(days=GRACE_PERIOD_DAYS)
+            if datetime.now(timezone.utc) < grace_deadline:
+                return True
+
+    # All other statuses → inactive
+    return False

@@ -10,6 +10,10 @@ Connection Ownership Helpers:
 Organization Helpers:
     - get_user_organization_id: resolve user → organization via OrganizationMember
 
+Shared Context (resolved ONCE per request via FastAPI Depends deduplication):
+    - get_org_context: queries org_id + subscription + tier in 2 DB calls, shared
+      across all dependencies that need org/subscription info
+
 Router-Level Dependencies (applied to gated router — all gated endpoints):
     - require_active_subscription: blocks all requests when service is inactive (403)
     - enforce_rate_limit: per-org per-minute and per-hour request caps (429)
@@ -18,6 +22,7 @@ Subrouter-Level Dependencies (applied to recommendation + component routers only
     - enforce_monthly_order_limit: blocks when monthly order quota exceeded (403)
 """
 
+from dataclasses import dataclass
 from typing import Optional
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,14 +30,14 @@ from sqlalchemy import select, and_
 
 from ..models import EcommerceConnection
 from .subscription_utils import (
-    is_service_active,
+    is_service_active_with_subscription,
     get_org_subscription,
     get_org_tier,
     get_tier_limits,
     get_org_monthly_order_count,
 )
 from .rate_limiting_utils import check_rate_limit
-from apps.accounts.models import User, OrganizationMember
+from apps.accounts.models import User, OrganizationMember, Subscription
 from apps.accounts.utils.auth_utils import get_current_user
 from core.db import get_session
 
@@ -136,12 +141,57 @@ async def get_user_organization_id(user_id: int, session: AsyncSession) -> Optio
 
 
 # ==========================================
+# Shared Organization Context
+# ==========================================
+
+@dataclass
+class OrgContext:
+    """
+    Resolved once per request via FastAPI Depends deduplication.
+
+    All dependencies that need org_id / subscription / tier declare
+    Depends(get_org_context). FastAPI calls get_org_context exactly once
+    per request and reuses the result — reducing 3x org_id + 3x subscription
+    queries down to 1x each (2 DB calls total instead of 10+).
+    """
+    org_id: Optional[int]
+    subscription: Optional[Subscription]
+    tier: str
+
+
+async def get_org_context(
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> OrgContext:
+    """
+    Resolve the user's organization context in 2 DB calls.
+
+    This endpoint:
+    1. Look up the user's organization ID from OrganizationMember
+    2. Look up the organization's subscription record
+    3. Derive the tier from the subscription
+
+    FastAPI deduplicates Depends() — when multiple dependencies declare
+    Depends(get_org_context), this function runs once and the result is
+    shared across require_active_subscription, enforce_rate_limit, and
+    enforce_monthly_order_limit within the same request.
+    """
+    org_id = await get_user_organization_id(user.id, session)
+    if not org_id:
+        return OrgContext(org_id=None, subscription=None, tier="FREE")
+
+    subscription = await get_org_subscription(org_id, session)
+    tier = get_org_tier(subscription)
+    return OrgContext(org_id=org_id, subscription=subscription, tier=tier)
+
+
+# ==========================================
 # Subscription Dependencies
 # ==========================================
 
 async def require_active_subscription(
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session)
+    ctx: OrgContext = Depends(get_org_context),
+    session: AsyncSession = Depends(get_session),
 ):
     """
     Router-level dependency — covers all gated ecommerce subrouters.
@@ -150,16 +200,16 @@ async def require_active_subscription(
     Unlike finpy/nexotype which only gate writes, Nudgio blocks everything
     after grace period — widgets show nothing (not broken, just empty).
 
-    Args:
-        user: Current authenticated user (resolved by get_current_user)
-        session: Database session
+    Uses get_org_context (deduplicated) for org_id and subscription.
+    Passes ctx.subscription to is_service_active_with_subscription to avoid
+    re-querying. Only needs its own session for the FREE tier connection
+    count check (when subscription is None).
     """
-    org_id = await get_user_organization_id(user.id, session)
-    if not org_id:
+    if not ctx.org_id:
         # No org = no connections = nothing to gate
         return
 
-    if not await is_service_active(org_id, session):
+    if not await is_service_active_with_subscription(ctx.subscription, ctx.org_id, session):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your subscription has expired. Reactivate to restore access."
@@ -167,28 +217,26 @@ async def require_active_subscription(
 
 
 async def enforce_rate_limit(
-    user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    ctx: OrgContext = Depends(get_org_context),
 ):
     """
     Router-level dependency — enforces per-org rate limits on all gated endpoints.
 
     Checks per-minute and per-hour request limits based on subscription tier.
     Raises HTTP 429 if either limit is exceeded.
+
+    Uses get_org_context (deduplicated) — no additional DB queries needed.
     """
-    org_id = await get_user_organization_id(user.id, session)
-    if not org_id:
+    if not ctx.org_id:
         # No org = FREE tier defaults
         await check_rate_limit(0, "FREE")
         return
 
-    subscription = await get_org_subscription(org_id, session)
-    tier = get_org_tier(subscription)
-    await check_rate_limit(org_id, tier)
+    await check_rate_limit(ctx.org_id, ctx.tier)
 
 
 async def enforce_monthly_order_limit(
-    user: User = Depends(get_current_user),
+    ctx: OrgContext = Depends(get_org_context),
     session: AsyncSession = Depends(get_session),
 ):
     """
@@ -196,22 +244,22 @@ async def enforce_monthly_order_limit(
 
     Only applied to recommendation and component subrouters (not connections, settings, or data).
     Raises HTTP 403 if the organization has exceeded their monthly order limit for their tier.
+
+    Uses get_org_context (deduplicated) for org_id and tier.
+    Only needs its own session for the monthly order count query.
     """
-    org_id = await get_user_organization_id(user.id, session)
-    if not org_id:
+    if not ctx.org_id:
         return
 
-    subscription = await get_org_subscription(org_id, session)
-    tier = get_org_tier(subscription)
-    limits = get_tier_limits(tier)
+    limits = get_tier_limits(ctx.tier)
 
     # None = unlimited (ENTERPRISE)
     if limits["max_monthly_orders"] is None:
         return
 
-    current_count = await get_org_monthly_order_count(org_id, session)
+    current_count = await get_org_monthly_order_count(ctx.org_id, session)
     if current_count >= limits["max_monthly_orders"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Monthly order limit exceeded: {limits['max_monthly_orders']} requests/month for {tier} plan. Upgrade to increase your limit."
+            detail=f"Monthly order limit exceeded: {limits['max_monthly_orders']} requests/month for {ctx.tier} plan. Upgrade to increase your limit."
         )
