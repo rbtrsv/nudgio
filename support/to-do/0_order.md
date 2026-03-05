@@ -2,95 +2,159 @@
 
 ---
 
-## Done
+## ✅ Done
 
 ### Repo Setup & Infrastructure
-- [x] Create nudgio repo (copied server + client skeleton from nexotype)
-- [x] Server config: main.py, config.py, manage.py updated for nudgio (port 8002/3002)
-- [x] Database: Coolify PostgreSQL configured (port 6035 public, 5432 internal)
-- [x] .env and .env.production with real DB credentials
-- [x] Initial migration created and applied (11 tables: 7 accounts + 4 ecommerce)
-- [x] Client ecommerce route group: `(ecommerce)` layout, page, sidebar, breadcrumb, providers
-- [x] Organization pages copied under `(ecommerce)/organizations/` (list, new, details, subscription)
-- [x] Nexotype routes disabled: `(nexotype)` → `_nexotype`
+- ✅ Create nudgio repo (copied server + client skeleton from nexotype)
+- ✅ Server config: main.py, config.py, manage.py updated for nudgio (port 8002/3002)
+- ✅ Database: Coolify PostgreSQL configured (port 6035 public, 5432 internal)
+- ✅ .env and .env.production with real DB credentials
+- ✅ Initial migration created and applied (11 tables: 7 accounts + 4 ecommerce)
+- ✅ Client ecommerce route group: `(ecommerce)` layout, page, sidebar, breadcrumb, providers
+- ✅ Organization pages copied under `(ecommerce)/organizations/` (list, new, details, subscription)
+- ✅ Nexotype routes disabled: `(nexotype)` → `_nexotype`
 
 ### Branding
-- [x] Branding rename: nexotype → nudgio (proxy.ts, token.client.utils.ts, token.server.utils.ts, auth.server.store.ts, root layout.tsx)
-- [x] Nudgio brand colors selected: `#17FFFD` → `#2631f7` (cyan → blue)
-- [x] Nudgio logo created (SVG, dark + light variants)
-- [x] Logo wired into login-signup.tsx, app-sidebar.tsx, ecommerce-sidebar.tsx
-- [x] Favicon added
+- ✅ Branding rename: nexotype → nudgio (proxy.ts, token.client.utils.ts, token.server.utils.ts, auth.server.store.ts, root layout.tsx)
+- ✅ Nudgio brand colors selected: `#17FFFD` → `#2631f7` (cyan → blue)
+- ✅ Nudgio logo created (SVG, dark + light variants)
+- ✅ Logo wired into login-signup.tsx, app-sidebar.tsx, ecommerce-sidebar.tsx
+- ✅ Favicon added
 
 ### Build & Deployment
-- [x] Frontend build passing (recharts, chart component, ts-expect-error fixed)
-- [x] Coolify: Nudgio Server + Client apps created (sslip.io URLs)
-- [x] Coolify: PostgreSQL running with backups
-- [x] Pushed to GitHub
+- ✅ Frontend build passing (recharts, chart component, ts-expect-error fixed)
+- ✅ Coolify: Nudgio Server + Client apps created (sslip.io URLs)
+- ✅ Coolify: PostgreSQL running with backups
+- ✅ Pushed to GitHub
+
+### Ecommerce Backend (Phases A–F)
+- ✅ Models: `EcommerceConnection` with `connection_method` (api/database), `store_url`, `api_key`, `api_secret`, `db_*` fields nullable
+- ✅ `BaseMixin` on `EcommerceConnection` + `RecommendationSettings` (timestamps, soft delete, user audit)
+- ✅ Migration applied (`91d861a1bea9` + BaseMixin migration)
+- ✅ All schemas rewritten with `Field(description="...")` — nexotype patterns
+- ✅ All subrouters rewritten — section headers, docstrings, two-tier except, soft delete
+- ✅ Adapter factory (`adapters/factory.py`) — routes by platform + connection_method
+- ✅ Shopify API adapter (`adapters/shopify/api.py`) — REST Admin API
+- ✅ WooCommerce API adapter (`adapters/woocommerce/api.py`) — REST API v3, HTTP Basic Auth
+- ✅ WooCommerce DB adapter (`adapters/woocommerce/database.py`) — direct MySQL
+- ✅ Magento API adapter (`adapters/magento/api.py`) — Bearer token, 2.4.4+ error detection
+- ✅ Magento DB adapter (`adapters/magento/database.py`) — direct MySQL, EAV
+- ✅ Shopify OAuth subrouter (`/shopify/auth` + `/shopify/callback`)
+- ✅ WooCommerce auto-auth subrouter (`/woocommerce/auth` + `/woocommerce/callback`)
+- ✅ Env vars for Shopify OAuth (config.py, .env, .env.production, .env.example)
+
+### Ecommerce Utils
+- ✅ `dependency_utils.py` — `get_user_connection()`, `get_active_connection()`, `require_active_subscription`, `get_user_organization_id()`
+- ✅ `subscription_utils.py` — tier constants (FREE/PRO/ENTERPRISE), tier limits, grace period, query + logic helpers
+- ✅ `cache_utils.py` — ABC + `InMemoryCacheBackend` + `DragonflyCacheBackend`
+- ✅ `encryption_utils.py` — Fernet symmetric encryption for credentials
+- ✅ `rate_limiting_utils.py` — ABC + `InMemoryRateLimitBackend` + `DragonflyRateLimitBackend`
+
+### Ecommerce Router
+- ✅ Router split: ungated (OAuth/auth callbacks) + gated (everything else with `require_active_subscription`)
+- ✅ 7 subrouters, 28 routes total
+- ✅ Connection limit check on create
+- ✅ Credential encryption on create/update, decryption in adapter factory
+- ✅ Cache wired into recommendation + component subrouters
+- ✅ Rate limiting wired into router
+- ✅ Monthly order limit enforcement wired
+
+### Ecommerce Frontend (Phase G)
+- ✅ All frontend files renamed to mirror backend model names (21 files via `git mv`)
+- ✅ All imports updated across 22+ files
+- ✅ `ecommerce-connections.schema.ts` — `connectionMethodEnum`, new fields
+- ✅ `api.endpoints.ts` — Shopify OAuth + WooCommerce auth endpoints
+- ✅ `ecommerce-connections.service.ts` — `initiateShopifyOAuth()` + `initiateWooCommerceAuth()`
+- ✅ `recommendation-settings.schema.ts` — rewritten to match backend
+- ✅ `recommendations.schema.ts` — `total` → `count`
+- ✅ `connections/new/page.tsx` — different fields per platform + connection method
+- ✅ `connections/[id]/page.tsx` — method badge, store_url for API, eye toggle on credentials
+- ✅ `connections/page.tsx` — OAuth/auth success redirects, method badge
+- ✅ `settings/page.tsx` — correct field names
+- ✅ `recommendations/page.tsx` — `result.count`
+- ✅ `data-provider.tsx` — removed auto-fetch (was causing 404s)
+- ✅ `recommendation-settings-provider.tsx` — removed auto-fetch (was causing 404s)
+- ✅ `ConnectionProvider` `initialFetch={true}` (connections load on all pages)
+
+### Backend Improvements
+- ✅ Propagate HTTP status codes in adapter error messages
+- ✅ Data endpoints — `data_subrouter.py` fetches products/orders/stats live from store APIs
+- ✅ Efficient adapter count methods — `get_product_count()` + `get_order_count()` on all 5 adapters
+- ✅ Removed `order_items_count` from stats
+- ✅ Settings endpoint returns defaults when no record exists (no more 404)
+- ✅ `pool_pre_ping=True` on DB engine
+- ✅ Frontend service envelope unwrapping bug fixed
+- ✅ Widget parameters (lookback_days, method, min_price_increase) passed through to engine
+- ✅ Product images in widget HTML (from adapter data, not placeholders)
+
+### Stripe / Billing
+- ✅ Stripe sandbox configured (separate from nexotype + finpy)
+- ✅ Pro + Enterprise products created in Stripe Dashboard with metadata
+- ✅ Stripe Customer Portal configured (plan switching, cancellations)
+- ✅ Production webhook endpoint (`https://server.nudgio.tech/accounts/subscriptions/webhook`)
+- ✅ `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` set in Coolify env vars
+- ✅ Tested: Pro subscription via Stripe Checkout → webhook → DB record
+
+### Landing Page (Website)
+- ✅ Next.js 16 app at `/website` — deployed to Vercel (`www.nudgio.tech`)
+- ✅ DNS configured: `@` → Vercel, `www` → Vercel, `server/client/wp` → Coolify
+- ✅ All branding updated (logos, metadata, colors, SEO)
+- ✅ HeroSectionAnimated — "Unparalleled. Commerce. Solutions."
+- ✅ Features component — 8 feature cards with lucide icons, Nudgio gradient on hover
+- ✅ HowItWorks component — 4 steps with gradient connecting line
+- ✅ ContactSection — address updated, cyan-500 colors
+- ✅ Contact form API route — nodemailer + Gmail
+- ✅ Blog page with 2 Nudgio articles (SimpleSection cards, no external images)
+- ✅ Footer — "© 2025 Buraro Technologies", LinkedIn/GitHub/Email
+- ✅ Navbar — Features, Blog, Contact
 
 ---
 
-## To Do
+## ❌ To Do
 
-### 1. Ecommerce Module Wiring (Core Product — Frontend Plumbing)
-- [ ] Ecommerce API endpoints file (`modules/ecommerce/utils/api.endpoints.ts`)
-- [ ] Ecommerce schemas (connections, settings, analytics — Zod)
-- [ ] Ecommerce services (API calls to server)
-- [ ] Ecommerce stores (Zustand — connections, settings, analytics)
-- [ ] Ecommerce hooks (useConnections, useRecommendationSettings, useAnalytics)
-- [ ] Ecommerce providers (wire stores into `ecommerce-providers.tsx`)
+### 1. Production DragonflyDB (⏸️ On Hold)
+- ❌ Provision DragonflyDB in Coolify
+- ❌ Switch `CACHE_BACKEND` and `RATE_LIMIT_BACKEND` to `"dragonfly"`
+- ❌ Configure `DRAGONFLY_URL` env var
 
-### 2. Ecommerce Dashboard Pages (Core Product — Frontend)
-- [ ] Connections page: list existing ecommerce connections (Shopify/WooCommerce/Magento)
-- [ ] Connection detail page: connection status, store info, settings
-- [ ] Connection create page: manual connection setup (current flow, before OAuth)
-- [ ] Recommendation settings page: lookback period, method, limits per connection
-- [ ] Widget preview page: live preview of HTML recommendation components
-- [ ] Analytics page: API usage, clicks, views, conversions per connection
-- [ ] Widget embed codes page: copy-paste embed snippets for merchants
+### 2. Shopify App Store Submission Blockers
+- ❌ GDPR webhooks — 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64)
+- ❌ GraphQL migration — migrate `ShopifyAdapter` from REST to GraphQL Admin API (REST rejected for new public apps since April 2025)
+- ❌ Shopify Billing API — integrate Shopify's own billing (required for App Store apps, cannot use external billing)
+- ❌ Register app in Shopify Partner Dashboard — set App URL + redirect URLs, get Client ID + Client Secret
+- ❌ `shopify.app.toml` configuration for webhooks and compliance endpoints
 
-### 3. Shopify OAuth Flow (Distribution — Shopify App Store Requirement)
-- [ ] Register app in Shopify Partner Dashboard
-- [ ] Implement GET `/shopify/auth` — redirect merchant to Shopify OAuth consent screen
-- [ ] Implement GET `/shopify/callback` — receive access token, save to EcommerceConnection
-- [ ] Replace manual token input with "Install on Shopify" button in connection create page
-- [ ] Test full OAuth flow: install → authorize → connection created
+### 3. Shopify Embedded App UI
+- ❌ App Bridge integration — Shopify apps must render inside Shopify Admin as an iframe
+- ❌ Embedded dashboard pages — connection status, settings, widget preview, analytics, embed codes
+- ❌ Handle session tokens from Shopify App Bridge
 
-### 4. Shopify Embedded App UI (Distribution — Shopify App Store Requirement)
-- [ ] Integrate Shopify App Bridge (JS library for iframe rendering in Shopify Admin)
-- [ ] Adapt dashboard pages to render inside Shopify Admin iframe
-- [ ] Handle session tokens from Shopify App Bridge (distinct from nudgio auth)
-- [ ] Test embedded experience in Shopify development store
+### 4. Shopify App Store Submission
+- ❌ App listing: description, screenshots, demo video
+- ❌ Submit for Shopify review (2-4 week review process)
 
-### 5. Billing / Pricing (Monetization)
-- [ ] Decide: Shopify Billing API vs Stripe (Stripe already in accounts module)
-- [ ] Define pricing tiers: Free (50 recs/day), Pro ($19/mo), Business ($49/mo)
-- [ ] Implement usage metering (recommendations per day per connection)
-- [ ] Implement tier gating on recommendation endpoints
-- [ ] Pricing page for non-Shopify merchants (WooCommerce, Magento)
+### 5. Legal Pages
+- ❌ Privacy policy
+- ❌ Terms of service
 
-### 6. Shopify App Store Submission (Distribution — Go-Live)
-- [ ] App listing: description, screenshots, demo video
-- [ ] Privacy policy page
-- [ ] Terms of service page
-- [ ] Submit for Shopify review (2-4 week review process)
+### 6. WooCommerce WordPress Plugin
+- ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets
+- ❌ Submit to WordPress Plugin Directory
 
-### 7. WooCommerce Plugin (Phase 2 — Second Platform)
-- [ ] PHP plugin: installs on WordPress, sends product/order data to Nudgio API
-- [ ] Recommendation widget rendering via shortcodes or Gutenberg blocks
-- [ ] Submit to WordPress Plugin Directory
+### 7. Magento Adobe Commerce Extension
+- ❌ Magento extension for Adobe Commerce Marketplace (lower priority — smaller market)
 
-### 8. Magento Extension (Phase 3 — Third Platform)
-- [ ] Magento extension format
-- [ ] Submit to Adobe Commerce Marketplace
+### 8. Nice to Have
+- ❌ Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)
 
 ---
 
 ## Notes
 
-- Items 1-2 are the core product — ecommerce module plumbing then dashboard pages
-- Items 3-4 are Shopify-specific distribution requirements — needed for App Store listing
-- Item 5 is monetization — can be done in parallel with 3-4
-- Item 6 is Shopify App Store submission
-- Items 7-8 are future platform expansions
-- Backend recommendation engine is already complete (adapters, scoring, widget generation, analytics tracking)
+- Items 1 is on hold until DragonflyDB is provisioned in Coolify
+- Items 2-4 are Shopify-specific — needed for App Store listing
+- Item 5 is required for all platforms (Shopify, WooCommerce, Magento)
+- Items 6-7 are future platform expansions
+- Item 8 is cosmetic — accounts subscription module already handles billing via Stripe
+- Backend recommendation engine is complete (adapters, scoring, widget generation, analytics tracking)
 - Accounts module is shared and complete (auth, organizations, subscriptions, Stripe)

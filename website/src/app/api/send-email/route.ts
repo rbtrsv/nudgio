@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const mailOptions = {
       from: `"${sanitizedName}" <${process.env.GMAIL_USER}>`,
-      to: process.env.GMAIL_USER,
+      to: 'robert.radoslav@protonmail.ch',
       replyTo: user_email,
       subject: `Nudgio Contact — ${sanitizedName}`,
       text: `Name: ${user_name}\nEmail: ${user_email}\n\nMessage:\n${message}`,
