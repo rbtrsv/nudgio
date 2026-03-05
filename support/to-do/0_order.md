@@ -133,9 +133,9 @@
 - ❌ App listing: description, screenshots, demo video
 - ❌ Submit for Shopify review (2-4 week review process)
 
-### 5. Legal Pages
-- ❌ Privacy policy
-- ❌ Terms of service
+### 5. Legal Pages ✅
+- ✅ Privacy policy — `/legal/privacy-policy` (GDPR/CCPA, store data, credentials, Stripe)
+- ✅ Terms of service — `/legal/terms-of-service` (SaaS terms, subscriptions, liability, Romanian jurisdiction)
 
 ### 6. WooCommerce WordPress Plugin
 - ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets
@@ -149,12 +149,35 @@
 
 ---
 
+## Priority List (What to Work on Next)
+
+### 🔴 High Priority — Required for Launch
+1. **Shopify Partner Dashboard registration** — register app, get Client ID + Client Secret, set redirect URLs. Everything else depends on this.
+2. **GDPR webhooks** — 3 mandatory compliance endpoints. Shopify will reject the app without them.
+3. **GraphQL migration** — migrate `ShopifyAdapter` from REST to GraphQL Admin API. REST rejected for new public apps since April 2025.
+4. **Shopify Billing API** — Shopify requires its own billing for App Store apps. Cannot use external Stripe billing for Shopify merchants.
+5. **`shopify.app.toml` configuration** — webhooks and compliance endpoints config.
+
+### 🟡 Medium Priority — Required for Shopify App Store
+6. **Shopify App Bridge integration** — apps must render inside Shopify Admin as an iframe.
+7. **Embedded dashboard pages** — connection status, settings, widget preview, analytics, embed codes inside Shopify Admin.
+8. **App Store submission** — listing, description, screenshots, demo video, submit for review (2-4 weeks).
+
+### 🟢 Low Priority — Future Expansions
+9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
+10. **WooCommerce WordPress Plugin** — PHP plugin for WordPress Plugin Directory.
+11. **Magento Adobe Commerce Extension** — smaller market, lowest priority.
+12. **Frontend subscription page** — cosmetic, accounts module already handles billing.
+
+---
+
 ## Notes
 
-- Items 1 is on hold until DragonflyDB is provisioned in Coolify
-- Items 2-4 are Shopify-specific — needed for App Store listing
-- Item 5 is required for all platforms (Shopify, WooCommerce, Magento)
-- Items 6-7 are future platform expansions
-- Item 8 is cosmetic — accounts subscription module already handles billing via Stripe
+- Items 1-5 are blockers — Shopify App Store will reject without them
+- Items 6-8 are Shopify embedded app requirements
+- Item 9 is on hold until DragonflyDB is provisioned in Coolify
+- Items 10-11 are future platform expansions
+- Item 12 is cosmetic — accounts subscription module already handles billing via Stripe
 - Backend recommendation engine is complete (adapters, scoring, widget generation, analytics tracking)
 - Accounts module is shared and complete (auth, organizations, subscriptions, Stripe)
+- Landing page is complete and deployed at www.nudgio.tech (Vercel)
