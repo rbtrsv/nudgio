@@ -125,7 +125,7 @@ const NavbarDownwards: React.FC = () => {
   );
 
   return (
-    <nav className={`bg-opacity-30 fixed top-0 left-0 z-50 w-full shadow-md backdrop-blur-lg backdrop-filter transition-transform duration-300 ease-in-out ${
+    <nav className={`bg-white/30 dark:bg-black/30 fixed top-0 left-0 z-50 w-full shadow-md backdrop-blur-lg transition-transform duration-300 ease-in-out ${
       isVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
       <div
