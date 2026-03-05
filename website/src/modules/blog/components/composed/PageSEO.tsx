@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import finpyDefaultImage from '@/modules/main/images/logos/finpy_default.png';
+import nudgioLogo from '@/modules/main/images/logos/nudgio_black_text_with_logo.svg';
 import Favicon from '@/modules/main/public/favicon.ico';
 
 interface PageSEOProps {
@@ -19,7 +19,7 @@ interface PageSEOProps {
   noindex?: boolean;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.nudgio.tech';
 
 export function generatePageMetadata({
   title,
@@ -38,21 +38,21 @@ export function generatePageMetadata({
     height: image.height || 630,
     alt: image.alt,
   } : {
-    url: `${BASE_URL}${finpyDefaultImage.src}`,
-    width: finpyDefaultImage.width,
-    height: finpyDefaultImage.height,
+    url: `${BASE_URL}${nudgioLogo.src}`,
+    width: nudgioLogo.width || 1200,
+    height: nudgioLogo.height || 630,
     alt: title,
   };
 
   const pageUrl = `${BASE_URL}/${slug}`;
-  const pageTitle = `${title} | Finpy Tech`;
+  const pageTitle = `${title} | Nudgio`;
 
   return {
     metadataBase: new URL(BASE_URL),
     title: pageTitle,
     description,
-    creator: author || 'Finpy Team',
-    publisher: 'Finpy Tech',
+    creator: author || 'Nudgio Team',
+    publisher: 'Nudgio',
     category: keywords.join(', '),
     robots: {
       index: !noindex,
@@ -72,7 +72,7 @@ export function generatePageMetadata({
       description,
       type: type === 'article' ? 'article' : 'website',
       url: pageUrl,
-      siteName: 'Finpy Tech',
+      siteName: 'Nudgio',
       locale: 'en_US',
       images: [pageImage],
       ...(type === 'article' && publishDate && author && {
@@ -84,11 +84,11 @@ export function generatePageMetadata({
       card: 'summary_large_image',
       title,
       description,
-      creator: '@finpy_tech',
-      site: '@finpy_tech',
+      creator: '@nudgio_tech',
+      site: '@nudgio_tech',
       images: [pageImage.url],
     },
-    authors: author ? [{ name: author }] : [{ name: 'Finpy Team' }],
+    authors: author ? [{ name: author }] : [{ name: 'Nudgio Team' }],
     alternates: { canonical: pageUrl },
     keywords: keywords,
     icons: {

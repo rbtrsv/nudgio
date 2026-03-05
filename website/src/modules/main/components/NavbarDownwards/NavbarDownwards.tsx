@@ -3,33 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import logoFinpyDark from '@/modules/main/images/logos/finpy.svg';
-import logoFinpyWhite from '@/modules/main/images/logos/finpy_white.svg';
+import logoNudgioDark from '@/modules/main/images/logos/nudgio_black_text_with_logo.svg';
+import logoNudgioWhite from '@/modules/main/images/logos/nudgio_white_text_with_logo.svg';
 import { Sun, MoonStar, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 const navItems = [
-  { name: 'Technologies', link: '/#technologies' },
-  { name: 'Contact', link: '/#contact' },
+  { name: 'Features', link: '/#features' },
   { name: 'Blog', link: '/blog' },
-  { name: 'Dashboard', link: '/dashboard' },
-  {
-    name: 'Stock Market News',
-    link: '#',
-    subItems: [
-      { name: 'Market Overview', link: '/market-overview' },
-      { name: 'Company News', link: '/company-news' },
-      { name: 'Economic Calendar', link: '/economic-calendar' },
-    ],
-  },
-  {
-    name: 'How to Invest',
-    link: '#',
-    subItems: [
-      { name: "Beginner's Guide", link: '/beginners-guide' },
-      { name: 'Investment Strategies', link: '/investment-strategies' },
-      { name: 'Risk Management', link: '/risk-management' },
-    ],
-  },
+  { name: 'Contact', link: '/#contact' },
+  // {
+  //   name: 'Resources',
+  //   link: '#',
+  //   subItems: [
+  //     { name: 'Documentation', link: '/docs' },
+  //     { name: 'Getting Started', link: '/getting-started' },
+  //     { name: 'API Reference', link: '/api-reference' },
+  //   ],
+  // },
 ];
 
 const NavbarDownwards: React.FC = () => {
@@ -90,16 +80,16 @@ const NavbarDownwards: React.FC = () => {
     <div className='mr-3 flex cursor-pointer items-center sm:mr-4 md:mr-5 lg:mr-6'>
       <Link href='/' className=''>
         <Image
-          src={logoFinpyDark}
-          alt='logo'
+          src={logoNudgioDark}
+          alt='Nudgio'
           width={110}
           height={75}
           className='block w-[100px] cursor-pointer sm:w-[105px] md:w-[110px] lg:w-[110px] xl:w-[110px] 2xl:w-[115px] dark:hidden'
           priority
         />
         <Image
-          src={logoFinpyWhite}
-          alt='logo'
+          src={logoNudgioWhite}
+          alt='Nudgio'
           width={110}
           height={75}
           className='hidden w-[100px] cursor-pointer sm:w-[105px] md:w-[110px] lg:w-[110px] xl:w-[110px] 2xl:w-[115px] dark:block'
@@ -116,8 +106,8 @@ const NavbarDownwards: React.FC = () => {
       className='p-2 transition-colors duration-200'
       onClick={handleThemeSwitch}
     >
-      <Sun className='hidden h-5 w-5 stroke-white/95 md:hover:stroke-violet-600 dark:block' />
-      <MoonStar className='h-5 w-5 stroke-black/95 md:hover:stroke-violet-600 dark:hidden' />
+      <Sun className='hidden h-5 w-5 stroke-white/95 md:hover:stroke-cyan-500 dark:block' />
+      <MoonStar className='h-5 w-5 stroke-black/95 md:hover:stroke-cyan-500 dark:hidden' />
     </button>
   );
 
@@ -127,9 +117,9 @@ const NavbarDownwards: React.FC = () => {
       className='ml-4 cursor-pointer text-3xl md:hidden'
     >
       {open ? (
-        <X className='h-6 w-6 text-black md:hover:text-violet-600 dark:text-white' />
+        <X className='h-6 w-6 text-black md:hover:text-cyan-500 dark:text-white' />
       ) : (
-        <Menu className='h-6 w-6 text-black md:hover:text-violet-600 dark:text-white' />
+        <Menu className='h-6 w-6 text-black md:hover:text-cyan-500 dark:text-white' />
       )}
     </button>
   );
@@ -156,9 +146,16 @@ const NavbarDownwards: React.FC = () => {
               key={item.name}
               className={`relative my-0 ${index !== 0 ? 'ml-2 sm:ml-3 md:ml-4 lg:ml-5 xl:ml-6' : ''} text-xs font-normal sm:text-sm md:text-sm lg:text-base xl:text-lg 2xl:text-xl`}
             >
-              {item.subItems ? (
+              <Link
+                href={item.link}
+                className='text-xs font-medium text-black/95 transition-colors duration-200 hover:text-cyan-500 sm:text-sm md:text-sm lg:text-base xl:text-lg 2xl:text-xl dark:text-white/95 dark:hover:text-cyan-500'
+              >
+                {item.name}
+              </Link>
+              {/* Dropdown template (uncomment when subItems are added to navItems):
+              {item.subItems && (
                 <div className='group relative'>
-                  <button className='flex items-center text-xs font-medium text-black/95 transition-colors duration-200 group-hover:text-violet-600 sm:text-sm md:text-sm lg:text-base xl:text-lg 2xl:text-xl dark:text-white/95 dark:group-hover:text-violet-600'>
+                  <button className='flex items-center text-xs font-medium text-black/95 transition-colors duration-200 group-hover:text-cyan-500 sm:text-sm md:text-sm lg:text-base xl:text-lg 2xl:text-xl dark:text-white/95 dark:group-hover:text-cyan-500'>
                     {item.name}
                     <ChevronDown className='ml-1 h-4 w-4 transition-transform duration-200 group-hover:hidden' />
                     <ChevronUp className='ml-1 hidden h-4 w-4 transition-transform duration-200 group-hover:block' />
@@ -176,14 +173,8 @@ const NavbarDownwards: React.FC = () => {
                     ))}
                   </ul>
                 </div>
-              ) : (
-                <Link
-                  href={item.link}
-                  className='text-xs font-medium text-black/95 transition-colors duration-200 hover:text-violet-600 sm:text-sm md:text-sm lg:text-base xl:text-lg 2xl:text-xl dark:text-white/95 dark:hover:text-violet-600'
-                >
-                  {item.name}
-                </Link>
               )}
+              */}
             </li>
           ))}
           <li className='ml-4'>
@@ -197,7 +188,15 @@ const NavbarDownwards: React.FC = () => {
         >
           {navItems.map((item) => (
             <li key={item.name} className='my-7 text-xl font-normal'>
-              {item.subItems ? (
+              <Link
+                href={item.link}
+                onClick={() => setOpen(false)}
+                className='text-xl font-medium text-black/95 dark:text-white/95'
+              >
+                {item.name}
+              </Link>
+              {/* Mobile dropdown template (uncomment when subItems are added to navItems):
+              {item.subItems && (
                 <div>
                   <button
                     onClick={() =>
@@ -230,15 +229,8 @@ const NavbarDownwards: React.FC = () => {
                     ))}
                   </ul>
                 </div>
-              ) : (
-                <Link
-                  href={item.link}
-                  onClick={() => setOpen(false)}
-                  className='text-xl font-medium text-black/95 dark:text-white/95'
-                >
-                  {item.name}
-                </Link>
               )}
+              */}
             </li>
           ))}
         </ul>

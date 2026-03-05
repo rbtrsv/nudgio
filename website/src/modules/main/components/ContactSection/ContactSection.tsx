@@ -72,7 +72,7 @@ export default function ContactSection() {
                     aria-hidden='true'
                   />
                 </dt>
-                <dd>Victoriei Business Center, Sevastopol 24, Bucharest</dd>
+                <dd>V7 Studio, D. I. Mendeleev 5, Bucharest</dd>
               </div>
               <div className='flex gap-x-4'>
                 <dt className='flex-none'>
@@ -84,7 +84,7 @@ export default function ContactSection() {
                 </dt>
                 <dd>
                   <a
-                    className='hover:text-[#9f55f9] dark:hover:text-[#9f55f9]'
+                    className='hover:text-cyan-500 dark:hover:text-cyan-500'
                     href='mailto:robert.radoslav@pm.me'
                   >
                     robert.radoslav@pm.me
@@ -118,7 +118,7 @@ export default function ContactSection() {
                       name='user_name'
                       id='user_name'
                       autoComplete='family-name'
-                      className='block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-black shadow-sm ring-1 ring-black/20 ring-inset focus:ring-2 focus:ring-[#9f55f9] focus:ring-inset sm:text-sm sm:leading-6 dark:text-white dark:ring-white/10 dark:focus:ring-[#9f55f9]'
+                      className='block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-black shadow-sm ring-1 ring-black/20 ring-inset focus:ring-2 focus:ring-cyan-500 focus:ring-inset sm:text-sm sm:leading-6 dark:text-white dark:ring-white/10 dark:focus:ring-cyan-500'
                     />
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export default function ContactSection() {
                       name='user_email'
                       id='user_email'
                       autoComplete='email'
-                      className='block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-black shadow-sm ring-1 ring-black/20 ring-inset focus:ring-2 focus:ring-[#9f55f9] focus:ring-inset sm:text-sm sm:leading-6 dark:text-white dark:ring-white/10 dark:focus:ring-[#9f55f9]'
+                      className='block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-black shadow-sm ring-1 ring-black/20 ring-inset focus:ring-2 focus:ring-cyan-500 focus:ring-inset sm:text-sm sm:leading-6 dark:text-white dark:ring-white/10 dark:focus:ring-cyan-500'
                     />
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export default function ContactSection() {
                       name='message'
                       id='message'
                       rows={4}
-                      className='block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-black shadow-sm ring-1 ring-black/20 ring-inset focus:ring-2 focus:ring-[#9f55f9] focus:ring-inset sm:text-sm sm:leading-6 dark:text-white dark:ring-white/10 dark:focus:ring-[#9f55f9]'
+                      className='block w-full rounded-md border-0 bg-white/5 px-3.5 py-2 text-black shadow-sm ring-1 ring-black/20 ring-inset focus:ring-2 focus:ring-cyan-500 focus:ring-inset sm:text-sm sm:leading-6 dark:text-white dark:ring-white/10 dark:focus:ring-cyan-500'
                     ></textarea>
                   </div>
                 </div>
@@ -160,7 +160,7 @@ export default function ContactSection() {
                 <button
                   type='submit'
                   disabled={sending}
-                  className='rounded-md bg-violet-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-violet-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9f55f9] disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='rounded-md bg-cyan-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-cyan-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
                   {sending ? 'Sending...' : 'Send message'}
                 </button>

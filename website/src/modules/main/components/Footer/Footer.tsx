@@ -1,15 +1,10 @@
-import { FaLinkedin, FaInstagram, FaGithub, FaEnvelope } from 'react-icons/fa6';
+import { FaLinkedin, FaGithub, FaEnvelope } from 'react-icons/fa6';
 
 const navigation = [
   {
     name: 'LinkedIn',
     href: 'https://www.linkedin.com/in/rbtrsv/',
     icon: FaLinkedin,
-  },
-  {
-    name: 'Instagram',
-    href: 'https://www.instagram.com/rbtrsv/',
-    icon: FaInstagram,
   },
   {
     name: 'GitHub',
@@ -32,7 +27,7 @@ export default function Footer() {
             <a
               key={item.name}
               href={item.href}
-              className='text-black hover:text-violet-600 dark:text-white dark:hover:text-violet-600'
+              className='text-black hover:text-cyan-500 dark:text-white dark:hover:text-cyan-500'
             >
               <span className='sr-only'>{item.name}</span>
               <item.icon className='h-6 w-6' aria-hidden='true' />
@@ -41,7 +36,7 @@ export default function Footer() {
         </div>
         <div className='mt-8 md:order-1 md:mt-0'>
           <p className='text-center text-xs leading-5 text-black dark:text-white'>
-            &copy; 2023 Buraro & Finpy Technologies. All rights reserved.
+            &copy; 2025 Buraro Technologies. All rights reserved.
           </p>
         </div>
       </div>

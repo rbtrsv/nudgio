@@ -6,7 +6,7 @@ export default function HeroSectionText() {
           <h1 className='bg-linear-to-br from-[#c517ff] to-[#2631f7] bg-clip-text text-3xl font-bold tracking-tight text-transparent lg:text-6xl'>
             Data-centric software solutions for the financial sector.
           </h1>
-          <p className='py-6 text-xl leading-8 tracking-tight text-black max-sm:text-lg sm:px-10 sm:px-16 dark:text-white'>
+          <p className='py-6 text-xl leading-8 tracking-tight text-black max-sm:text-lg sm:px-10 dark:text-white'>
             Unparalleled financial data insights, distinctively delivered by our
             data-driven technology solutions.
           </p>

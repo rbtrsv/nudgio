@@ -9,11 +9,11 @@ import BlogSearchBar from '@/modules/blog/components/composed/BlogSearchBar';
 import { generatePageMetadata } from '@/modules/blog/components/composed/PageSEO';
 
 export const metadata: Metadata = generatePageMetadata({
-  title: 'Finpy Blog',
-  description: 'Insights on fintech, finance, programming, and entrepreneurship to help you build better financial solutions and grow your business',
+  title: 'Nudgio Blog',
+  description: 'Insights on e-commerce, product recommendations, and growth strategies to help you increase revenue and customer engagement.',
   slug: 'blog',
   type: 'website',
-  keywords: ['fintech', 'finance', 'programming', 'entrepreneurship', 'business', 'technology', 'software', 'development'],
+  keywords: ['e-commerce', 'product recommendations', 'cross-selling', 'upselling', 'Shopify', 'WooCommerce', 'Magento'],
 });
 
 interface BlogPost {
@@ -27,37 +27,21 @@ interface BlogPost {
 
 const blogPosts: BlogPost[] = [
   {
-    title: "How to Code Effectively",
-    slug: "how_to_code",
-    summary: "Learn the best practices for efficient coding and improve your skills.",
-    publishDate: "2023-11-01",
-    categories: ["Programming"],
-    href: "/blog/articles/how_to_code"
+    title: "Why Product Recommendations Matter for E-Commerce Revenue",
+    slug: "why-product-recommendations-matter",
+    summary: "Discover how AI-powered product recommendations can increase average order value, boost conversion rates, and create a personalized shopping experience for your customers.",
+    publishDate: "2026-03-05",
+    categories: ["E-Commerce", "Product Recommendations"],
+    href: "/blog/articles/why-product-recommendations-matter"
   },
   {
-    title: "Daily Routine Components Demo",
-    slug: "routine-demo", 
-    summary: "Explore our new routine section components with interactive examples and content, inspired by evidence-based optimization strategies.",
-    publishDate: "2025-01-15",
-    categories: ["Lifestyle", "Demo"],
-    href: "/blog/articles/routine-demo"
+    title: "Building a Cross-Platform E-Commerce Strategy",
+    slug: "cross-platform-ecommerce-strategy",
+    summary: "Learn why selling across Shopify, WooCommerce, and Magento simultaneously gives you a competitive edge — and how to unify your recommendation engine across all platforms.",
+    publishDate: "2026-03-05",
+    categories: ["E-Commerce", "Strategy"],
+    href: "/blog/articles/cross-platform-ecommerce-strategy"
   },
-  {
-    title: "The Science of Longevity",
-    slug: "science_of_longevity",
-    summary: "Explore the latest research and practices for extending healthy lifespan, backed by cutting-edge scientific studies and practical applications.",
-    publishDate: "2023-11-01",
-    categories: ["Longevity", "Health"],
-    href: "/blog/articles/science_of_longevity"
-  },
-  {
-    title: "Entrepreneurship Mindset",
-    slug: "entrepreneurship-mindset",
-    summary: "Develop the mental frameworks and habits that successful entrepreneurs use to build thriving businesses and overcome challenges.",
-    publishDate: "2023-10-15",
-    categories: ["Entrepreneurship", "Productivity"],
-    href: "/blog/articles/entrepreneurship-mindset"
-  }
 ];
 
 export default async function BlogPage({
@@ -67,14 +51,14 @@ export default async function BlogPage({
 }) {
   const resolvedSearchParams = await searchParams;
   const selectedCategories = resolvedSearchParams.categories ? resolvedSearchParams.categories.split(',') : [];
-  const allCategories = ['Programming', 'Lifestyle', 'Demo', 'Longevity', 'Health', 'Entrepreneurship', 'Productivity'];
+  const allCategories = ['E-Commerce', 'Product Recommendations', 'Strategy'];
 
   return (
     <div className="flex flex-col min-h-screen">
       <NavbarDownwards />
-      
+
       <main className="grow bg-white dark:bg-black">
-        
+
         {/* Hero Header */}
         <section className="pt-20 sm:pt-24 md:pt-28 lg:pt-32 pb-4">
           <BlogHeroHeader />
@@ -82,11 +66,11 @@ export default async function BlogPage({
 
         {/* Category Filter with Search */}
         <section className="py-4 pb-6 border-b border-zinc-200 dark:border-zinc-800">
-          <BlogCategoryTabs 
+          <BlogCategoryTabs
             allCategories={allCategories}
             selectedCategories={selectedCategories}
           />
-          
+
           {/* Search Bar below categories but above divider */}
           <div className="mt-6">
             <div className="w-72 max-w-72 mx-auto px-4">
@@ -97,16 +81,16 @@ export default async function BlogPage({
 
         {/* Blog Posts */}
         <section className="py-16">
-          <BlogPostsGrid 
+          <BlogPostsGrid
             blogPosts={blogPosts}
             selectedCategories={selectedCategories}
           />
         </section>
-        
+
         {/* Future: Pagination would go here */}
-        
+
       </main>
-      
+
       <Footer />
     </div>
   );

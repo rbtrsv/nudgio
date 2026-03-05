@@ -1,22 +1,22 @@
 import { Metadata, Viewport } from 'next';
-import Technologies from '@/modules/main/components/Technologies/Technologies';
+import Features from '@/modules/main/components/Features/Features';
+import HowItWorks from '@/modules/main/components/HowItWorks/HowItWorks';
 import ContactSection from '@/modules/main/components/ContactSection/ContactSection';
 import NavbarDownwards from '@/modules/main/components/NavbarDownwards/NavbarDownwards';
 import Footer from '@/modules/main/components/Footer/Footer';
-import FinpyDefault from '@/modules/main/images/logos/finpy_default.png';
 import HeroSectionAnimated from '@/modules/main/components/HeroSectionAnimated/HeroSectionAnimated';
 import Favicon from '@/modules/main/public/favicon.ico';
 
-const BASE_URL = 'https://www.finpy.tech';
+const BASE_URL = 'https://www.nudgio.tech';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
-  title: 'Unparalleled. Software. Solutions',
+  title: 'Nudgio — AI-Powered Product Recommendations for E-Commerce',
   description:
-    'Transform your business landscape with our game-changing, data-driven technology solutions.',
-  creator: 'Finpy Team',
-  publisher: 'Finpy Tech',
-  category: 'Software Solutions, Data-Driven Technology, Business Transformation, Fintech',
+    'Boost your e-commerce revenue with intelligent, cross-platform product recommendations. Works with Shopify, WooCommerce, and Magento.',
+  creator: 'Nudgio Team',
+  publisher: 'Nudgio',
+  category: 'E-Commerce, Product Recommendations, AI, SaaS',
   robots: {
     index: true,
     follow: true,
@@ -37,38 +37,32 @@ export const metadata: Metadata = {
   },
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'Unparalleled. Software. Solutions',
+    title: 'Nudgio — AI-Powered Product Recommendations for E-Commerce',
     description:
-      'Transform your business landscape with our game-changing, data-driven technology solutions.',
+      'Boost your e-commerce revenue with intelligent, cross-platform product recommendations. Works with Shopify, WooCommerce, and Magento.',
     url: '/',
-    siteName: 'Finpy Tech',
-    images: [
-      {
-        url: FinpyDefault.src,
-        width: FinpyDefault.width,
-        height: FinpyDefault.height,
-        alt: 'Finpy Tech',
-      },
-    ],
+    siteName: 'Nudgio',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Unparalleled. Software. Solutions',
+    title: 'Nudgio — AI-Powered Product Recommendations for E-Commerce',
     description:
-      'Transform your business landscape with our game-changing, data-driven technology solutions.',
-    creator: '@finpy_tech',
-    site: '@finpy_tech',
-    images: [FinpyDefault.src],
+      'Boost your e-commerce revenue with intelligent, cross-platform product recommendations. Works with Shopify, WooCommerce, and Magento.',
   },
   keywords: [
-    'Software Solutions',
-    'Data-Driven Technology',
-    'Business Transformation',
-    'Fintech',
+    'Product Recommendations',
+    'E-Commerce',
+    'AI Recommendations',
+    'Shopify',
+    'WooCommerce',
+    'Magento',
+    'Cross-Selling',
+    'Upselling',
+    'SaaS',
   ],
-  authors: [{ name: 'Finpy Team' }],
+  authors: [{ name: 'Nudgio Team' }],
 };
 
 export const viewport: Viewport = {
@@ -83,7 +77,8 @@ export default function Home() {
       <main>
         <NavbarDownwards />
         <HeroSectionAnimated />
-        <Technologies />
+        <Features />
+        <HowItWorks />
         <ContactSection />
         <Footer />
         {/* <div className="bg-violet-600 w-full h-[300px]"></div> */}
