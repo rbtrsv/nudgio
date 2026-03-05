@@ -24,7 +24,7 @@ export const WidgetParamsSchema = z.object({
   connection_id: z.number(),
   product_id: z.string().optional(),
   top: z.number().default(4),
-  lookback_days: z.number().default(30),
+  lookback_days: z.number().optional(),
   method: z.enum(['volume', 'value', 'balanced']).optional(),
   min_price_increase: z.number().optional(),
   style: z.enum(['card', 'carousel', 'list']).default('card'),

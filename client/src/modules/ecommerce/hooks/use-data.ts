@@ -67,7 +67,6 @@ export function useAnalytics() {
     hasStats: !!connectionStats,
     productsCount: connectionStats?.products_count ?? 0,
     ordersCount: connectionStats?.orders_count ?? 0,
-    orderItemsCount: connectionStats?.order_items_count ?? 0,
     lastSync: connectionStats?.last_sync ?? null,
     dataFreshnessDays: connectionStats?.data_freshness_days ?? null,
   };

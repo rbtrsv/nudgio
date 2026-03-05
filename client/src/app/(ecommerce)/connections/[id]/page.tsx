@@ -20,7 +20,6 @@ import {
   AlertTriangle,
   Package,
   ShoppingCart,
-  ListOrdered,
   Settings,
   Eye,
   EyeOff,
@@ -303,13 +302,6 @@ export default function ConnectionDetailPage() {
                     <div>
                       <p className="text-2xl font-bold">{connectionStats.orders_count}</p>
                       <p className="text-sm text-muted-foreground">Orders</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <ListOrdered className="h-8 w-8 text-muted-foreground" />
-                    <div>
-                      <p className="text-2xl font-bold">{connectionStats.order_items_count}</p>
-                      <p className="text-sm text-muted-foreground">Order Items</p>
                     </div>
                   </div>
                 </div>
