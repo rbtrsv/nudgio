@@ -1431,7 +1431,7 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 ## What Remains
 
 ### Performance (Built, Not Wired — Highest Priority)
-- ❌ Wire cache into recommendation + component subrouters — `cache_utils.py` is built (ABC + two backends) but not connected, biggest performance win
+- ✅ Wire cache into recommendation + component subrouters
 - ❌ Wire rate limiting into router — `check_rate_limit()` exists in `rate_limiting_utils.py` but not used as a dependency
 - ❌ Wire monthly order limit enforcement — `get_org_monthly_order_count()` exists in `subscription_utils.py` but doesn't block when exceeded
 

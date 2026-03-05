@@ -12,6 +12,7 @@ from ..schemas.recommendation_schemas import BestsellerMethod
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
 from ..utils.dependency_utils import get_active_connection
+from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
 
 router = APIRouter(prefix="/components", tags=["Product Component Recommendations"])
 
@@ -79,9 +80,22 @@ async def get_bestsellers_component(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
 
-        # Map method string to enum
-        method_enum = BestsellerMethod(method) if method in [m.value for m in BestsellerMethod] else BestsellerMethod.VOLUME
-        recs = await engine.get_bestsellers(limit=top, lookback_days=lookback_days, method=method_enum)
+        # Check cache first
+        cached = await get_cached_recommendations(
+            connection_id, "bestseller",
+            limit=top, method=method, lookback_days=lookback_days,
+        )
+        if cached is not None:
+            recs = cached
+        else:
+            # Generate bestseller recommendations (cache miss)
+            method_enum = BestsellerMethod(method) if method in [m.value for m in BestsellerMethod] else BestsellerMethod.VOLUME
+            recs = await engine.get_bestsellers(limit=top, lookback_days=lookback_days, method=method_enum)
+            # Cache for next request
+            await set_cached_recommendations(
+                connection_id, "bestseller", recs,
+                limit=top, method=method, lookback_days=lookback_days,
+            )
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -137,7 +151,21 @@ async def get_cross_sell_component(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
-        recs = await engine.get_cross_sell(product_id=product_id, limit=top, lookback_days=lookback_days)
+        # Check cache first
+        cached = await get_cached_recommendations(
+            connection_id, "cross_sell",
+            product_id=product_id, limit=top, lookback_days=lookback_days,
+        )
+        if cached is not None:
+            recs = cached
+        else:
+            # Generate cross-sell recommendations (cache miss)
+            recs = await engine.get_cross_sell(product_id=product_id, limit=top, lookback_days=lookback_days)
+            # Cache for next request
+            await set_cached_recommendations(
+                connection_id, "cross_sell", recs,
+                product_id=product_id, limit=top, lookback_days=lookback_days,
+            )
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -193,7 +221,21 @@ async def get_upsell_component(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
-        recs = await engine.get_upsell(product_id=product_id, limit=top, min_price_increase_percent=min_price_increase_percent)
+        # Check cache first
+        cached = await get_cached_recommendations(
+            connection_id, "upsell",
+            product_id=product_id, limit=top, min_price_increase_percent=min_price_increase_percent,
+        )
+        if cached is not None:
+            recs = cached
+        else:
+            # Generate upsell recommendations (cache miss)
+            recs = await engine.get_upsell(product_id=product_id, limit=top, min_price_increase_percent=min_price_increase_percent)
+            # Cache for next request
+            await set_cached_recommendations(
+                connection_id, "upsell", recs,
+                product_id=product_id, limit=top, min_price_increase_percent=min_price_increase_percent,
+            )
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -248,7 +290,21 @@ async def get_similar_component(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
         
-        recs = await engine.get_similar(product_id=product_id, limit=top)
+        # Check cache first
+        cached = await get_cached_recommendations(
+            connection_id, "similar",
+            product_id=product_id, limit=top,
+        )
+        if cached is not None:
+            recs = cached
+        else:
+            # Generate similar product recommendations (cache miss)
+            recs = await engine.get_similar(product_id=product_id, limit=top)
+            # Cache for next request
+            await set_cached_recommendations(
+                connection_id, "similar", recs,
+                product_id=product_id, limit=top,
+            )
         
         # Generate HTML component
         html = generate_recommendation_html(
@@ -496,7 +552,8 @@ def generate_mobile_cards(recommendations: List[Dict], colors: Dict[str, str], s
         price = rec.get('price', '0.00')
         handle = rec.get('handle', '')
         position = rec.get('position', 1)
-        
+        image_url = rec.get('image_url', '')
+
         # Build product URL
         if shop_urls.get("product_template") and shop_urls.get("base_url"):
             if "{handle}" in shop_urls["product_template"] and handle:

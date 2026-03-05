@@ -190,7 +190,12 @@ async def get_cached_recommendations(
         Cached recommendation list, or None if not cached
     """
     key = _generate_key(f"recs_{rec_type}", connection_id=connection_id, **params)
-    return await cache.get(key)
+    result = await cache.get(key)
+    if result is not None:
+        logger.debug("Cache HIT — rec_type=%s connection_id=%s params=%s", rec_type, connection_id, params)
+    else:
+        logger.debug("Cache MISS — rec_type=%s connection_id=%s params=%s", rec_type, connection_id, params)
+    return result
 
 
 async def set_cached_recommendations(
@@ -212,3 +217,4 @@ async def set_cached_recommendations(
     """
     key = _generate_key(f"recs_{rec_type}", connection_id=connection_id, **params)
     await cache.set(key, recommendations, ttl_seconds)
+    logger.debug("Cache SET — rec_type=%s connection_id=%s ttl=%ss params=%s", rec_type, connection_id, ttl_seconds, params)

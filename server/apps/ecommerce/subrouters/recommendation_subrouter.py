@@ -17,6 +17,7 @@ from ..schemas.recommendation_schemas import (
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
 from ..utils.dependency_utils import get_active_connection
+from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
 
 # ==========================================
 # Product Recommendations Router
@@ -48,12 +49,25 @@ async def get_bestsellers(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
 
-        # Generate bestseller recommendations
-        recommendations = await engine.get_bestsellers(
-            limit=payload.limit,
-            method=payload.method,
-            lookback_days=payload.lookback_days,
+        # Check cache first
+        cached = await get_cached_recommendations(
+            payload.connection_id, "bestseller",
+            limit=payload.limit, method=payload.method.value, lookback_days=payload.lookback_days,
         )
+        if cached is not None:
+            recommendations = cached
+        else:
+            # Generate bestseller recommendations (cache miss)
+            recommendations = await engine.get_bestsellers(
+                limit=payload.limit,
+                method=payload.method,
+                lookback_days=payload.lookback_days,
+            )
+            # Cache for next request
+            await set_cached_recommendations(
+                payload.connection_id, "bestseller", recommendations,
+                limit=payload.limit, method=payload.method.value, lookback_days=payload.lookback_days,
+            )
 
         return RecommendationResponse(
             success=True,
@@ -94,12 +108,25 @@ async def get_cross_sell(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
 
-        # Generate cross-sell recommendations
-        recommendations = await engine.get_cross_sell(
-            product_id=payload.product_id,
-            limit=payload.limit,
-            lookback_days=payload.lookback_days,
+        # Check cache first
+        cached = await get_cached_recommendations(
+            payload.connection_id, "cross_sell",
+            product_id=payload.product_id, limit=payload.limit, lookback_days=payload.lookback_days,
         )
+        if cached is not None:
+            recommendations = cached
+        else:
+            # Generate cross-sell recommendations (cache miss)
+            recommendations = await engine.get_cross_sell(
+                product_id=payload.product_id,
+                limit=payload.limit,
+                lookback_days=payload.lookback_days,
+            )
+            # Cache for next request
+            await set_cached_recommendations(
+                payload.connection_id, "cross_sell", recommendations,
+                product_id=payload.product_id, limit=payload.limit, lookback_days=payload.lookback_days,
+            )
 
         return RecommendationResponse(
             success=True,
@@ -141,12 +168,25 @@ async def get_upsell(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
 
-        # Generate upsell recommendations
-        recommendations = await engine.get_upsell(
-            product_id=payload.product_id,
-            limit=payload.limit,
-            min_price_increase_percent=payload.min_price_increase_percent,
+        # Check cache first
+        cached = await get_cached_recommendations(
+            payload.connection_id, "upsell",
+            product_id=payload.product_id, limit=payload.limit, min_price_increase_percent=payload.min_price_increase_percent,
         )
+        if cached is not None:
+            recommendations = cached
+        else:
+            # Generate upsell recommendations (cache miss)
+            recommendations = await engine.get_upsell(
+                product_id=payload.product_id,
+                limit=payload.limit,
+                min_price_increase_percent=payload.min_price_increase_percent,
+            )
+            # Cache for next request
+            await set_cached_recommendations(
+                payload.connection_id, "upsell", recommendations,
+                product_id=payload.product_id, limit=payload.limit, min_price_increase_percent=payload.min_price_increase_percent,
+            )
 
         return RecommendationResponse(
             success=True,
@@ -188,11 +228,24 @@ async def get_similar_products(
         adapter = get_adapter(connection)
         engine = RecommendationEngine(adapter)
 
-        # Generate similar product recommendations
-        recommendations = await engine.get_similar(
-            product_id=payload.product_id,
-            limit=payload.limit,
+        # Check cache first
+        cached = await get_cached_recommendations(
+            payload.connection_id, "similar",
+            product_id=payload.product_id, limit=payload.limit,
         )
+        if cached is not None:
+            recommendations = cached
+        else:
+            # Generate similar product recommendations (cache miss)
+            recommendations = await engine.get_similar(
+                product_id=payload.product_id,
+                limit=payload.limit,
+            )
+            # Cache for next request
+            await set_cached_recommendations(
+                payload.connection_id, "similar", recommendations,
+                product_id=payload.product_id, limit=payload.limit,
+            )
 
         return RecommendationResponse(
             success=True,
