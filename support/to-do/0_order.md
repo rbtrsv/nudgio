@@ -34,7 +34,7 @@
 - ✅ All schemas rewritten with `Field(description="...")` — nexotype patterns
 - ✅ All subrouters rewritten — section headers, docstrings, two-tier except, soft delete
 - ✅ Adapter factory (`adapters/factory.py`) — routes by platform + connection_method
-- ✅ Shopify API adapter (`adapters/shopify/api.py`) — REST Admin API
+- ✅ Shopify API adapter (`adapters/shopify/api.py`) — GraphQL Admin API (migrated from REST)
 - ✅ WooCommerce API adapter (`adapters/woocommerce/api.py`) — REST API v3, HTTP Basic Auth
 - ✅ WooCommerce DB adapter (`adapters/woocommerce/database.py`) — direct MySQL
 - ✅ Magento API adapter (`adapters/magento/api.py`) — Bearer token, 2.4.4+ error detection
@@ -118,8 +118,8 @@
 - ❌ Configure `DRAGONFLY_URL` env var
 
 ### 2. Shopify App Store Submission Blockers
-- ❌ GDPR webhooks — 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64)
-- ❌ GraphQL migration — migrate `ShopifyAdapter` from REST to GraphQL Admin API (REST rejected for new public apps since April 2025)
+- ✅ GDPR webhooks — 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64)
+- ✅ GraphQL migration — `ShopifyAdapter` rewritten from REST to GraphQL Admin API (2026-01), config-driven version, cursor pagination, N+1 eliminated
 - ❌ Shopify Billing API — integrate Shopify's own billing (required for App Store apps, cannot use external billing)
 - ✅ Register app in Shopify Partner Dashboard — app registered, Client ID + Client Secret obtained, redirect URLs configured, OAuth flow tested with dev store
 - ❌ `shopify.app.toml` configuration for webhooks and compliance endpoints
@@ -153,8 +153,8 @@
 
 ### 🔴 High Priority — Required for Launch
 1. ✅ **Shopify Partner Dashboard registration** — app registered, Client ID + Client Secret obtained, OAuth flow tested with dev store.
-2. **GDPR webhooks** — 3 mandatory compliance endpoints. Shopify will reject the app without them.
-3. **GraphQL migration** — migrate `ShopifyAdapter` from REST to GraphQL Admin API. REST rejected for new public apps since April 2025.
+2. ✅ **GDPR webhooks** — DONE. 3 compliance endpoints with HMAC-SHA256 verification.
+3. ✅ **GraphQL migration** — DONE. `ShopifyAdapter` rewritten to GraphQL Admin API (2026-01).
 4. **Shopify Billing API** — Shopify requires its own billing for App Store apps. Cannot use external Stripe billing for Shopify merchants.
 5. **`shopify.app.toml` configuration** — webhooks and compliance endpoints config.
 
