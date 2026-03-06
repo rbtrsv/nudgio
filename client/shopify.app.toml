@@ -1,0 +1,28 @@
+# Nudgio — Shopify App Configuration
+# Deploy: cd server && shopify app deploy
+# Docs: https://shopify.dev/docs/apps/build/cli-for-apps/app-configuration
+
+client_id = "37b4b12ed793e4127ba69f5e8d5f5922"
+name = "Nudgio"
+application_url = "https://client.nudgio.tech"
+embedded = true
+
+[access_scopes]
+scopes = "read_products,read_orders"
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [
+  "https://server.nudgio.tech/api/v1/ecommerce/shopify/callback",
+]
+
+[webhooks]
+api_version = "2026-01"
+
+  # All topics go to the dispatcher endpoint which routes by X-Shopify-Topic header
+  [[webhooks.subscriptions]]
+  topics = ["app/uninstalled", "app_subscriptions/update"]
+  compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+  uri = "https://server.nudgio.tech/api/v1/ecommerce/shopify/webhooks"
+
+[build]

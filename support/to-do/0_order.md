@@ -120,9 +120,9 @@
 ### 2. Shopify App Store Submission Blockers
 - ✅ GDPR webhooks — 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64)
 - ✅ GraphQL migration — `ShopifyAdapter` rewritten from REST to GraphQL Admin API (2026-01), config-driven version, cursor pagination, N+1 eliminated
-- ❌ Shopify Billing API — integrate Shopify's own billing (required for App Store apps, cannot use external billing)
+- ✅ Shopify Billing API — Shopify Billing API integrated (ShopifyBilling model, subscribe/callback/cancel/status endpoints, webhook handler, subscription integration with grace period + multi-store entitlement)
 - ✅ Register app in Shopify Partner Dashboard — app registered, Client ID + Client Secret obtained, redirect URLs configured, OAuth flow tested with dev store
-- ❌ `shopify.app.toml` configuration for webhooks and compliance endpoints
+- ✅ `shopify.app.toml` configuration — scopes, redirect URLs, webhooks, compliance topics, all routed through dispatcher endpoint
 
 ### 3. Shopify Embedded App UI
 - ❌ App Bridge integration — Shopify apps must render inside Shopify Admin as an iframe
@@ -155,8 +155,8 @@
 1. ✅ **Shopify Partner Dashboard registration** — app registered, Client ID + Client Secret obtained, OAuth flow tested with dev store.
 2. ✅ **GDPR webhooks** — DONE. 3 compliance endpoints with HMAC-SHA256 verification.
 3. ✅ **GraphQL migration** — DONE. `ShopifyAdapter` rewritten to GraphQL Admin API (2026-01).
-4. **Shopify Billing API** — Shopify requires its own billing for App Store apps. Cannot use external Stripe billing for Shopify merchants.
-5. **`shopify.app.toml` configuration** — webhooks and compliance endpoints config.
+4. ✅ **Shopify Billing API** — DONE. ShopifyBilling model, 4 billing endpoints, webhook handler, OrgContext integration.
+5. ✅ **`shopify.app.toml` configuration** — DONE. Dispatcher endpoint, app/uninstalled handler, all topics configured.
 
 ### 🟡 Medium Priority — Required for Shopify App Store
 6. **Shopify App Bridge integration** — apps must render inside Shopify Admin as an iframe.
