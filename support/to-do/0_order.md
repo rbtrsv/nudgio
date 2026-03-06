@@ -121,7 +121,7 @@
 - ❌ GDPR webhooks — 3 mandatory compliance endpoints (`customers/data_request`, `customers/redact`, `shop/redact`) with HMAC-SHA256 verification (Base64)
 - ❌ GraphQL migration — migrate `ShopifyAdapter` from REST to GraphQL Admin API (REST rejected for new public apps since April 2025)
 - ❌ Shopify Billing API — integrate Shopify's own billing (required for App Store apps, cannot use external billing)
-- ❌ Register app in Shopify Partner Dashboard — set App URL + redirect URLs, get Client ID + Client Secret
+- ✅ Register app in Shopify Partner Dashboard — app registered, Client ID + Client Secret obtained, redirect URLs configured, OAuth flow tested with dev store
 - ❌ `shopify.app.toml` configuration for webhooks and compliance endpoints
 
 ### 3. Shopify Embedded App UI
@@ -152,7 +152,7 @@
 ## Priority List (What to Work on Next)
 
 ### 🔴 High Priority — Required for Launch
-1. **Shopify Partner Dashboard registration** — register app, get Client ID + Client Secret, set redirect URLs. Everything else depends on this.
+1. ✅ **Shopify Partner Dashboard registration** — app registered, Client ID + Client Secret obtained, OAuth flow tested with dev store.
 2. **GDPR webhooks** — 3 mandatory compliance endpoints. Shopify will reject the app without them.
 3. **GraphQL migration** — migrate `ShopifyAdapter` from REST to GraphQL Admin API. REST rejected for new public apps since April 2025.
 4. **Shopify Billing API** — Shopify requires its own billing for App Store apps. Cannot use external Stripe billing for Shopify merchants.

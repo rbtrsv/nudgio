@@ -107,3 +107,7 @@ CLI AI Tools
 codex resume
 claude --resume
 gemini > chat > save or resume in gemini terminal app.
+
+Shopify
+For extensions, run `shopify app generate extension`                                                                    │
+To see your app, run `shopify app dev`
