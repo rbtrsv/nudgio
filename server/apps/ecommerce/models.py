@@ -77,6 +77,7 @@ class EcommerceConnection(BaseMixin, Base):
     settings: Mapped[Optional["RecommendationSettings"]] = relationship(back_populates="connection", uselist=False, cascade="all, delete-orphan")
     usage_tracking: Mapped[list["APIUsageTracking"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
     analytics: Mapped[list["RecommendationAnalytics"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
+    shopify_billing: Mapped[Optional["ShopifyBilling"]] = relationship(back_populates="connection", uselist=False, cascade="all, delete-orphan")
 
 
 # ==========================================
@@ -162,3 +163,36 @@ class RecommendationAnalytics(Base):
 
     # Relationships
     connection: Mapped["EcommerceConnection"] = relationship(back_populates="analytics")
+
+
+# ==========================================
+# 5. SHOPIFY BILLING
+# ==========================================
+
+class ShopifyBilling(BaseMixin, Base):
+    """
+    Purpose: Tracks Shopify app subscription charges per connection.
+    Scope: Shopify merchants only — replaces Stripe for Shopify App Store billing.
+    Usage: "Pro plan via Shopify Billing for My Shopify Store".
+    """
+    __tablename__ = "shopify_billings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    connection_id: Mapped[int] = mapped_column(Integer, ForeignKey("ecommerce_connections.id", ondelete="CASCADE"), nullable=False, unique=True)
+    organization_id: Mapped[int] = mapped_column(Integer, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+
+    # Shopify subscription GID (e.g., "gid://shopify/AppSubscription/12345")
+    shopify_subscription_gid: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
+    # Plan tier: "PRO", "ENTERPRISE" (matches TIER_ORDER in subscription_utils.py)
+    plan_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    # Billing status: "PENDING", "ACTIVE", "PAST_DUE", "CANCELED"
+    billing_status: Mapped[str] = mapped_column(String(50), default="PENDING", nullable=False)
+    # Whether this is a test charge (dev store)
+    test: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Billing period
+    start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    end_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    connection: Mapped["EcommerceConnection"] = relationship(back_populates="shopify_billing")

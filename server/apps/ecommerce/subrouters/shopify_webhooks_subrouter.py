@@ -1,7 +1,7 @@
 """
-Shopify GDPR Webhooks Subrouter
+Shopify Webhooks Subrouter
 
-Mandatory compliance endpoints required for Shopify App Store submission.
+Mandatory compliance endpoints + billing status webhooks.
 Shopify sends POST requests with JSON body signed via X-Shopify-Hmac-SHA256
 header (Base64-encoded HMAC-SHA256 of raw body using Client Secret as key).
 
@@ -9,6 +9,7 @@ Endpoints:
 - POST /shopify/webhooks/customers/data_request — customer requests their data
 - POST /shopify/webhooks/customers/redact — delete customer's personal data
 - POST /shopify/webhooks/shop/redact — delete all shop data (48h after uninstall)
+- POST /shopify/webhooks/app_subscriptions/update — billing status changes
 
 These are ungated — no user auth, no subscription check, no rate limiting.
 Authentication is via HMAC signature verification only.
@@ -27,14 +28,15 @@ from sqlalchemy import select
 from core.db import get_session
 from core.config import settings
 from ..models import EcommerceConnection
+from ..utils.shopify_billing_utils import handle_shopify_billing_webhook
 
 logger = logging.getLogger(__name__)
 
 # ==========================================
-# Shopify GDPR Webhooks Router
+# Shopify Webhooks Router
 # ==========================================
 
-router = APIRouter(prefix="/shopify/webhooks", tags=["Shopify GDPR Webhooks"])
+router = APIRouter(prefix="/shopify/webhooks", tags=["Shopify Webhooks"])
 
 
 # ==========================================
@@ -203,4 +205,46 @@ async def shop_redact(
     else:
         logger.info(f"shop/redact: no active connections found for {shop_domain}")
 
+    return {"success": True}
+
+
+# ==========================================
+# Billing Webhook
+# ==========================================
+
+@router.post("/app_subscriptions/update")
+async def app_subscriptions_update(
+    request: Request,
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Handle Shopify APP_SUBSCRIPTIONS_UPDATE webhook
+
+    This endpoint:
+    1. Verify the HMAC-SHA256 signature (Base64) via _verify_webhook_hmac
+    2. Parse JSON payload and extract shop domain
+    3. Call handle_shopify_billing_webhook to update ShopifyBilling record
+       → idempotent: re-processing same webhook = same result
+       → if ShopifyBilling not found for GID: logs warning, still returns 200
+    4. Return 200 only after HMAC verified + payload processed
+       (401 on invalid HMAC is raised by _verify_webhook_hmac before reaching step 2)
+
+    Register in Shopify Partner Dashboard:
+        topic: APP_SUBSCRIPTIONS_UPDATE
+        URL: https://server.nudgio.tech/api/v1/ecommerce/shopify/webhooks/app_subscriptions/update
+    """
+    # Step 1: Verify HMAC signature (raises 401 if invalid)
+    body = await _verify_webhook_hmac(request)
+
+    # Step 2: Parse payload
+    import json
+    payload = json.loads(body)
+    shop_domain = request.headers.get("X-Shopify-Shop-Domain", "unknown")
+
+    logger.info(f"Received app_subscriptions/update webhook for shop: {shop_domain}")
+
+    # Step 3: Process billing status update (idempotent)
+    await handle_shopify_billing_webhook(payload, shop_domain, db)
+
+    # Step 4: Return 200
     return {"success": True}

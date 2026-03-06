@@ -30,16 +30,20 @@ from .subrouters.data_subrouter import router as data_router
 from .subrouters.shopify_oauth_subrouter import router as shopify_oauth_router
 from .subrouters.woocommerce_auth_subrouter import router as woocommerce_auth_router
 
-# Shopify GDPR compliance webhooks
+# Shopify webhooks (GDPR compliance + billing status)
 from .subrouters.shopify_webhooks_subrouter import router as shopify_webhooks_router
+
+# Shopify billing
+from .subrouters.shopify_billing_subrouter import router as shopify_billing_router
 
 
 router = APIRouter(prefix="/ecommerce")
 
-# Ungated — auth callbacks + platform webhooks (no user auth needed)
+# Ungated — auth callbacks + platform webhooks + billing (no user auth needed for callbacks)
 router.include_router(shopify_oauth_router)
 router.include_router(woocommerce_auth_router)
 router.include_router(shopify_webhooks_router)
+router.include_router(shopify_billing_router)  # Mixed gating handled internally
 
 # Gated — everything else requires active service
 # See require_active_subscription in dependency_utils.py for details.

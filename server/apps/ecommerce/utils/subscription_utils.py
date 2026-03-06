@@ -41,7 +41,9 @@ from datetime import datetime, timezone
 from sqlalchemy import select, func, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models import EcommerceConnection, APIUsageTracking
+from sqlalchemy import case
+
+from ..models import EcommerceConnection, APIUsageTracking, ShopifyBilling
 from apps.accounts.models import Subscription
 
 logger = logging.getLogger(__name__)
@@ -139,6 +141,69 @@ async def get_org_monthly_order_count(org_id: int, session: AsyncSession) -> int
     return result.scalar() or 0
 
 
+async def get_org_shopify_billing(org_id: int, session: AsyncSession) -> ShopifyBilling | None:
+    """
+    Get the organization's best ShopifyBilling entitlement.
+
+    An org may have multiple Shopify connections (multiple stores), each with
+    its own ShopifyBilling record. This returns the single most favorable record
+    for tier resolution and service access checks.
+
+    Priority order (deterministic):
+    1. ACTIVE ENTERPRISE
+    2. ACTIVE PRO
+    3. CANCELED/PAST_DUE ENTERPRISE (may still be in grace period)
+    4. CANCELED/PAST_DUE PRO (may still be in grace period)
+    5. None — no billing records, org is on FREE tier
+
+    Tie-break within same status + tier: most recently updated (updated_at DESC,
+    then start_date DESC).
+
+    Query: all non-deleted ShopifyBilling for org_id, ordered by:
+      - CASE billing_status WHEN 'ACTIVE' THEN 0 WHEN 'PAST_DUE' THEN 1 WHEN 'CANCELED' THEN 2 ELSE 3 END ASC
+      - CASE plan_name WHEN 'ENTERPRISE' THEN 0 WHEN 'PRO' THEN 1 ELSE 2 END ASC
+      - COALESCE(updated_at, start_date) DESC
+    LIMIT 1
+
+    Args:
+        org_id: Organization ID
+        session: Database session
+
+    Returns:
+        ShopifyBilling or None
+    """
+    # Priority ordering: ACTIVE > PAST_DUE > CANCELED > others
+    status_priority = case(
+        (ShopifyBilling.billing_status == "ACTIVE", 0),
+        (ShopifyBilling.billing_status == "PAST_DUE", 1),
+        (ShopifyBilling.billing_status == "CANCELED", 2),
+        else_=3,
+    )
+
+    # Tier ordering: ENTERPRISE > PRO > others
+    tier_priority = case(
+        (ShopifyBilling.plan_name == "ENTERPRISE", 0),
+        (ShopifyBilling.plan_name == "PRO", 1),
+        else_=2,
+    )
+
+    result = await session.execute(
+        select(ShopifyBilling)
+        .where(
+            ShopifyBilling.organization_id == org_id,
+            ShopifyBilling.billing_status != "PENDING",
+            ShopifyBilling.deleted_at.is_(None),  # Exclude soft-deleted records
+        )
+        .order_by(
+            status_priority.asc(),
+            tier_priority.asc(),
+            func.coalesce(ShopifyBilling.updated_at, ShopifyBilling.start_date).desc(),
+        )
+        .limit(1)
+    )
+    return result.scalar_one_or_none()
+
+
 # ==========================================
 # Logic Helpers
 # ==========================================
@@ -199,6 +264,38 @@ def get_tier_limits(tier: str) -> dict:
         Dict with max_connections, max_monthly_orders, requests_per_minute, requests_per_hour
     """
     return TIER_LIMITS.get(tier, TIER_LIMITS["FREE"])
+
+
+def is_shopify_billing_active(shopify_billing: ShopifyBilling | None) -> bool:
+    """
+    Check if a ShopifyBilling record grants active service.
+
+    Same grace period logic as Stripe subscriptions:
+    - ACTIVE → True
+    - CANCELED/PAST_DUE within grace period (end_date + GRACE_PERIOD_DAYS > now) → True
+    - Otherwise → False
+
+    Args:
+        shopify_billing: ShopifyBilling model instance or None
+
+    Returns:
+        True if service should be active, False otherwise
+    """
+    if not shopify_billing:
+        return False
+
+    if shopify_billing.billing_status == "ACTIVE":
+        return True
+
+    # CANCELED/PAST_DUE — check grace period
+    if shopify_billing.billing_status in ("CANCELED", "PAST_DUE"):
+        if shopify_billing.end_date:
+            from datetime import timedelta
+            grace_deadline = shopify_billing.end_date + timedelta(days=GRACE_PERIOD_DAYS)
+            if datetime.now(timezone.utc) < grace_deadline:
+                return True
+
+    return False
 
 
 async def is_over_connection_limit(org_id: int, session: AsyncSession, subscription: Subscription | None) -> bool:

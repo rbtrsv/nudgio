@@ -28,10 +28,12 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from ..models import EcommerceConnection
+from ..models import EcommerceConnection, ShopifyBilling
 from .subscription_utils import (
     is_service_active_with_subscription,
     get_org_subscription,
+    get_org_shopify_billing,
+    is_shopify_billing_active,
     get_org_tier,
     get_tier_limits,
     get_org_monthly_order_count,
@@ -152,10 +154,11 @@ class OrgContext:
     All dependencies that need org_id / subscription / tier declare
     Depends(get_org_context). FastAPI calls get_org_context exactly once
     per request and reuses the result — reducing 3x org_id + 3x subscription
-    queries down to 1x each (2 DB calls total instead of 10+).
+    queries down to 1x each (3 DB calls total instead of 10+).
     """
     org_id: Optional[int]
     subscription: Optional[Subscription]
+    shopify_billing: Optional["ShopifyBilling"]  # Resolved once per request
     tier: str
 
 
@@ -164,12 +167,13 @@ async def get_org_context(
     session: AsyncSession = Depends(get_session),
 ) -> OrgContext:
     """
-    Resolve the user's organization context in 2 DB calls.
+    Resolve the user's organization context in 3 DB calls.
 
     This endpoint:
     1. Look up the user's organization ID from OrganizationMember
-    2. Look up the organization's subscription record
-    3. Derive the tier from the subscription
+    2. Look up the organization's Stripe subscription record
+    3. Look up the organization's best ShopifyBilling entitlement
+    4. Derive the tier — ShopifyBilling takes priority if ACTIVE
 
     FastAPI deduplicates Depends() — when multiple dependencies declare
     Depends(get_org_context), this function runs once and the result is
@@ -178,11 +182,18 @@ async def get_org_context(
     """
     org_id = await get_user_organization_id(user.id, session)
     if not org_id:
-        return OrgContext(org_id=None, subscription=None, tier="FREE")
+        return OrgContext(org_id=None, subscription=None, shopify_billing=None, tier="FREE")
 
     subscription = await get_org_subscription(org_id, session)
-    tier = get_org_tier(subscription)
-    return OrgContext(org_id=org_id, subscription=subscription, tier=tier)
+    shopify_billing = await get_org_shopify_billing(org_id, session)
+
+    # Shopify billing takes priority for tier resolution (ACTIVE or grace period)
+    if is_shopify_billing_active(shopify_billing):
+        tier = shopify_billing.plan_name or "FREE"
+    else:
+        tier = get_org_tier(subscription)
+
+    return OrgContext(org_id=org_id, subscription=subscription, shopify_billing=shopify_billing, tier=tier)
 
 
 # ==========================================
@@ -200,7 +211,10 @@ async def require_active_subscription(
     Unlike finpy/nexotype which only gate writes, Nudgio blocks everything
     after grace period — widgets show nothing (not broken, just empty).
 
-    Uses get_org_context (deduplicated) for org_id and subscription.
+    Checks ShopifyBilling first (if present, takes priority over Stripe),
+    then falls through to existing Stripe subscription check.
+
+    Uses get_org_context (deduplicated) for org_id, subscription, and shopify_billing.
     Passes ctx.subscription to is_service_active_with_subscription to avoid
     re-querying. Only needs its own session for the FREE tier connection
     count check (when subscription is None).
@@ -209,6 +223,11 @@ async def require_active_subscription(
         # No org = no connections = nothing to gate
         return
 
+    # Shopify billing check (if present, takes priority over Stripe)
+    if is_shopify_billing_active(ctx.shopify_billing):
+        return
+
+    # Existing Stripe subscription check (unchanged)
     if not await is_service_active_with_subscription(ctx.subscription, ctx.org_id, session):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
