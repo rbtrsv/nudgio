@@ -4,14 +4,12 @@
  * Polaris web component version of (standalone)/settings/page.tsx.
  * Runs inside the Shopify Admin iframe.
  *
- * Same 7 fields as standalone:
+ * 5 algorithm fields (shop URLs excluded — Shopify provides these automatically):
  * - bestseller_method — select (volume, value, balanced)
  * - bestseller_lookback_days — number input
  * - crosssell_lookback_days — number input
  * - max_recommendations — number input
  * - min_price_increase_percent — number input
- * - shop_base_url — text input
- * - product_url_template — text input
  *
  * No connection selector — connection is auto-resolved from Shopify session token.
  * Save feedback uses shopify.toast.show() (App Bridge toast).
@@ -85,8 +83,6 @@ export default function ShopifySettingsPage() {
   const [crosssellLookbackDays, setCrosssellLookbackDays] = useState(30);
   const [maxRecommendations, setMaxRecommendations] = useState(10);
   const [minPriceIncreasePercent, setMinPriceIncreasePercent] = useState(10);
-  const [shopBaseUrl, setShopBaseUrl] = useState('');
-  const [productUrlTemplate, setProductUrlTemplate] = useState('');
 
   // Action states
   const [isSaving, setIsSaving] = useState(false);
@@ -103,8 +99,6 @@ export default function ShopifySettingsPage() {
       setCrosssellLookbackDays(settings.crosssell_lookback_days);
       setMaxRecommendations(settings.max_recommendations);
       setMinPriceIncreasePercent(settings.min_price_increase_percent);
-      setShopBaseUrl(settings.shop_base_url || '');
-      setProductUrlTemplate(settings.product_url_template || '');
     }
   }, [settings]);
 
@@ -156,8 +150,6 @@ export default function ShopifySettingsPage() {
         crosssell_lookback_days: crosssellLookbackDays,
         max_recommendations: maxRecommendations,
         min_price_increase_percent: minPriceIncreasePercent,
-        shop_base_url: shopBaseUrl || null,
-        product_url_template: productUrlTemplate || null,
       };
 
       const response = await updateSettings(token, payload);
@@ -221,6 +213,9 @@ export default function ShopifySettingsPage() {
 
   return (
     <s-page heading="Settings">
+
+      {/* Top spacer — breathing room between page heading and first section */}
+      <s-box paddingBlockStart="base" />
 
       {/* Algorithm Configuration Section */}
       <s-section heading="Algorithm Configuration">
@@ -288,31 +283,6 @@ export default function ShopifySettingsPage() {
                 const val = parseInt(e.currentTarget.value, 10);
                 if (!isNaN(val)) setMinPriceIncreasePercent(val);
               }}
-            />
-
-          </s-stack>
-        </s-box>
-      </s-section>
-
-      {/* Shop URLs Section */}
-      <s-section heading="Shop URLs">
-        <s-box padding="base">
-          <s-stack direction="block" gap="base">
-
-            {/* Shop Base URL — text input */}
-            <s-text-field
-              label="Shop Base URL"
-              value={shopBaseUrl}
-              onChange={(e) => setShopBaseUrl(e.currentTarget.value)}
-              details="e.g. https://mystore.com"
-            />
-
-            {/* Product URL Template — text input */}
-            <s-text-field
-              label="Product URL Template"
-              value={productUrlTemplate}
-              onChange={(e) => setProductUrlTemplate(e.currentTarget.value)}
-              details="e.g. /products/{handle}"
             />
 
           </s-stack>

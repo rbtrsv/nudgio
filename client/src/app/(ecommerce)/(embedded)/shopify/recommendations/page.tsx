@@ -212,8 +212,12 @@ export default function ShopifyRecommendationsPage() {
   return (
     <s-page heading="Recommendations">
 
+      {/* Top spacer — breathing room between page heading and first section */}
+      <s-box paddingBlockStart="base" />
+
       {/* Type Selector — button group acting as tabs */}
       <s-section heading="Recommendation Type">
+        <s-box padding="base">
         <s-button-group>
           <s-button
             variant={activeType === 'bestsellers' ? 'primary' : undefined}
@@ -240,6 +244,7 @@ export default function ShopifyRecommendationsPage() {
             Similar
           </s-button>
         </s-button-group>
+        </s-box>
       </s-section>
 
       {/* Parameters Section */}

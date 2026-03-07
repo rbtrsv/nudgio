@@ -132,6 +132,9 @@ export default function ShopifyComponentsPage() {
   return (
     <s-page heading="Components">
 
+      {/* Top spacer — breathing room between page heading and first section */}
+      <s-box paddingBlockStart="base" />
+
       {/* Widget Configuration Section */}
       <s-section heading="Widget Configuration">
         <s-box padding="base">

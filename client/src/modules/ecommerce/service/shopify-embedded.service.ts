@@ -127,15 +127,14 @@ export interface EmbeddedSettingsResponse {
   error: string | null;
 }
 
-/** Settings create/update payload — matches backend RecommendationSettingsCreate */
+/** Settings create/update payload — matches backend RecommendationSettingsCreate.
+ *  shop_base_url and product_url_template excluded — Shopify provides these automatically. */
 export interface EmbeddedSettingsPayload {
   bestseller_method: string;
   bestseller_lookback_days: number;
   crosssell_lookback_days: number;
   max_recommendations: number;
   min_price_increase_percent: number;
-  shop_base_url: string | null;
-  product_url_template: string | null;
 }
 
 /** Simple message response */
@@ -375,7 +374,7 @@ export const getSettings = async (
  * Create or update recommendation settings for the embedded app's connection.
  *
  * @param sessionToken Shopify session token from App Bridge idToken()
- * @param data Settings payload with all 7 fields
+ * @param data Settings payload with 5 algorithm fields
  * @returns Settings response with updated settings
  */
 export const updateSettings = async (

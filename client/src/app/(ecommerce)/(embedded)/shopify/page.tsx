@@ -75,6 +75,9 @@ export default function ShopifyDashboardPage() {
   return (
     <s-page heading="Nudgio Dashboard">
 
+      {/* Top spacer — breathing room between page heading and first section */}
+      <s-box paddingBlockStart="base" />
+
       {/* Connection Status Section */}
       <s-section heading="Connection">
         <s-box padding="base" borderWidth="base" borderRadius="base">

@@ -208,6 +208,9 @@ function ShopifyBillingContent() {
   return (
     <s-page heading="Billing">
 
+      {/* Top spacer — breathing room between page heading and first section */}
+      <s-box paddingBlockStart="base" />
+
       {/* Callback Result Banners */}
       {callbackResult === 'success' && (
         <s-section>
