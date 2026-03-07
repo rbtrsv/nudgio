@@ -21,7 +21,7 @@
           iframe.style.height = height + "px";
         }
       }
-    } catch (e) {
+    } catch {
       // Cross-origin — cannot access contentDocument, keep min-height fallback
     }
   }
@@ -52,7 +52,7 @@
               });
             });
           }
-        } catch (e) {
+        } catch {
           // Cross-origin fallback
         }
       });

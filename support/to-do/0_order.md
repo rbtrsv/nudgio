@@ -86,6 +86,12 @@
 - ✅ Frontend service envelope unwrapping bug fixed
 - ✅ Widget parameters (lookback_days, method, min_price_increase) passed through to engine
 - ✅ Product images in widget HTML (from adapter data, not placeholders)
+- ✅ Token Exchange typo fix — `id-token` → `id_token` in `shopify_session_utils.py` (was preventing offline access token exchange)
+- ✅ GraphQL error parsing — robust normalization (str/dict/list) in `shopify/api.py`, `shopify_session_utils.py`, `shopify_billing_utils.py`
+- ✅ Engine image_url mapping — Shopify returns `image_url` (string), WooCommerce returns `images` (list); engine now handles both
+- ✅ Removed `/api/v1/` prefix from all server URLs — billing callbacks, webhook URIs, auth redirects, app proxy, `.env.example`
+- ✅ App Proxy HMAC verification — rewritten to match Shopify docs (decoded values, no separator join, duplicate keys with comma)
+- ✅ Liquid template URL encoding — color values encoded separately before append (was triple-encoding entire query string)
 
 ### Stripe / Billing
 - ✅ Stripe sandbox configured (separate from nexotype + finpy)
@@ -170,7 +176,7 @@
 ### 🟡 Medium Priority — Required for Shopify App Store
 6. ✅ **Shopify App Bridge integration** — DONE. CDN-loaded App Bridge + Polaris, session token auth, Token Exchange API, auto-provisioning.
 7. ✅ **Embedded dashboard pages** — DONE. 5 pages (dashboard, settings, recommendations, components, billing). 16 embedded endpoints. Security gating.
-7b. ✅ **Storefront widget delivery (Stage 3)** — DONE. App Proxy subrouter (4 endpoints, HMAC hex verification, entitlement check), `[app_proxy]` in `shopify.app.toml`, Theme App Extension (Liquid block + iframe auto-resize JS), deployed via `shopify app deploy`, Components page updated with storefront instructions.
+7b. ✅ **Storefront widget delivery (Stage 3)** — DONE. App Proxy subrouter (4 endpoints, HMAC hex verification per Shopify docs — decoded values, no separator join, duplicate keys with comma), `[app_proxy]` in `shopify.app.toml`, Theme App Extension (Liquid block + iframe auto-resize JS), deployed via `shopify app deploy`, Components page updated with storefront instructions. Verified working in Theme Editor with product images.
 8. **App Store submission** — listing, description, screenshots, demo video, submit for review (2-4 weeks).
 
 ### 🟢 Low Priority — Future Expansions
