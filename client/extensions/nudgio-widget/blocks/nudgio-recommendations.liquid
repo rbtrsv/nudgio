@@ -1,0 +1,103 @@
+{% comment %}
+  Nudgio Recommendations — Theme App Extension Block
+
+  Renders an iframe pointing to the App Proxy URL which serves
+  recommendation widget HTML (Tailwind-styled product cards).
+
+  The iframe isolates widget styles (Tailwind CDN) from the merchant's
+  theme — same approach as the embedded Components page preview.
+
+  Widget types:
+  - bestsellers: no product context needed
+  - cross-sell, upsell, similar: pass current product.id from Liquid context
+
+  Shopify App Proxy rewrites:
+    https://shop.myshopify.com/apps/nudgio-widget/bestsellers?top=4&...
+    → https://server.nudgio.tech/api/v1/ecommerce/shopify/app-proxy/bestsellers?top=4&...&shop=...&signature=...
+{% endcomment %}
+
+{% comment %} Build the App Proxy URL with widget settings from Theme Editor {% endcomment %}
+{% assign proxy_base = "/apps/nudgio-widget/" | append: block.settings.widget_type %}
+{% assign params = "?top=" | append: block.settings.product_count %}
+{% assign params = params | append: "&style=" | append: block.settings.widget_style %}
+{% assign params = params | append: "&primary_color=" | append: block.settings.primary_color | url_encode %}
+{% assign params = params | append: "&text_color=" | append: block.settings.text_color | url_encode %}
+{% assign params = params | append: "&bg_color=" | append: block.settings.bg_color | url_encode %}
+
+{% comment %} For product-specific widget types, pass the current product ID {% endcomment %}
+{% if block.settings.widget_type != "bestsellers" and product %}
+  {% assign params = params | append: "&product_id=" | append: product.id %}
+{% endif %}
+
+{% assign iframe_src = proxy_base | append: params %}
+
+<div class="nudgio-recommendations" {{ block.shopify_attributes }}>
+  <iframe
+    src="{{ iframe_src }}"
+    style="width: 100%; border: none; min-height: 200px; overflow: hidden;"
+    title="Nudgio Recommendations"
+    loading="lazy"
+    id="nudgio-widget-{{ block.id }}"
+  ></iframe>
+</div>
+
+<script src="{{ 'nudgio-widget.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Nudgio Recommendations",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "widget_type",
+      "label": "Widget Type",
+      "default": "bestsellers",
+      "options": [
+        { "value": "bestsellers", "label": "Bestsellers" },
+        { "value": "cross-sell", "label": "Frequently Bought Together" },
+        { "value": "upsell", "label": "You Might Like" },
+        { "value": "similar", "label": "Similar Products" }
+      ],
+      "info": "Cross-sell, upsell, and similar require a product page context."
+    },
+    {
+      "type": "range",
+      "id": "product_count",
+      "label": "Number of Products",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "widget_style",
+      "label": "Layout Style",
+      "default": "card",
+      "options": [
+        { "value": "card", "label": "Grid Cards" },
+        { "value": "carousel", "label": "Carousel" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "default": "#3B82F6"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1F2937"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#FFFFFF"
+    }
+  ]
+}
+{% endschema %}

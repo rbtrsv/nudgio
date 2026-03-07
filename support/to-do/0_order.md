@@ -130,12 +130,13 @@
 - ✅ Handle session tokens from Shopify App Bridge — `shopify.idToken()` → Bearer token → `verify_shopify_session_token` → `get_shopify_connection` dependency
 - ✅ Security hardening — embedded gating (subscription + rate limit + monthly order limit via `EmbeddedOrgContext`), `scalars().first()` fix for multi-org users
 - ✅ Navigation & UI polish — `<s-app-nav>` sidebar navigation, Shop URLs removed from Settings, button group fix, top spacers, nav icon SVG
-- ❌ Storefront widget delivery (Stage 3):
-  - ❌ **App Proxy backend endpoint** — public endpoint (no session token, no JWT) that serves widget HTML. Shopify proxies storefront requests through it. Must verify Shopify HMAC signature on every request to prevent unauthorized access.
-  - ❌ **App Proxy config in `shopify.app.toml`** — register the proxy URL prefix (e.g. `/apps/nudgio`) and target backend URL so Shopify knows where to forward storefront requests.
-  - ❌ **Theme App Extension** — Liquid + JS files in `extensions/` directory. Creates an app block that merchants add via Theme Editor (Online Store → Customize → Add block → Nudgio Widget). The block fetches widget HTML from the App Proxy and renders it on product/collection pages.
-  - ❌ **Deploy extension** — `shopify app deploy` pushes the theme extension to Shopify so it appears in the merchant's Theme Editor.
-  - ❌ **Update Components page** — replace the "Storefront Delivery" info banner with actual instructions or a direct link to Theme Editor.
+- ✅ Storefront widget delivery (Stage 3):
+  - ✅ **App Proxy backend endpoint** — `shopify_app_proxy_subrouter.py` with HMAC-SHA256 hex verification, 4 widget endpoints (bestsellers, cross-sell, upsell, similar), entitlement check via `is_service_active()`, all responses HTMLResponse (renders in storefront iframe)
+  - ✅ **App Proxy config in `shopify.app.toml`** — `[app_proxy]` section: url, prefix="apps", subpath="nudgio-widget". Storefront URL: `https://shop.myshopify.com/apps/nudgio-widget/{type}`
+  - ✅ **Theme App Extension** — `extensions/nudgio-widget/`: Liquid app block with iframe + `{% schema %}` settings (widget type, count, style, colors), iframe auto-resize JS. Deployed to Shopify CDN (not Coolify).
+  - ✅ **Deploy extension** — deployed via `shopify app deploy`
+  - ✅ **Update Components page** — info banner updated with actual storefront instructions
+  - ✅ **Bottom spacers** — `<s-box paddingBlockEnd="base" />` added to all 5 embedded pages
 
 ### 4. Shopify App Store Submission
 - ❌ App listing: description, screenshots, demo video
@@ -169,7 +170,7 @@
 ### 🟡 Medium Priority — Required for Shopify App Store
 6. ✅ **Shopify App Bridge integration** — DONE. CDN-loaded App Bridge + Polaris, session token auth, Token Exchange API, auto-provisioning.
 7. ✅ **Embedded dashboard pages** — DONE. 5 pages (dashboard, settings, recommendations, components, billing). 16 embedded endpoints. Security gating.
-7b. **Storefront widget delivery (Stage 3)** — App Proxy backend (HMAC verified, serves widget HTML), App Proxy config in `shopify.app.toml`, Theme App Extension (Liquid + JS app block for Theme Editor), deploy extension, update Components page with real instructions.
+7b. ✅ **Storefront widget delivery (Stage 3)** — DONE. App Proxy subrouter (4 endpoints, HMAC hex verification, entitlement check), `[app_proxy]` in `shopify.app.toml`, Theme App Extension (Liquid block + iframe auto-resize JS), deployed via `shopify app deploy`, Components page updated with storefront instructions.
 8. **App Store submission** — listing, description, screenshots, demo video, submit for review (2-4 weeks).
 
 ### 🟢 Low Priority — Future Expansions

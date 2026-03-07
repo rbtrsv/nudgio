@@ -155,6 +155,9 @@ export default function ShopifyDashboardPage() {
         </s-box>
       </s-section>
 
+      {/* Bottom spacer — breathing room after last section */}
+      <s-box paddingBlockEnd="base" />
+
     </s-page>
   );
 }

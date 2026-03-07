@@ -341,6 +341,9 @@ export default function ShopifyRecommendationsPage() {
       {/* Results */}
       {result && <ResultsSection result={result} />}
 
+      {/* Bottom spacer — breathing room after last section */}
+      <s-box paddingBlockEnd="base" />
+
     </s-page>
   );
 }

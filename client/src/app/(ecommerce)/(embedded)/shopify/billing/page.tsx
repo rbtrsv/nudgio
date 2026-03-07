@@ -352,6 +352,9 @@ function ShopifyBillingContent() {
         </s-stack>
       </s-section>
 
+      {/* Bottom spacer — breathing room after last section */}
+      <s-box paddingBlockEnd="base" />
+
     </s-page>
   );
 }

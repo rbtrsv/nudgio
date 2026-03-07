@@ -134,10 +134,10 @@ All schema fields have `Field(description="...")`.
 ### Router (`server/apps/ecommerce/router.py`)
 
 Prefix: `/ecommerce`. Split into ungated and gated groups:
-- **Ungated**: Shopify OAuth + WooCommerce auth callbacks (merchant connecting for first time, no subscription check needed)
+- **Ungated**: Shopify OAuth + WooCommerce auth callbacks + webhooks + billing + embedded (session token auth) + App Proxy (HMAC auth)
 - **Gated**: Everything else via `APIRouter(dependencies=[Depends(require_active_subscription)])` — connections, settings, recommendations, components, data. All endpoints return 403 when subscription is inactive.
 
-7 subrouters, 28 routes total.
+9 subrouters, 57 routes total.
 
 ### Frontend (`client/src/`)
 
@@ -1467,7 +1467,7 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 ### Shopify Embedded App UI
 - ✅ App Bridge integration — CDN-loaded App Bridge + Polaris web components, session token auth (JWT HS256), Token Exchange API, auto-provisioning (User + Org + Connection)
 - ✅ Embedded dashboard pages — 5 pages: dashboard, settings, recommendations, components (preview only), billing. 16 embedded endpoints (53 total routes). Security gating (subscription + rate limit + monthly order limit via EmbeddedOrgContext)
-- ❌ Storefront widget delivery (Stage 3) — App Proxy + HMAC verification + Theme App Extension (Liquid + JS) for live storefront rendering
+- ✅ Storefront widget delivery (Stage 3) — `shopify_app_proxy_subrouter.py` (4 widget endpoints, HMAC-SHA256 hex verification, entitlement check), `[app_proxy]` in `shopify.app.toml`, Theme App Extension `extensions/nudgio-widget/` (Liquid block + iframe auto-resize JS, deployed to Shopify CDN via `shopify app deploy`)
 
 ### WooCommerce WordPress Plugin (Distribution)
 - ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets

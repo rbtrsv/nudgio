@@ -303,15 +303,18 @@ export default function ShopifyComponentsPage() {
             />
           </s-box>
 
-          {/* Stage 3 info banner */}
-          <s-banner tone="info" heading="Storefront Delivery">
+          {/* Storefront delivery instructions */}
+          <s-banner tone="info" heading="Add to Your Storefront">
             <s-paragraph>
-              To display this widget on your storefront, enable the Nudgio theme extension
-              in your Shopify theme editor. Storefront delivery will be available in a future update.
+              To display this widget on your storefront, go to Online Store → Customize,
+              then add the "Nudgio Recommendations" block to any section on your product or collection pages.
             </s-paragraph>
           </s-banner>
         </s-section>
       )}
+
+      {/* Bottom spacer — breathing room after last section */}
+      <s-box paddingBlockEnd="base" />
 
     </s-page>
   );

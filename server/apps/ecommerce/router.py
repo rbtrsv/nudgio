@@ -33,6 +33,9 @@ from .subrouters.woocommerce_auth_subrouter import router as woocommerce_auth_ro
 # Shopify webhooks (GDPR compliance + billing status)
 from .subrouters.shopify_webhooks_subrouter import router as shopify_webhooks_router
 
+# Shopify App Proxy (storefront widget delivery via HMAC auth)
+from .subrouters.shopify_app_proxy_subrouter import router as shopify_app_proxy_router
+
 # Shopify billing
 from .subrouters.shopify_billing_subrouter import router as shopify_billing_router
 
@@ -42,12 +45,13 @@ from .subrouters.shopify_embedded_subrouter import router as shopify_embedded_ro
 
 router = APIRouter(prefix="/ecommerce")
 
-# Ungated — auth callbacks + platform webhooks + billing + embedded (session token auth handled internally)
+# Ungated — auth callbacks + platform webhooks + billing + embedded + app proxy (HMAC auth handled internally)
 router.include_router(shopify_oauth_router)
 router.include_router(woocommerce_auth_router)
 router.include_router(shopify_webhooks_router)
 router.include_router(shopify_billing_router)  # Mixed gating handled internally
 router.include_router(shopify_embedded_router)  # Session token auth handled internally
+router.include_router(shopify_app_proxy_router)  # HMAC auth handled internally
 
 # Gated — everything else requires active service
 # See require_active_subscription in dependency_utils.py for details.
