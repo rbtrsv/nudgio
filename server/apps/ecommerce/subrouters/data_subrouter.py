@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,6 +17,8 @@ from ..schemas.data_schemas import (
 )
 from ..adapters.factory import get_adapter
 from ..utils.dependency_utils import get_active_connection
+
+logger = logging.getLogger(__name__)
 
 # ==========================================
 # Data Management Router
@@ -138,6 +142,53 @@ async def import_order_items(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error importing order items: {str(e)}")
+
+
+# ==========================================
+# GET /products/{connection_id} — Product List for Dropdown
+# ==========================================
+
+@router.get("/products/{connection_id}")
+async def get_products(
+    connection_id: int,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Get a simplified product list for the standalone Components page dropdown.
+
+    Returns product_id, title, and image_url for each active product.
+
+    This endpoint:
+    1. Validate the user owns an active connection
+    2. Get adapter for the connection
+    3. Fetch products from the store (limit=250)
+    4. Return simplified list: product_id, title, image_url
+    """
+    try:
+        # Step 1: Validate user owns an active connection
+        connection = await get_active_connection(connection_id, user.id, db)
+
+        # Step 2–3: Fetch products from store adapter
+        adapter = get_adapter(connection)
+        raw_products = await adapter.get_products(limit=250)
+
+        # Step 4: Return simplified list for dropdown
+        products = [
+            {
+                "product_id": p.get("product_id", ""),
+                "title": p.get("title", ""),
+                "image_url": p.get("image_url", ""),
+            }
+            for p in raw_products
+        ]
+
+        return {"products": products, "count": len(products)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Products list error for connection_id=%s: %s", connection_id, str(e))
+        raise HTTPException(status_code=500, detail=f"Error fetching products: {str(e)}")
 
 
 @router.get("/stats/{connection_id}", response_model=ConnectionStatsResponse)

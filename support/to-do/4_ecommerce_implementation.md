@@ -137,7 +137,7 @@ Prefix: `/ecommerce`. Split into ungated and gated groups:
 - **Ungated**: Shopify OAuth + WooCommerce auth callbacks + webhooks + billing + embedded (session token auth) + App Proxy (HMAC auth)
 - **Gated**: Everything else via `APIRouter(dependencies=[Depends(require_active_subscription)])` — connections, settings, recommendations, components, data. All endpoints return 403 when subscription is inactive.
 
-9 subrouters, 57 routes total.
+9 subrouters, 58 routes total (added GET /shopify/embedded/products for admin dropdown).
 
 ### Frontend (`client/src/`)
 

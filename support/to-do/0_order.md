@@ -143,6 +143,9 @@
   - ✅ **Deploy extension** — deployed via `shopify app deploy`
   - ✅ **Update Components page** — info banner updated with actual storefront instructions
   - ✅ **Bottom spacers** — `<s-box paddingBlockEnd="base" />` added to all 5 embedded pages
+- ✅ Components page product dropdown — replaced raw Product ID text field with `<s-select>` dropdown that fetches products from `GET /shopify/embedded/products` (ungated). Info banner explains storefront auto-detects product via Theme Editor.
+- ✅ Liquid template guard — if widget type requires product but `product` object is nil (non-product page), renders friendly HTML message instead of iframe request. Defense-in-depth alongside backend app proxy guard.
+- ✅ Managed Pricing billing page — billing page rewritten for Shopify Managed Pricing. Shows current plan + plan comparison + "Manage Plan on Shopify" button that opens `https://admin.shopify.com/store/{storeHandle}/charges/nudgio/pricing_plans`. Subscribe/cancel endpoints and service functions kept with comments for manual pricing revert. Partner Dashboard → Distribution → Manage listing → Pricing content → Settings → "Managed pricing" selected.
 
 ### 4. Shopify App Store Submission
 - ❌ App listing: description, screenshots, demo video
@@ -160,7 +163,7 @@
 - ❌ Magento extension for Adobe Commerce Marketplace (lower priority — smaller market)
 
 ### 8. Nice to Have
-- ❌ Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)
+- ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page with plan display + Shopify upgrade redirect; Standalone: Stripe via accounts module)
 
 ---
 
@@ -177,13 +180,15 @@
 6. ✅ **Shopify App Bridge integration** — DONE. CDN-loaded App Bridge + Polaris, session token auth, Token Exchange API, auto-provisioning.
 7. ✅ **Embedded dashboard pages** — DONE. 5 pages (dashboard, settings, recommendations, components, billing). 16 embedded endpoints. Security gating.
 7b. ✅ **Storefront widget delivery (Stage 3)** — DONE. App Proxy subrouter (4 endpoints, HMAC hex verification per Shopify docs — decoded values, no separator join, duplicate keys with comma), `[app_proxy]` in `shopify.app.toml`, Theme App Extension (Liquid block + iframe auto-resize JS), deployed via `shopify app deploy`, Components page updated with storefront instructions. Verified working in Theme Editor with product images.
+7c. ✅ **Components product dropdown + guards** — DONE. Product dropdown (fetches from `GET /products`, ungated), Liquid guard for non-product pages, app proxy guard for missing product_id.
+7d. ✅ **Managed Pricing billing** — DONE. Billing page shows current plan + "Manage Plan on Shopify" button (opens Shopify-hosted pricing page). Subscribe/cancel code kept for manual pricing revert. Managed Pricing configured in Partner Dashboard.
 8. **App Store submission** — listing, description, screenshots, demo video, submit for review (2-4 weeks).
 
 ### 🟢 Low Priority — Future Expansions
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
 10. **WooCommerce WordPress Plugin** — PHP plugin for WordPress Plugin Directory.
 11. **Magento Adobe Commerce Extension** — smaller market, lowest priority.
-12. **Frontend subscription page** — cosmetic, accounts module already handles billing.
+12. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
 
 ---
 
@@ -193,7 +198,7 @@
 - Items 6-8 are Shopify embedded app requirements
 - Item 9 is on hold until DragonflyDB is provisioned in Coolify
 - Items 10-11 are future platform expansions
-- Item 12 is cosmetic — accounts subscription module already handles billing via Stripe
+- Item 12 is DONE — Shopify uses Managed Pricing, standalone uses Stripe via accounts module
 - Backend recommendation engine is complete (adapters, scoring, widget generation, analytics tracking)
 - Accounts module is shared and complete (auth, organizations, subscriptions, Stripe)
 - Landing page is complete and deployed at www.nudgio.tech (Vercel)

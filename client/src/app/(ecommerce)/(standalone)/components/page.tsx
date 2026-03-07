@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
 import { useComponents, type WidgetType } from '@/modules/ecommerce/hooks/use-components';
+import { getProducts, type DataProduct } from '@/modules/ecommerce/service/data.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';
@@ -31,10 +32,37 @@ export default function ComponentsPage() {
   const [borderRadius, setBorderRadius] = useState('8px');
   const [copied, setCopied] = useState(false);
 
+  // Product dropdown state (for cross-sell, upsell, similar widget types)
+  const [products, setProducts] = useState<DataProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsFetched, setProductsFetched] = useState(false);
+
   const needsProductId = widgetType !== 'bestsellers';
   const needsLookback = widgetType === 'bestsellers' || widgetType === 'cross-sell';
   const needsMethod = widgetType === 'bestsellers';
   const needsMinPriceIncrease = widgetType === 'upsell';
+
+  // Fetch products when a non-bestseller widget type is selected and connection is active
+  useEffect(() => {
+    if (!needsProductId || !activeConnectionId || productsFetched) return;
+
+    const fetchProductList = async () => {
+      setProductsLoading(true);
+      const response = await getProducts(activeConnectionId);
+      setProducts(response.products);
+      setProductsFetched(true);
+      setProductsLoading(false);
+    };
+
+    fetchProductList();
+  }, [needsProductId, activeConnectionId, productsFetched]);
+
+  // Reset fetched state when connection changes (need to re-fetch for new connection)
+  useEffect(() => {
+    setProductsFetched(false);
+    setProducts([]);
+    setProductId('');
+  }, [activeConnectionId]);
 
   const handleGenerate = async () => {
     if (!activeConnectionId) return;
@@ -134,11 +162,22 @@ export default function ComponentsPage() {
                 </Select>
               </div>
 
-              {/* Product ID — shown when needed */}
+              {/* Product — dropdown shown when needed (cross-sell, upsell, similar) */}
               {needsProductId && (
                 <div className="space-y-2">
-                  <Label>Product ID</Label>
-                  <Input value={productId} onChange={(e) => setProductId(e.target.value)} placeholder="Enter product ID" />
+                  <Label>Product</Label>
+                  <Select value={productId} onValueChange={(v) => setProductId(v)} disabled={productsLoading}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={productsLoading ? 'Loading products...' : 'Select a product'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map((p) => (
+                        <SelectItem key={p.product_id} value={p.product_id}>
+                          {p.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
 

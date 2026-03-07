@@ -60,6 +60,7 @@ export const COMPONENT_ENDPOINTS = {
  */
 export const DATA_ENDPOINTS = {
   STATS: (connId: number) => `${API_BASE_URL}/ecommerce/data/stats/${connId}`,
+  PRODUCTS: (connId: number) => `${API_BASE_URL}/ecommerce/data/products/${connId}`,
 };
 
 /**
