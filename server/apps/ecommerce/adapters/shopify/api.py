@@ -64,7 +64,16 @@ class ShopifyAdapter:
                 headers=self._get_headers(),
                 json=payload
             ) as response:
+                # Non-200 responses may return HTML (e.g., 401 error page)
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise Exception(f"Shopify GraphQL HTTP {response.status}: {error_text[:200]}")
+
                 body = await response.json()
+
+                # response.json() may return a string if body isn't valid JSON
+                if isinstance(body, str):
+                    raise Exception(f"Shopify GraphQL returned non-JSON response: {body[:200]}")
 
                 # Log query cost for throttling visibility
                 cost = body.get("extensions", {}).get("cost")
@@ -76,7 +85,19 @@ class ShopifyAdapter:
                 data = body.get("data")
 
                 if errors and data is None:
-                    error_messages = "; ".join(e.get("message", str(e)) for e in errors)
+                    # Normalize errors: can be str, dict, or list of dicts
+                    if isinstance(errors, str):
+                        error_messages = errors
+                    elif isinstance(errors, dict):
+                        error_messages = errors.get("message", str(errors))
+                    elif isinstance(errors, list):
+                        error_messages = "; ".join(
+                            e.get("message", str(e)) if isinstance(e, dict) else str(e)
+                            for e in errors
+                        )
+                    else:
+                        logger.warning("Shopify GraphQL unexpected errors type: %s (%s)", type(errors).__name__, errors)
+                        error_messages = str(errors)
                     raise Exception(f"Shopify GraphQL error: {error_messages}")
 
                 if errors:

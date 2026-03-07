@@ -114,9 +114,18 @@ async def _shopify_graphql(
 
             # Fatal error — errors present and no data at all
             if errors and data is None:
-                error_messages = "; ".join(
-                    e.get("message", str(e)) for e in errors
-                )
+                # Normalize errors: can be str, dict, or list of dicts
+                if isinstance(errors, str):
+                    error_messages = errors
+                elif isinstance(errors, dict):
+                    error_messages = errors.get("message", str(errors))
+                elif isinstance(errors, list):
+                    error_messages = "; ".join(
+                        e.get("message", str(e)) if isinstance(e, dict) else str(e)
+                        for e in errors
+                    )
+                else:
+                    error_messages = str(errors)
                 raise Exception(f"Shopify GraphQL error: {error_messages}")
 
             # Partial errors — log but continue

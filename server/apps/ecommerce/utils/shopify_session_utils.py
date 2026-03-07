@@ -177,7 +177,7 @@ async def exchange_session_for_access_token(
         "client_secret": settings.SHOPIFY_CLIENT_SECRET,
         "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
         "subject_token": session_token,
-        "subject_token_type": "urn:ietf:params:oauth:token-type:id-token",
+        "subject_token_type": "urn:ietf:params:oauth:token-type:id_token",
         "requested_token_type": "urn:shopify:params:oauth:token-type:offline-access-token",
     }
 
@@ -265,7 +265,18 @@ async def get_shopify_shop_info(
     data = body.get("data")
 
     if errors and data is None:
-        error_messages = "; ".join(e.get("message", str(e)) for e in errors)
+        # Normalize errors: can be str, dict, or list of dicts
+        if isinstance(errors, str):
+            error_messages = errors
+        elif isinstance(errors, dict):
+            error_messages = errors.get("message", str(errors))
+        elif isinstance(errors, list):
+            error_messages = "; ".join(
+                e.get("message", str(e)) if isinstance(e, dict) else str(e)
+                for e in errors
+            )
+        else:
+            error_messages = str(errors)
         raise Exception(f"Shopify Shop API error: {error_messages}")
 
     shop = data.get("shop", {})
