@@ -53,60 +53,65 @@ router = APIRouter(prefix="/shopify/app-proxy", tags=["Shopify App Proxy"])
 
 
 # ==========================================
-# HMAC Verification (Hex — same as OAuth)
+# HMAC Verification (App Proxy — NOT same as OAuth)
 # ==========================================
 
 def _verify_proxy_signature(request: Request, client_secret: str) -> bool:
     """
     Verify Shopify App Proxy HMAC-SHA256 signature.
 
-    Same algorithm as OAuth callback (_verify_hmac in shopify_oauth_subrouter.py)
-    but param name is 'signature' instead of 'hmac'.
+    DIFFERENT from OAuth callback (_verify_hmac in shopify_oauth_subrouter.py).
+    App Proxy uses a different join format.
 
     Follows Shopify App Proxy authentication docs exactly:
-    1. Extract 'signature' param
-    2. Remove 'signature' from params
-    3. Sort remaining params alphabetically by key
-    4. Join as key=value with &
-    5. HMAC-SHA256 with Client Secret → hex digest
-    6. Timing-safe compare
+    https://shopify.dev/docs/apps/build/online-store/app-proxies/authenticate-app-proxies
 
-    Edge cases handled:
-    - Uses raw query string (not dict(request.query_params)) to preserve
-      duplicate keys, ordering, and exact URL encoding
-    - Empty values included as key= in concatenation
-    - URL decoding handled manually from raw string
+    Algorithm (matching Ruby reference):
+        query_hash = Rack::Utils.parse_query(query_string)
+        signature = query_hash.delete("signature")
+        sorted_params = query_hash.collect{ |k, v| "#{k}=#{Array(v).join(',')}" }.sort.join
+        calculated = OpenSSL::HMAC.hexdigest('sha256', secret, sorted_params)
+
+    Key differences from OAuth HMAC:
+    - Values are URL-decoded (not raw encoded)
+    - Duplicate keys are joined with comma: key=v1,v2
+    - Sorted key=value pairs are concatenated WITHOUT separator (no &)
+    - HMAC-SHA256 hex digest with Client Secret
     """
-    # Parse from raw query string to preserve duplicates/ordering
-    raw_qs = str(request.url.query)
-    pairs = [p.split("=", 1) for p in raw_qs.split("&") if p]
+    from urllib.parse import unquote, parse_qs
 
-    # Extract and remove signature
-    received_signature = ""
-    filtered_pairs = []
-    for pair in pairs:
-        key = pair[0]
-        value = pair[1] if len(pair) > 1 else ""
-        if key == "signature":
-            received_signature = value
-        else:
-            filtered_pairs.append((key, value))
+    # Step 1: Parse query string with URL decoding, preserve duplicate keys
+    # parse_qs returns {key: [val1, val2, ...]} with decoded values
+    raw_qs = str(request.url.query)
+    parsed = parse_qs(raw_qs, keep_blank_values=True)
+
+    # Step 2: Extract and remove signature
+    signature_list = parsed.pop("signature", [])
+    received_signature = signature_list[0] if signature_list else ""
 
     if not received_signature:
         return False
 
-    # Sort remaining pairs alphabetically by key, then join
-    # Values stay in their original URL-encoded form — same format Shopify used to compute signature
-    filtered_pairs.sort(key=lambda p: p[0])
-    sorted_params = "&".join(f"{k}={v}" for k, v in filtered_pairs)
+    # Step 3: Build sorted params string
+    # Duplicate key values joined with comma, then sorted alphabetically, then concatenated (no separator)
+    param_strings = []
+    for key, values in parsed.items():
+        # Join multiple values with comma (e.g., extra=1&extra=2 → extra=1,2)
+        joined_value = ",".join(values)
+        param_strings.append(f"{key}={joined_value}")
 
+    # Sort alphabetically and concatenate WITHOUT separator (Shopify's .sort.join with no arg)
+    param_strings.sort()
+    sorted_params = "".join(param_strings)
+
+    # Step 4: HMAC-SHA256 hex digest
     computed = hmac_mod.new(
         client_secret.encode("utf-8"),
         sorted_params.encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
 
-    # Compare hex digest directly — no re-encoding, same format as Shopify's signature
+    # Step 5: Timing-safe compare
     return hmac_mod.compare_digest(computed, received_signature)
 
 

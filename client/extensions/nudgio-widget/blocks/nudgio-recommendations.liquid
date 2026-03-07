@@ -18,11 +18,15 @@
 
 {% comment %} Build the App Proxy URL with widget settings from Theme Editor {% endcomment %}
 {% assign proxy_base = "/apps/nudgio-widget/" | append: block.settings.widget_type %}
+{% comment %} URL-encode color values separately — encoding the full string would encode ? & = too {% endcomment %}
+{% assign primary_encoded = block.settings.primary_color | url_encode %}
+{% assign text_encoded = block.settings.text_color | url_encode %}
+{% assign bg_encoded = block.settings.bg_color | url_encode %}
 {% assign params = "?top=" | append: block.settings.product_count %}
 {% assign params = params | append: "&style=" | append: block.settings.widget_style %}
-{% assign params = params | append: "&primary_color=" | append: block.settings.primary_color | url_encode %}
-{% assign params = params | append: "&text_color=" | append: block.settings.text_color | url_encode %}
-{% assign params = params | append: "&bg_color=" | append: block.settings.bg_color | url_encode %}
+{% assign params = params | append: "&primary_color=" | append: primary_encoded %}
+{% assign params = params | append: "&text_color=" | append: text_encoded %}
+{% assign params = params | append: "&bg_color=" | append: bg_encoded %}
 
 {% comment %} For product-specific widget types, pass the current product ID {% endcomment %}
 {% if block.settings.widget_type != "bestsellers" and product %}
