@@ -207,6 +207,17 @@ export default function ShopifyEmbeddedLayout({
         strategy="beforeInteractive"
       />
 
+      {/* Shopify Admin sidebar navigation — renders automatically in Admin sidebar (desktop)
+          and as dropdown from TitleBar (mobile). Links must use href, not onClick.
+          First link with rel="home" defines the home route (not rendered as nav item). */}
+      <s-app-nav>
+        <s-link href="/shopify" rel="home">Dashboard</s-link>
+        <s-link href="/shopify/settings">Settings</s-link>
+        <s-link href="/shopify/recommendations">Recommendations</s-link>
+        <s-link href="/shopify/components">Components</s-link>
+        <s-link href="/shopify/billing">Billing</s-link>
+      </s-app-nav>
+
       <EmbeddedContext.Provider value={contextValue}>
         {children}
       </EmbeddedContext.Provider>

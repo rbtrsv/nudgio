@@ -110,4 +110,50 @@ declare global {
   }
 }
 
+// ==========================================
+// App Bridge Web Component Types
+// ==========================================
+
+/**
+ * <s-app-nav> — Shopify Admin sidebar navigation.
+ *
+ * App Bridge web component (NOT a Polaris component — not in @shopify/polaris-types).
+ * Renders automatically as left sidebar (desktop) and TitleBar dropdown (mobile).
+ * Children are <s-link> elements defining navigation items.
+ *
+ * https://shopify.dev/docs/api/app-bridge-library/web-components/ui-nav-menu
+ */
+interface AppNavProps {
+  children?: React.ReactNode;
+}
+
+/**
+ * Augment <s-link> with `rel` prop.
+ *
+ * The `rel` attribute is used by <s-app-nav> to identify the home route
+ * (rel="home"). This prop is App Bridge-specific and not included in
+ * @shopify/polaris-types LinkProps.
+ */
+interface LinkRelProps {
+  rel?: 'home' | (string & {});
+}
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      's-app-nav': AppNavProps;
+      's-link': IntrinsicElements['s-link'] & LinkRelProps;
+    }
+  }
+}
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      's-app-nav': AppNavProps;
+      's-link': IntrinsicElements['s-link'] & LinkRelProps;
+    }
+  }
+}
+
 export {};

@@ -113,3 +113,5 @@ shopify app generate extension                                                  
 shopify app dev
 shopify app deploy
 https://admin.shopify.com/store/nudgio-dev-store/apps/nudgio
+https://dev.shopify.com/dashboard/
+https://partners.shopify.com/4786160/
