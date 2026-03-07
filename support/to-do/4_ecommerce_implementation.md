@@ -1458,15 +1458,16 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Eye toggle on credential fields in connection detail page
 
 ### Shopify App Store Submission Blockers
-- ❌ GDPR webhooks — implement 3 mandatory compliance endpoints with HMAC-SHA256 verification (Base64, not hex)
-- ❌ GraphQL migration — migrate `ShopifyAdapter` from REST to GraphQL Admin API (REST rejected for new public apps since April 2025)
-- ❌ Shopify Billing API — integrate Shopify's own billing (required for App Store apps, cannot use external billing)
-- ❌ Shopify Partner Dashboard — register app, set App URL + redirect URLs, get Client ID + Client Secret
-- ❌ `shopify.app.toml` configuration for webhooks and compliance endpoints
+- ✅ GDPR webhooks — 3 mandatory compliance endpoints with HMAC-SHA256 verification (Base64)
+- ✅ GraphQL migration — `ShopifyAdapter` rewritten from REST to GraphQL Admin API (2026-01)
+- ✅ Shopify Billing API — ShopifyBilling model, subscribe/callback/cancel/status endpoints, webhook handler
+- ✅ Shopify Partner Dashboard — app registered, Client ID + Client Secret obtained, OAuth flow tested
+- ✅ `shopify.app.toml` configuration — scopes, redirect URLs, webhooks, compliance topics
 
 ### Shopify Embedded App UI
-- ❌ App Bridge integration — Shopify apps must render inside Shopify Admin as an iframe
-- ❌ Embedded dashboard pages — connection status, settings, widget preview, analytics, embed codes
+- ✅ App Bridge integration — CDN-loaded App Bridge + Polaris web components, session token auth (JWT HS256), Token Exchange API, auto-provisioning (User + Org + Connection)
+- ✅ Embedded dashboard pages — 5 pages: dashboard, settings, recommendations, components (preview only), billing. 16 embedded endpoints (53 total routes). Security gating (subscription + rate limit + monthly order limit via EmbeddedOrgContext)
+- ❌ Storefront widget delivery (Stage 3) — App Proxy + HMAC verification + Theme App Extension (Liquid + JS) for live storefront rendering
 
 ### WooCommerce WordPress Plugin (Distribution)
 - ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets
@@ -1476,9 +1477,9 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ❌ Magento extension for Adobe Commerce Marketplace — lower priority (smaller market)
 
 ### Landing Page + Legal
-- ❌ Landing page — product description, pricing tiers, screenshots, demo, sign-up CTA
-- ❌ Privacy policy — required for all platforms
-- ❌ Terms of service — required for all platforms
+- ✅ Landing page — deployed at www.nudgio.tech (Vercel), hero + features + how it works + contact form + blog
+- ✅ Privacy policy — `/legal/privacy-policy` (GDPR/CCPA)
+- ✅ Terms of service — `/legal/terms-of-service` (SaaS terms, Romanian jurisdiction)
 
 ### Nice to Have
 - ❌ Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)

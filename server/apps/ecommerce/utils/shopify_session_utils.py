@@ -330,12 +330,16 @@ async def auto_provision_shopify_merchant(
     if existing_user:
         # Reuse existing User — find their organization
         user = existing_user
+        # Use .first() instead of .scalar_one_or_none() —
+        # user may belong to multiple organizations (e.g. registered on standalone
+        # AND auto-provisioned via Shopify). scalar_one_or_none() would raise
+        # MultipleResultsFound in that case.
         org_result = await db.execute(
             select(OrganizationMember).where(
                 OrganizationMember.user_id == user.id,
             )
         )
-        membership = org_result.scalar_one_or_none()
+        membership = org_result.scalars().first()
 
         if membership:
             org_id = membership.organization_id

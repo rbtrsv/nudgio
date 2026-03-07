@@ -125,9 +125,11 @@
 - ✅ `shopify.app.toml` configuration — scopes, redirect URLs, webhooks, compliance topics, all routed through dispatcher endpoint
 
 ### 3. Shopify Embedded App UI
-- ❌ App Bridge integration — Shopify apps must render inside Shopify Admin as an iframe
-- ❌ Embedded dashboard pages — connection status, settings, widget preview, analytics, embed codes
-- ❌ Handle session tokens from Shopify App Bridge
+- ✅ App Bridge integration — CDN-loaded App Bridge + Polaris web components, session token auth (JWT HS256), Token Exchange API for offline access tokens
+- ✅ Embedded dashboard pages — 5 pages: dashboard, settings, recommendations, components (preview only), billing. 16 embedded endpoints (53 total routes). Polaris web components (`s-page`, `s-section`, `s-box`, `s-stack`, etc.)
+- ✅ Handle session tokens from Shopify App Bridge — `shopify.idToken()` → Bearer token → `verify_shopify_session_token` → `get_shopify_connection` dependency
+- ✅ Security hardening — embedded gating (subscription + rate limit + monthly order limit via `EmbeddedOrgContext`), `scalars().first()` fix for multi-org users
+- ❌ Storefront widget delivery (Stage 3) — App Proxy + HMAC verification + Theme App Extension (Liquid + JS)
 
 ### 4. Shopify App Store Submission
 - ❌ App listing: description, screenshots, demo video
@@ -159,8 +161,9 @@
 5. ✅ **`shopify.app.toml` configuration** — DONE. Dispatcher endpoint, app/uninstalled handler, all topics configured.
 
 ### 🟡 Medium Priority — Required for Shopify App Store
-6. **Shopify App Bridge integration** — apps must render inside Shopify Admin as an iframe.
-7. **Embedded dashboard pages** — connection status, settings, widget preview, analytics, embed codes inside Shopify Admin.
+6. ✅ **Shopify App Bridge integration** — DONE. CDN-loaded App Bridge + Polaris, session token auth, Token Exchange API, auto-provisioning.
+7. ✅ **Embedded dashboard pages** — DONE. 5 pages (dashboard, settings, recommendations, components, billing). 16 embedded endpoints. Security gating.
+7b. **Storefront widget delivery (Stage 3)** — App Proxy config, HMAC verification, Theme App Extension (Liquid + JS) for live storefront rendering.
 8. **App Store submission** — listing, description, screenshots, demo video, submit for review (2-4 weeks).
 
 ### 🟢 Low Priority — Future Expansions

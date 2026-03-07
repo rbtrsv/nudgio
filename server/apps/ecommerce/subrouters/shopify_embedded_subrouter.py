@@ -71,6 +71,11 @@ from ..utils.shopify_session_utils import (
     auto_provision_shopify_merchant,
     get_shopify_connection,
 )
+from ..utils.dependency_utils import (
+    require_embedded_active_subscription,
+    enforce_embedded_rate_limit,
+    enforce_embedded_monthly_order_limit,
+)
 from .components_subrouter import generate_recommendation_html, get_default_shop_urls
 
 logger = logging.getLogger(__name__)
@@ -115,6 +120,26 @@ class EmbeddedSimilarRequest(BaseModel):
 # ==========================================
 
 router = APIRouter(prefix="/shopify/embedded", tags=["Shopify Embedded"])
+
+# Gated sub-router for settings endpoints — subscription + rate limit.
+# Same pattern as router.py gated vs ungated split.
+_gated = APIRouter(
+    dependencies=[
+        Depends(require_embedded_active_subscription),
+        Depends(enforce_embedded_rate_limit),
+    ]
+)
+
+# Gated sub-router for recommendation + component endpoints —
+# subscription + rate limit + monthly order limit.
+# Same as standalone: recommendations/components are metered by monthly order count.
+_gated_recs = APIRouter(
+    dependencies=[
+        Depends(require_embedded_active_subscription),
+        Depends(enforce_embedded_rate_limit),
+        Depends(enforce_embedded_monthly_order_limit),
+    ]
+)
 
 
 # ==========================================
@@ -342,7 +367,7 @@ async def get_dashboard(
 # GET /settings — Get Recommendation Settings
 # ==========================================
 
-@router.get("/settings", response_model=RecommendationSettingsResponse)
+@_gated.get("/settings", response_model=RecommendationSettingsResponse)
 async def get_settings(
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
@@ -402,7 +427,7 @@ async def get_settings(
 # PUT /settings — Create/Update Settings
 # ==========================================
 
-@router.put("/settings", response_model=RecommendationSettingsResponse)
+@_gated.put("/settings", response_model=RecommendationSettingsResponse)
 async def update_settings(
     payload: RecommendationSettingsCreate,
     connection: EcommerceConnection = Depends(get_shopify_connection),
@@ -476,7 +501,7 @@ async def update_settings(
 # POST /settings/reset — Reset to Defaults
 # ==========================================
 
-@router.post("/settings/reset", response_model=MessageResponse)
+@_gated.post("/settings/reset", response_model=MessageResponse)
 async def reset_settings(
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
@@ -519,7 +544,7 @@ async def reset_settings(
 # POST /recommendations/bestsellers
 # ==========================================
 
-@router.post("/recommendations/bestsellers", response_model=RecommendationResponse)
+@_gated_recs.post("/recommendations/bestsellers", response_model=RecommendationResponse)
 async def get_bestsellers(
     payload: EmbeddedBestsellerRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
@@ -580,7 +605,7 @@ async def get_bestsellers(
 # POST /recommendations/cross-sell
 # ==========================================
 
-@router.post("/recommendations/cross-sell", response_model=RecommendationResponse)
+@_gated_recs.post("/recommendations/cross-sell", response_model=RecommendationResponse)
 async def get_cross_sell(
     payload: EmbeddedCrossSellRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
@@ -642,7 +667,7 @@ async def get_cross_sell(
 # POST /recommendations/upsell
 # ==========================================
 
-@router.post("/recommendations/upsell", response_model=RecommendationResponse)
+@_gated_recs.post("/recommendations/upsell", response_model=RecommendationResponse)
 async def get_upsell(
     payload: EmbeddedUpsellRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
@@ -704,7 +729,7 @@ async def get_upsell(
 # POST /recommendations/similar
 # ==========================================
 
-@router.post("/recommendations/similar", response_model=RecommendationResponse)
+@_gated_recs.post("/recommendations/similar", response_model=RecommendationResponse)
 async def get_similar_products(
     payload: EmbeddedSimilarRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
@@ -765,7 +790,7 @@ async def get_similar_products(
 # GET /components/bestsellers — HTML Preview
 # ==========================================
 
-@router.get("/components/bestsellers", response_class=HTMLResponse)
+@_gated_recs.get("/components/bestsellers", response_class=HTMLResponse)
 async def get_bestsellers_component(
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
@@ -845,7 +870,7 @@ async def get_bestsellers_component(
 # GET /components/cross-sell — HTML Preview
 # ==========================================
 
-@router.get("/components/cross-sell", response_class=HTMLResponse)
+@_gated_recs.get("/components/cross-sell", response_class=HTMLResponse)
 async def get_cross_sell_component(
     product_id: str = Query(..., description="Product ID for cross-sell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
@@ -913,7 +938,7 @@ async def get_cross_sell_component(
 # GET /components/upsell — HTML Preview
 # ==========================================
 
-@router.get("/components/upsell", response_class=HTMLResponse)
+@_gated_recs.get("/components/upsell", response_class=HTMLResponse)
 async def get_upsell_component(
     product_id: str = Query(..., description="Product ID for upsell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
@@ -981,7 +1006,7 @@ async def get_upsell_component(
 # GET /components/similar — HTML Preview
 # ==========================================
 
-@router.get("/components/similar", response_class=HTMLResponse)
+@_gated_recs.get("/components/similar", response_class=HTMLResponse)
 async def get_similar_component(
     product_id: str = Query(..., description="Product ID for similar product recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
@@ -1277,3 +1302,14 @@ async def billing_status(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+# ==========================================
+# Mount Gated Sub-Routers
+# ==========================================
+
+# Settings — subscription + rate limit
+router.include_router(_gated)
+
+# Recommendations + Components — subscription + rate limit + monthly order limit
+router.include_router(_gated_recs)
