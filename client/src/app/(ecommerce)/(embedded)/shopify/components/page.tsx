@@ -1,0 +1,315 @@
+/**
+ * Shopify Embedded App — Components Page
+ *
+ * Polaris web component version of (standalone)/components/page.tsx.
+ * Runs inside the Shopify Admin iframe.
+ *
+ * Widget type selector + configuration inputs + generate button.
+ * Live preview via iframe (srcdoc) — NOT dangerouslySetInnerHTML
+ * (Polaris shadow DOM may interfere with widget styles).
+ *
+ * Preview only — no embed code section.
+ * Embed code / storefront delivery is deferred to Stage 3
+ * (requires App Proxy + HMAC verification + Theme App Extension).
+ *
+ * No connection selector — connection is auto-resolved from Shopify session token.
+ *
+ * Backend: /server/apps/ecommerce/subrouters/shopify_embedded_subrouter.py
+ * - GET /shopify/embedded/components/bestsellers
+ * - GET /shopify/embedded/components/cross-sell
+ * - GET /shopify/embedded/components/upsell
+ * - GET /shopify/embedded/components/similar
+ */
+
+'use client';
+
+import { useState } from 'react';
+import { useEmbedded } from '../layout';
+import { getComponentHtml } from '@/modules/ecommerce/service/shopify-embedded.service';
+
+// ==========================================
+// Types
+// ==========================================
+
+type WidgetType = 'bestsellers' | 'cross-sell' | 'upsell' | 'similar';
+
+// ==========================================
+// Components Page
+// ==========================================
+
+export default function ShopifyComponentsPage() {
+  const { getSessionToken, isLoading: contextLoading, error: contextError } = useEmbedded();
+
+  // Widget config state
+  const [widgetType, setWidgetType] = useState<WidgetType>('bestsellers');
+  const [productId, setProductId] = useState('');
+  const [top, setTop] = useState(4);
+  const [lookbackDays, setLookbackDays] = useState(30);
+  const [method, setMethod] = useState<'volume' | 'value' | 'balanced'>('volume');
+  const [minPriceIncrease, setMinPriceIncrease] = useState(10);
+  const [style, setStyle] = useState<'card' | 'carousel' | 'list'>('card');
+  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [primaryColor, setPrimaryColor] = useState('#3B82F6');
+  const [textColor, setTextColor] = useState('#1F2937');
+  const [bgColor, setBgColor] = useState('#FFFFFF');
+  const [borderRadius, setBorderRadius] = useState('8px');
+
+  // Preview state
+  const [html, setHtml] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Derived flags
+  const needsProductId = widgetType !== 'bestsellers';
+  const needsMethod = widgetType === 'bestsellers';
+  const needsMinPriceIncrease = widgetType === 'upsell';
+
+  // ==========================================
+  // Generate preview
+  // ==========================================
+
+  const handleGenerate = async () => {
+    if (needsProductId && !productId) {
+      setError('Product ID is required');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const token = await getSessionToken();
+      const result = await getComponentHtml(token, widgetType, {
+        product_id: needsProductId ? productId : undefined,
+        top,
+        lookback_days: lookbackDays,
+        method: needsMethod ? method : undefined,
+        min_price_increase_percent: needsMinPriceIncrease ? minPriceIncrease : undefined,
+        style,
+        device,
+        primary_color: primaryColor,
+        text_color: textColor,
+        bg_color: bgColor,
+        border_radius: borderRadius,
+      });
+
+      setHtml(result);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to generate widget';
+      setError(message);
+      console.error('Component generate error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ==========================================
+  // Loading / Error — context level
+  // ==========================================
+
+  if (contextLoading) {
+    return (
+      <s-page heading="Components">
+        <s-section heading="Loading...">
+          <s-spinner />
+        </s-section>
+      </s-page>
+    );
+  }
+
+  if (contextError) {
+    return (
+      <s-page heading="Components">
+        <s-section>
+          <s-banner tone="critical" heading="Error">
+            <s-paragraph>{contextError}</s-paragraph>
+          </s-banner>
+        </s-section>
+      </s-page>
+    );
+  }
+
+  return (
+    <s-page heading="Components">
+
+      {/* Widget Configuration Section */}
+      <s-section heading="Widget Configuration">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+
+            {/* Widget Type */}
+            <s-select
+              label="Widget Type"
+              value={widgetType}
+              onChange={(e) => setWidgetType(e.currentTarget.value as WidgetType)}
+            >
+              <s-option value="bestsellers">Bestsellers</s-option>
+              <s-option value="cross-sell">Cross-Sell</s-option>
+              <s-option value="upsell">Upsell</s-option>
+              <s-option value="similar">Similar Products</s-option>
+            </s-select>
+
+            {/* Product ID — shown for cross-sell, upsell, similar */}
+            {needsProductId && (
+              <s-text-field
+                label="Product ID"
+                value={productId}
+                onChange={(e) => setProductId(e.currentTarget.value)}
+                details="Shopify product ID (e.g. 8234567890)"
+              />
+            )}
+
+            {/* Items to Show */}
+            <s-number-field
+              label="Items to Show"
+              min={1}
+              max={20}
+              step={1}
+              value={String(top)}
+              onChange={(e) => {
+                const val = parseInt(e.currentTarget.value, 10);
+                if (!isNaN(val)) setTop(val);
+              }}
+            />
+
+            {/* Lookback Days */}
+            <s-number-field
+              label="Lookback Days"
+              min={1}
+              max={3650}
+              step={1}
+              value={String(lookbackDays)}
+              onChange={(e) => {
+                const val = parseInt(e.currentTarget.value, 10);
+                if (!isNaN(val)) setLookbackDays(val);
+              }}
+            />
+
+            {/* Method — only for bestsellers */}
+            {needsMethod && (
+              <s-select
+                label="Method"
+                value={method}
+                onChange={(e) => setMethod(e.currentTarget.value as 'volume' | 'value' | 'balanced')}
+              >
+                <s-option value="volume">Volume</s-option>
+                <s-option value="value">Value</s-option>
+                <s-option value="balanced">Balanced</s-option>
+              </s-select>
+            )}
+
+            {/* Min Price Increase — only for upsell */}
+            {needsMinPriceIncrease && (
+              <s-number-field
+                label="Min Price Increase (%)"
+                min={0}
+                max={500}
+                step={1}
+                value={String(minPriceIncrease)}
+                onChange={(e) => {
+                  const val = parseInt(e.currentTarget.value, 10);
+                  if (!isNaN(val)) setMinPriceIncrease(val);
+                }}
+              />
+            )}
+
+            {/* Style */}
+            <s-select
+              label="Style"
+              value={style}
+              onChange={(e) => setStyle(e.currentTarget.value as 'card' | 'carousel' | 'list')}
+            >
+              <s-option value="card">Card</s-option>
+              <s-option value="carousel">Carousel</s-option>
+              <s-option value="list">List</s-option>
+            </s-select>
+
+            {/* Device */}
+            <s-select
+              label="Device"
+              value={device}
+              onChange={(e) => setDevice(e.currentTarget.value as 'desktop' | 'mobile')}
+            >
+              <s-option value="desktop">Desktop</s-option>
+              <s-option value="mobile">Mobile</s-option>
+            </s-select>
+
+            {/* Colors */}
+            <s-text-field
+              label="Primary Color"
+              value={primaryColor}
+              onChange={(e) => setPrimaryColor(e.currentTarget.value)}
+              details="Hex color code (e.g. #3B82F6)"
+            />
+
+            <s-text-field
+              label="Text Color"
+              value={textColor}
+              onChange={(e) => setTextColor(e.currentTarget.value)}
+              details="Hex color code (e.g. #1F2937)"
+            />
+
+            <s-text-field
+              label="Background Color"
+              value={bgColor}
+              onChange={(e) => setBgColor(e.currentTarget.value)}
+              details="Hex color code (e.g. #FFFFFF)"
+            />
+
+            <s-text-field
+              label="Border Radius"
+              value={borderRadius}
+              onChange={(e) => setBorderRadius(e.currentTarget.value)}
+              details="CSS value (e.g. 8px)"
+            />
+
+            {/* Generate Button */}
+            <s-button
+              variant="primary"
+              onClick={handleGenerate}
+              disabled={isLoading || (needsProductId && !productId) || undefined}
+            >
+              {isLoading ? 'Generating...' : 'Generate Preview'}
+            </s-button>
+
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Error Banner */}
+      {error && (
+        <s-section>
+          <s-banner tone="critical" heading="Error">
+            <s-paragraph>{error}</s-paragraph>
+          </s-banner>
+        </s-section>
+      )}
+
+      {/* Live Preview — rendered in iframe to isolate widget styles */}
+      {html && (
+        <s-section heading="Live Preview">
+          <s-box padding="base" borderWidth="base" borderRadius="base">
+            <iframe
+              srcDoc={html}
+              style={{
+                width: '100%',
+                minHeight: '400px',
+                border: 'none',
+              }}
+              title="Widget Preview"
+            />
+          </s-box>
+
+          {/* Stage 3 info banner */}
+          <s-banner tone="info" heading="Storefront Delivery">
+            <s-paragraph>
+              To display this widget on your storefront, enable the Nudgio theme extension
+              in your Shopify theme editor. Storefront delivery will be available in a future update.
+            </s-paragraph>
+          </s-banner>
+        </s-section>
+      )}
+
+    </s-page>
+  );
+}

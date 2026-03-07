@@ -175,6 +175,7 @@ async def billing_callback(
     connection_id: int = Query(..., description="Ecommerce connection ID"),
     charge_id: int = Query(..., description="Shopify charge ID appended by Shopify"),
     shop: str = Query(default=None, description="Shop domain appended by Shopify"),
+    embedded: bool = Query(default=False, description="Whether this billing flow was initiated from the embedded app"),
     db: AsyncSession = Depends(get_session),
 ):
     """
@@ -198,6 +199,10 @@ async def billing_callback(
     8. Redirect to frontend with result query param
     """
     try:
+        # Redirect base path depends on whether this billing flow was initiated
+        # from the embedded app (Polaris UI inside Shopify Admin) or standalone (shadcn UI)
+        redirect_base = f"{settings.FRONTEND_URL}/shopify/billing" if embedded else f"{settings.FRONTEND_URL}/connections"
+
         # Step 1: Get connection (no ownership check — this is a redirect)
         result = await db.execute(
             select(EcommerceConnection).where(
@@ -211,7 +216,7 @@ async def billing_callback(
         if not connection:
             logger.warning("Shopify billing callback: connection_id=%s not found", connection_id)
             return RedirectResponse(
-                url=f"{settings.FRONTEND_URL}/connections?shopify_billing=error",
+                url=f"{redirect_base}?shopify_billing=error",
                 status_code=302,
             )
 
@@ -222,7 +227,7 @@ async def billing_callback(
                 connection.store_url, shop,
             )
             return RedirectResponse(
-                url=f"{settings.FRONTEND_URL}/connections?shopify_billing=error",
+                url=f"{redirect_base}?shopify_billing=error",
                 status_code=302,
             )
 
@@ -240,7 +245,7 @@ async def billing_callback(
         if not billing:
             logger.warning("Shopify billing callback: no PENDING record for connection_id=%s", connection_id)
             return RedirectResponse(
-                url=f"{settings.FRONTEND_URL}/connections?shopify_billing=error",
+                url=f"{redirect_base}?shopify_billing=error",
                 status_code=302,
             )
 
@@ -254,7 +259,7 @@ async def billing_callback(
                 charge_id, stored_gid,
             )
             return RedirectResponse(
-                url=f"{settings.FRONTEND_URL}/connections?shopify_billing=error",
+                url=f"{redirect_base}?shopify_billing=error",
                 status_code=302,
             )
 
@@ -286,7 +291,7 @@ async def billing_callback(
             )
 
             return RedirectResponse(
-                url=f"{settings.FRONTEND_URL}/connections?shopify_billing=success&plan={billing.plan_name}",
+                url=f"{redirect_base}?shopify_billing=success&plan={billing.plan_name}",
                 status_code=302,
             )
         else:
@@ -301,15 +306,16 @@ async def billing_callback(
             )
 
             return RedirectResponse(
-                url=f"{settings.FRONTEND_URL}/connections?shopify_billing=declined",
+                url=f"{redirect_base}?shopify_billing=declined",
                 status_code=302,
             )
 
     except Exception as e:
         await db.rollback()
         logger.error("Shopify billing callback error: %s", str(e))
+        error_base = f"{settings.FRONTEND_URL}/shopify/billing" if embedded else f"{settings.FRONTEND_URL}/connections"
         return RedirectResponse(
-            url=f"{settings.FRONTEND_URL}/connections?shopify_billing=error",
+            url=f"{error_base}?shopify_billing=error",
             status_code=302,
         )
 

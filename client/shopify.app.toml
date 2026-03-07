@@ -4,7 +4,7 @@
 
 client_id = "37b4b12ed793e4127ba69f5e8d5f5922"
 name = "Nudgio"
-application_url = "https://client.nudgio.tech"
+application_url = "https://client.nudgio.tech/shopify"
 embedded = true
 
 [access_scopes]

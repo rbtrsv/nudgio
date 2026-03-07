@@ -36,14 +36,18 @@ from .subrouters.shopify_webhooks_subrouter import router as shopify_webhooks_ro
 # Shopify billing
 from .subrouters.shopify_billing_subrouter import router as shopify_billing_router
 
+# Shopify embedded app API (session token auth)
+from .subrouters.shopify_embedded_subrouter import router as shopify_embedded_router
+
 
 router = APIRouter(prefix="/ecommerce")
 
-# Ungated — auth callbacks + platform webhooks + billing (no user auth needed for callbacks)
+# Ungated — auth callbacks + platform webhooks + billing + embedded (session token auth handled internally)
 router.include_router(shopify_oauth_router)
 router.include_router(woocommerce_auth_router)
 router.include_router(shopify_webhooks_router)
 router.include_router(shopify_billing_router)  # Mixed gating handled internally
+router.include_router(shopify_embedded_router)  # Session token auth handled internally
 
 # Gated — everything else requires active service
 # See require_active_subscription in dependency_utils.py for details.
