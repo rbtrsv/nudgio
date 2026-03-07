@@ -200,13 +200,8 @@ export default function ShopifyEmbeddedLayout({
 
   return (
     <>
-      {/* App Bridge — iframe-Admin communication (session tokens, navigation, toast) */}
-      <Script
-        src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
-        strategy="beforeInteractive"
-      />
-
-      {/* Polaris web components — Shopify UI design system (s-page, s-card, etc.) */}
+      {/* Polaris web components — Shopify UI design system (s-page, s-card, etc.)
+          App Bridge is loaded in root layout.tsx <head> (must be first sync script). */}
       <Script
         src="https://cdn.shopify.com/shopifycloud/polaris.js"
         strategy="beforeInteractive"
