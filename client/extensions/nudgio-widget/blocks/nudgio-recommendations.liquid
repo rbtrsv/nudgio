@@ -35,17 +35,27 @@
 
 {% assign iframe_src = proxy_base | append: params %}
 
-<div class="nudgio-recommendations" {{ block.shopify_attributes }}>
-  <iframe
-    src="{{ iframe_src }}"
-    style="width: 100%; border: none; min-height: 200px; overflow: hidden;"
-    title="Nudgio Recommendations"
-    loading="lazy"
-    id="nudgio-widget-{{ block.id }}"
-  ></iframe>
-</div>
+{% comment %} Guard: product-specific widget types require a product page context {% endcomment %}
+{% if block.settings.widget_type != "bestsellers" and product == nil %}
+  <div class="nudgio-recommendations" {{ block.shopify_attributes }}>
+    <p style="padding: 16px; color: #6b7280; font-size: 14px; text-align: center;">
+      This widget type requires a product page. Move this block to a product page template,
+      or switch the widget type to "Bestsellers" for non-product pages.
+    </p>
+  </div>
+{% else %}
+  <div class="nudgio-recommendations" {{ block.shopify_attributes }}>
+    <iframe
+      src="{{ iframe_src }}"
+      style="width: 100%; border: none; min-height: 200px; overflow: hidden;"
+      title="Nudgio Recommendations"
+      loading="lazy"
+      id="nudgio-widget-{{ block.id }}"
+    ></iframe>
+  </div>
 
-<script src="{{ 'nudgio-widget.js' | asset_url }}" defer></script>
+  <script src="{{ 'nudgio-widget.js' | asset_url }}" defer></script>
+{% endif %}
 
 {% schema %}
 {

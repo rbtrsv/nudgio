@@ -23,9 +23,13 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useEmbedded } from '../layout';
-import { getComponentHtml } from '@/modules/ecommerce/service/shopify-embedded.service';
+import {
+  getComponentHtml,
+  getProducts,
+  type EmbeddedProduct,
+} from '@/modules/ecommerce/service/shopify-embedded.service';
 
 // ==========================================
 // Types
@@ -54,6 +58,11 @@ export default function ShopifyComponentsPage() {
   const [bgColor, setBgColor] = useState('#FFFFFF');
   const [borderRadius, setBorderRadius] = useState('8px');
 
+  // Product dropdown state
+  const [products, setProducts] = useState<EmbeddedProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsFetched, setProductsFetched] = useState(false);
+
   // Preview state
   const [html, setHtml] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +72,32 @@ export default function ShopifyComponentsPage() {
   const needsProductId = widgetType !== 'bestsellers';
   const needsMethod = widgetType === 'bestsellers';
   const needsMinPriceIncrease = widgetType === 'upsell';
+
+  // ==========================================
+  // Fetch products for dropdown (once, when first needed)
+  // ==========================================
+
+  const fetchProducts = useCallback(async () => {
+    if (productsFetched || productsLoading) return;
+    try {
+      setProductsLoading(true);
+      const token = await getSessionToken();
+      const result = await getProducts(token);
+      setProducts(result.products);
+      setProductsFetched(true);
+    } catch (err) {
+      console.error('Failed to fetch products:', err);
+    } finally {
+      setProductsLoading(false);
+    }
+  }, [productsFetched, productsLoading, getSessionToken]);
+
+  // Fetch products when a product-specific widget type is selected
+  useEffect(() => {
+    if (needsProductId && !productsFetched) {
+      fetchProducts();
+    }
+  }, [needsProductId, productsFetched, fetchProducts]);
 
   // ==========================================
   // Generate preview
@@ -152,14 +187,32 @@ export default function ShopifyComponentsPage() {
               <s-option value="similar">Similar Products</s-option>
             </s-select>
 
-            {/* Product ID — shown for cross-sell, upsell, similar */}
+            {/* Product dropdown — shown for cross-sell, upsell, similar */}
             {needsProductId && (
-              <s-text-field
-                label="Product ID"
-                value={productId}
-                onChange={(e) => setProductId(e.currentTarget.value)}
-                details="Shopify product ID (e.g. 8234567890)"
-              />
+              <>
+                <s-banner tone="info">
+                  <s-paragraph>
+                    On your storefront, this widget type automatically detects the current product
+                    via Theme Editor. The dropdown below is for preview purposes only.
+                  </s-paragraph>
+                </s-banner>
+
+                <s-select
+                  label="Product"
+                  value={productId}
+                  onChange={(e) => setProductId(e.currentTarget.value)}
+                  disabled={productsLoading || undefined}
+                >
+                  <s-option value="">
+                    {productsLoading ? 'Loading products...' : 'Select a product'}
+                  </s-option>
+                  {products.map((p) => (
+                    <s-option key={p.product_id} value={p.product_id}>
+                      {p.title}
+                    </s-option>
+                  ))}
+                </s-select>
+              </>
             )}
 
             {/* Items to Show */}

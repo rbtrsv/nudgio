@@ -24,6 +24,9 @@ Stage 2 Endpoints:
 - POST /shopify/embedded/billing/cancel — cancel subscription
 - GET  /shopify/embedded/billing/status — billing status
 
+Product Helpers:
+- GET  /shopify/embedded/products — product list for admin dropdown (ungated)
+
 Stage 3 (future — separate):
 - App Proxy + HMAC verification for storefront widget delivery
 - Theme App Extension (Liquid + JS) for storefront rendering
@@ -357,6 +360,52 @@ async def get_dashboard(
         raise
     except Exception as e:
         logger.error("Embedded dashboard error: %s", str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred: {str(e)}",
+        )
+
+
+# ==========================================
+# GET /products — Product List for Admin Dropdown
+# ==========================================
+
+@router.get("/products")
+async def get_products(
+    connection: EcommerceConnection = Depends(get_shopify_connection),
+):
+    """
+    Get a simplified product list for the admin Components page dropdown.
+
+    Returns product_id, title, and image_url for each active product.
+    On the ungated router — FREE tier merchants can preview widgets too.
+
+    This endpoint:
+    1. Get connection via get_shopify_connection dependency (session token auth)
+    2. Get adapter for the connection
+    3. Fetch products from the store (limit=250)
+    4. Return simplified list: product_id, title, image_url
+    """
+    try:
+        # Step 2–3: Fetch products from store adapter
+        adapter = get_adapter(connection)
+        raw_products = await adapter.get_products(limit=250)
+
+        # Step 4: Return simplified list for dropdown
+        products = [
+            {
+                "product_id": p.get("product_id", ""),
+                "title": p.get("title", ""),
+                "image_url": p.get("image_url", ""),
+            }
+            for p in raw_products
+        ]
+
+        return {"products": products, "count": len(products)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Embedded products error: %s", str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred: {str(e)}",
@@ -1072,6 +1121,11 @@ async def get_similar_component(
 # ==========================================
 # POST /billing/subscribe — Create Subscription
 # ==========================================
+# NOTE: This endpoint uses the Billing API (appSubscriptionCreate).
+# Currently NOT used — app is configured with Managed Pricing in the Partner Dashboard.
+# Managed Pricing handles subscriptions through Shopify's hosted pricing page.
+# Kept here in case we switch back to Manual Pricing (Billing API) in the future.
+# To switch: Partner Dashboard → Distribution → Manage listing → Pricing content → Settings.
 
 @router.post("/billing/subscribe")
 async def billing_subscribe(
@@ -1187,6 +1241,10 @@ async def billing_subscribe(
 # ==========================================
 # POST /billing/cancel — Cancel Subscription
 # ==========================================
+# NOTE: This endpoint uses the Billing API (cancel_shopify_subscription).
+# Currently NOT used — app is configured with Managed Pricing in the Partner Dashboard.
+# With Managed Pricing, merchants cancel through Shopify's interface, not our endpoint.
+# Kept here in case we switch back to Manual Pricing (Billing API) in the future.
 
 @router.post("/billing/cancel")
 async def billing_cancel(

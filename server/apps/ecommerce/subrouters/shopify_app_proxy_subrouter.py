@@ -267,7 +267,7 @@ async def get_bestsellers_widget(
 async def get_cross_sell_widget(
     request: Request,
     shop: str = Query("", description="Shopify store domain (added by Shopify App Proxy)"),
-    product_id: str = Query(..., description="Product ID for cross-sell recommendations"),
+    product_id: str | None = Query(None, description="Product ID for cross-sell recommendations (required — only works on product pages)"),
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
     style: str = Query("card", description="Component style: card, carousel, list"),
@@ -285,15 +285,20 @@ async def get_cross_sell_widget(
     signature in query params. Returns HTML for iframe rendering on storefront.
 
     This endpoint:
-    1. Verify HMAC-SHA256 signature from 'signature' query param
-    2. Look up active Shopify connection by 'shop' domain
-    3. Check entitlement (active subscription or free tier within limits)
-    4. Get RecommendationSettings for shop URL configuration
-    5. Create adapter + engine, check cache or generate cross-sell recommendations
-    6. Generate HTML widget via generate_recommendation_html
-    7. Return HTMLResponse for iframe rendering
+    1. Check product_id is present (only available on product pages)
+    2. Verify HMAC-SHA256 signature from 'signature' query param
+    3. Look up active Shopify connection by 'shop' domain
+    4. Check entitlement (active subscription or free tier within limits)
+    5. Get RecommendationSettings for shop URL configuration
+    6. Create adapter + engine, check cache or generate cross-sell recommendations
+    7. Generate HTML widget via generate_recommendation_html
+    8. Return HTMLResponse for iframe rendering
     """
     try:
+        # Step 0: product_id required — only available on product pages
+        if not product_id:
+            return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
+
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
             logger.error("App Proxy: SHOPIFY_CLIENT_SECRET not configured")
@@ -371,7 +376,7 @@ async def get_cross_sell_widget(
 async def get_upsell_widget(
     request: Request,
     shop: str = Query("", description="Shopify store domain (added by Shopify App Proxy)"),
-    product_id: str = Query(..., description="Product ID for upsell recommendations"),
+    product_id: str | None = Query(None, description="Product ID for upsell recommendations (required — only works on product pages)"),
     top: int = Query(4, description="Number of recommendations to show"),
     min_price_increase_percent: int = Query(10, description="Minimum price increase percentage for upsell candidates"),
     style: str = Query("card", description="Component style: card, carousel, list"),
@@ -389,15 +394,20 @@ async def get_upsell_widget(
     signature in query params. Returns HTML for iframe rendering on storefront.
 
     This endpoint:
-    1. Verify HMAC-SHA256 signature from 'signature' query param
-    2. Look up active Shopify connection by 'shop' domain
-    3. Check entitlement (active subscription or free tier within limits)
-    4. Get RecommendationSettings for shop URL configuration
-    5. Create adapter + engine, check cache or generate upsell recommendations
-    6. Generate HTML widget via generate_recommendation_html
-    7. Return HTMLResponse for iframe rendering
+    1. Check product_id is present (only available on product pages)
+    2. Verify HMAC-SHA256 signature from 'signature' query param
+    3. Look up active Shopify connection by 'shop' domain
+    4. Check entitlement (active subscription or free tier within limits)
+    5. Get RecommendationSettings for shop URL configuration
+    6. Create adapter + engine, check cache or generate upsell recommendations
+    7. Generate HTML widget via generate_recommendation_html
+    8. Return HTMLResponse for iframe rendering
     """
     try:
+        # Step 0: product_id required — only available on product pages
+        if not product_id:
+            return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
+
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
             logger.error("App Proxy: SHOPIFY_CLIENT_SECRET not configured")
@@ -475,7 +485,7 @@ async def get_upsell_widget(
 async def get_similar_widget(
     request: Request,
     shop: str = Query("", description="Shopify store domain (added by Shopify App Proxy)"),
-    product_id: str = Query(..., description="Product ID for similar product recommendations"),
+    product_id: str | None = Query(None, description="Product ID for similar product recommendations (required — only works on product pages)"),
     top: int = Query(4, description="Number of recommendations to show"),
     style: str = Query("card", description="Component style: card, carousel, list"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
@@ -492,15 +502,20 @@ async def get_similar_widget(
     signature in query params. Returns HTML for iframe rendering on storefront.
 
     This endpoint:
-    1. Verify HMAC-SHA256 signature from 'signature' query param
-    2. Look up active Shopify connection by 'shop' domain
-    3. Check entitlement (active subscription or free tier within limits)
-    4. Get RecommendationSettings for shop URL configuration
-    5. Create adapter + engine, check cache or generate similar product recommendations
-    6. Generate HTML widget via generate_recommendation_html
-    7. Return HTMLResponse for iframe rendering
+    1. Check product_id is present (only available on product pages)
+    2. Verify HMAC-SHA256 signature from 'signature' query param
+    3. Look up active Shopify connection by 'shop' domain
+    4. Check entitlement (active subscription or free tier within limits)
+    5. Get RecommendationSettings for shop URL configuration
+    6. Create adapter + engine, check cache or generate similar product recommendations
+    7. Generate HTML widget via generate_recommendation_html
+    8. Return HTMLResponse for iframe rendering
     """
     try:
+        # Step 0: product_id required — only available on product pages
+        if not product_id:
+            return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
+
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
             logger.error("App Proxy: SHOPIFY_CLIENT_SECRET not configured")

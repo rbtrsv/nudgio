@@ -55,7 +55,7 @@ const TermsOfService: React.FC = () => {
               3.1 Authorization
             </h3>
             <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
-              By connecting your ecommerce store to Nudgio, you represent and warrant that you have the authority to grant us access to your store&apos;s product and order data through the APIs or database credentials you provide. You are solely responsible for ensuring that your use of Nudgio complies with the terms of service of your ecommerce platform (Shopify, WooCommerce, or Magento).
+              By connecting your ecommerce store to Nudgio, you represent and warrant that you have the authority to grant us access to your store&apos;s product and order data through the APIs or database credentials you provide. You are solely responsible for ensuring that your use of Nudgio complies with the terms of service of your ecommerce platform (Shopify, WooCommerce, or Magento). For Shopify merchants, your use of Nudgio is also subject to Shopify&apos;s API Terms of Service and Partner Program Agreement.
             </p>
 
             <h3 className="text-xl font-medium my-2 text-zinc-900 dark:text-zinc-100">
@@ -91,7 +91,7 @@ const TermsOfService: React.FC = () => {
               4.2 Payment
             </h3>
             <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
-              Paid subscriptions are billed monthly through Stripe. By subscribing to a paid plan, you authorize us to charge the payment method on file at the beginning of each billing cycle. All fees are non-refundable except as required by applicable law.
+              For merchants who install Nudgio from the Shopify App Store, subscription billing is processed through Shopify&apos;s Billing API and charges appear in your Shopify admin. For all other platforms (WooCommerce, Magento), paid subscriptions are billed monthly through Stripe. By subscribing to a paid plan, you authorize us to charge the applicable payment method at the beginning of each billing cycle. All fees are non-refundable except as required by applicable law.
             </p>
 
             <h3 className="text-xl font-medium my-2 text-zinc-900 dark:text-zinc-100">

@@ -59,6 +59,13 @@ const PrivacyPolicy: React.FC = () => {
               <li><strong>Location Data</strong>: General geographic location inferred from your IP address.</li>
               <li><strong>Analytics Data</strong>: Recommendation widget interactions (impressions, clicks) tracked for performance analytics.</li>
             </ul>
+
+            <h3 className="text-xl font-medium my-2 text-zinc-900 dark:text-zinc-100">
+              1.4 Shopify Session Data
+            </h3>
+            <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
+              When you install Nudgio from the Shopify App Store, our embedded app processes Shopify session tokens (JSON Web Tokens) that contain your shop domain, user ID, and locale. These tokens are used solely for authentication within the Shopify Admin and are not stored on our servers. We also exchange session tokens for offline access tokens through Shopify&apos;s Token Exchange API, which are encrypted and stored to maintain your store connection.
+            </p>
           </div>
         </div>
 
@@ -113,7 +120,8 @@ const PrivacyPolicy: React.FC = () => {
           </h2>
           <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-4">We use third-party services to help us operate our platform, including but not limited to:</p>
           <ul className="list-disc pl-6 space-y-2 mb-4 font-normal max-sm:text-sm sm:text-base dark:text-white text-black">
-            <li><strong>Stripe</strong>: Handles subscription billing and payment processing. Stripe collects and processes payment information under its own privacy policy.</li>
+            <li><strong>Shopify Billing API</strong>: For merchants who install Nudgio from the Shopify App Store, subscription billing is processed through Shopify&apos;s Billing API. Charges appear in your Shopify admin and are subject to Shopify&apos;s terms and privacy policy.</li>
+            <li><strong>Stripe</strong>: For merchants on WooCommerce and Magento, subscription billing and payment processing are handled by Stripe. Stripe collects and processes payment information under its own privacy policy.</li>
             <li><strong>Vercel</strong>: Hosts our website and provides anonymous analytics. Subject to Vercel&apos;s privacy policy.</li>
             <li><strong>Ecommerce Platforms</strong>: Shopify, WooCommerce, and Magento APIs are accessed using credentials you provide to fetch product and order data necessary for our service.</li>
           </ul>
@@ -165,6 +173,18 @@ const PrivacyPolicy: React.FC = () => {
             <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
               You can disconnect your ecommerce store at any time through the Nudgio dashboard. When you delete a connection, all associated API credentials are permanently removed from our systems. Cached recommendation data is also cleared.
             </p>
+
+            <h3 className="text-xl font-medium my-2 text-zinc-900 dark:text-zinc-100">
+              7.3 Shopify GDPR Compliance Requests
+            </h3>
+            <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-4">
+              For merchants using the Shopify App Store, we support Shopify&apos;s mandatory GDPR compliance webhooks:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 mb-6 font-normal max-sm:text-sm sm:text-base dark:text-white text-black">
+              <li><strong>Customer Data Request</strong>: When a customer requests their data, Shopify notifies us and we provide all personal data we hold for that customer within 30 days.</li>
+              <li><strong>Customer Data Erasure</strong>: When a customer requests deletion of their data, we remove all personal data associated with that customer from our systems within 30 days.</li>
+              <li><strong>Shop Data Erasure</strong>: When a merchant uninstalls Nudgio, we delete all store data (products, orders, API credentials, recommendation settings) associated with that shop within 30 days.</li>
+            </ul>
           </div>
         </div>
 
@@ -197,10 +217,28 @@ const PrivacyPolicy: React.FC = () => {
 
         <div className="space-y-6">
           <h2 className="text-3xl font-semibold my-3 text-zinc-900 dark:text-zinc-100">
-            11. Changes to This Privacy Policy
+            11. Data Controller
+          </h2>
+          <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
+            The data controller responsible for processing your personal data is Buraro Technologies, located in Bucharest, Romania. For any questions or requests regarding data protection, please contact us at contact@nudgio.tech.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <h2 className="text-3xl font-semibold my-3 text-zinc-900 dark:text-zinc-100">
+            12. Changes to This Privacy Policy
           </h2>
           <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
             We may update this Privacy Policy from time to time. When we make changes, we will revise the effective date at the top of the policy and post the updated policy on our website. We encourage you to review this policy regularly.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          <h2 className="text-3xl font-semibold my-3 text-zinc-900 dark:text-zinc-100">
+            13. Contact
+          </h2>
+          <p className="font-normal max-sm:text-sm sm:text-base dark:text-white text-black mb-6">
+            If you have any questions about this Privacy Policy or our data practices, please contact us at contact@nudgio.tech.
           </p>
         </div>
 

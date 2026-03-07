@@ -27,6 +27,9 @@
  * - POST /billing/cancel — cancel subscription
  * - GET  /billing/status — billing status
  *
+ * Product Helpers:
+ * - GET  /products — product list for admin dropdown (ungated)
+ *
  * Stage 3 (future — separate):
  * - App Proxy + Theme App Extension for storefront widget delivery
  */
@@ -62,6 +65,8 @@ const EMBEDDED_ENDPOINTS = {
   BILLING_SUBSCRIBE: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/subscribe`,
   BILLING_CANCEL: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/cancel`,
   BILLING_STATUS: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/status`,
+  // Product Helpers (ungated)
+  PRODUCTS: `${API_BASE_URL}/ecommerce/shopify/embedded/products`,
 };
 
 // ==========================================
@@ -236,6 +241,23 @@ export interface EmbeddedComponentParams {
 export interface EmbeddedBillingSubscribeResponse {
   success: boolean;
   confirmation_url: string;
+}
+
+// ==========================================
+// Response Types — Products (ungated)
+// ==========================================
+
+/** Single product for admin dropdown — matches backend GET /products item */
+export interface EmbeddedProduct {
+  product_id: string;
+  title: string;
+  image_url: string;
+}
+
+/** Product list response — matches backend GET /products */
+export interface EmbeddedProductsResponse {
+  products: EmbeddedProduct[];
+  count: number;
 }
 
 // ==========================================
@@ -536,6 +558,10 @@ export const getComponentHtml = async (
 /**
  * Create a Shopify app subscription charge.
  *
+ * NOTE: Currently NOT used — app is configured with Managed Pricing in the Partner Dashboard.
+ * With Managed Pricing, merchants subscribe through Shopify's hosted pricing page.
+ * Kept here in case we switch back to Manual Pricing (Billing API) in the future.
+ *
  * Returns a confirmation_url — redirect the merchant to this URL
  * to approve the charge. Use window.open(url, '_top') to exit the iframe.
  *
@@ -556,6 +582,10 @@ export const subscribeBilling = async (
 
 /**
  * Cancel an active Shopify app subscription.
+ *
+ * NOTE: Currently NOT used — app is configured with Managed Pricing in the Partner Dashboard.
+ * With Managed Pricing, merchants cancel through Shopify's interface, not our endpoint.
+ * Kept here in case we switch back to Manual Pricing (Billing API) in the future.
  *
  * @param sessionToken Shopify session token from App Bridge idToken()
  * @returns Success response
@@ -581,6 +611,28 @@ export const getBillingStatus = async (
 ): Promise<EmbeddedBilling> => {
   return embeddedFetch<EmbeddedBilling>(
     EMBEDDED_ENDPOINTS.BILLING_STATUS,
+    sessionToken,
+    { method: 'GET' },
+  );
+};
+
+// ==========================================
+// Product Helpers (ungated)
+// ==========================================
+
+/**
+ * Get a simplified product list for the admin Components page dropdown.
+ *
+ * On the ungated router — FREE tier merchants can preview widgets too.
+ *
+ * @param sessionToken Shopify session token from App Bridge idToken()
+ * @returns Product list with product_id, title, image_url
+ */
+export const getProducts = async (
+  sessionToken: string,
+): Promise<EmbeddedProductsResponse> => {
+  return embeddedFetch<EmbeddedProductsResponse>(
+    EMBEDDED_ENDPOINTS.PRODUCTS,
     sessionToken,
     { method: 'GET' },
   );
