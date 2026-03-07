@@ -81,7 +81,10 @@ class RecommendationEngine:
             for i, (product_id, metrics) in enumerate(sorted_products[:limit]):
                 if product_id in products_dict:
                     product = products_dict[product_id]
+                    # Shopify adapter returns 'image_url' (string),
+                    # WooCommerce/Magento return 'images' (list) — handle both
                     images = product.get('images', [])
+                    image_url = product.get('image_url', '') or (images[0] if images else '')
                     recommendations.append({
                         'product_id': product_id,
                         'title': product.get('title', ''),
@@ -89,7 +92,7 @@ class RecommendationEngine:
                         'handle': product.get('handle', ''),
                         'vendor': product.get('vendor', ''),
                         'sku': product.get('sku', ''),
-                        'image_url': images[0] if images else '',
+                        'image_url': image_url,
                         'position': i + 1,
                         'metrics': metrics
                     })
@@ -145,7 +148,10 @@ class RecommendationEngine:
             for i, (pid, count) in enumerate(sorted_cooccur[:limit]):
                 if pid in products_dict:
                     product = products_dict[pid]
+                    # Shopify adapter returns 'image_url' (string),
+                    # WooCommerce/Magento return 'images' (list) — handle both
                     images = product.get('images', [])
+                    image_url = product.get('image_url', '') or (images[0] if images else '')
                     recommendations.append({
                         'product_id': pid,
                         'title': product.get('title', ''),
@@ -153,7 +159,7 @@ class RecommendationEngine:
                         'handle': product.get('handle', ''),
                         'vendor': product.get('vendor', ''),
                         'sku': product.get('sku', ''),
-                        'image_url': images[0] if images else '',
+                        'image_url': image_url,
                         'position': i + 1,
                         'co_occurrence_count': count
                     })
@@ -198,7 +204,10 @@ class RecommendationEngine:
                     product.get('product_type') == base_product.get('product_type')):
                     
                     price_increase = ((current_price - base_price) / base_price) * 100
+                    # Shopify adapter returns 'image_url' (string),
+                    # WooCommerce/Magento return 'images' (list) — handle both
                     images = product.get('images', [])
+                    image_url = product.get('image_url', '') or (images[0] if images else '')
                     upsell_candidates.append({
                         'product_id': str(product['product_id']),
                         'title': product.get('title', ''),
@@ -206,7 +215,7 @@ class RecommendationEngine:
                         'handle': product.get('handle', ''),
                         'vendor': product.get('vendor', ''),
                         'sku': product.get('sku', ''),
-                        'image_url': images[0] if images else '',
+                        'image_url': image_url,
                         'price_increase_percent': round(price_increase, 2)
                     })
             
@@ -259,7 +268,10 @@ class RecommendationEngine:
                         similarity_score += 0.4
                     
                     if similarity_score > 0:
+                        # Shopify adapter returns 'image_url' (string),
+                        # WooCommerce/Magento return 'images' (list) — handle both
                         images = product.get('images', [])
+                        image_url = product.get('image_url', '') or (images[0] if images else '')
                         similar_products.append({
                             'product_id': str(product['product_id']),
                             'title': product.get('title', ''),
@@ -267,7 +279,7 @@ class RecommendationEngine:
                             'handle': product.get('handle', ''),
                             'vendor': product.get('vendor', ''),
                             'sku': product.get('sku', ''),
-                            'image_url': images[0] if images else '',
+                            'image_url': image_url,
                             'similarity_score': similarity_score
                         })
             
