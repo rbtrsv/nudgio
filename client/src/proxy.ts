@@ -19,7 +19,8 @@ const PUBLIC_ROUTES = [
   '/pricing',
   '/logout',  // Allow access to logout page
   '/forgot-password',  // Allow password reset request
-  '/reset-password'    // Allow password reset completion
+  '/reset-password',   // Allow password reset completion
+  '/shopify',          // Embedded app routes use Shopify session token, not JWT cookies
 ];
 
 /**
