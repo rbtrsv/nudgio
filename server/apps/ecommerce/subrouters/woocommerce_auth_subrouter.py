@@ -46,7 +46,7 @@ async def initiate_woocommerce_auth(
             "scope": "read",
             "user_id": str(user.id),
             "return_url": f"{settings.FRONTEND_URL}/connections?wc_connected=true",
-            "callback_url": f"{settings.SERVER_URL}/api/v1/ecommerce/woocommerce/callback",
+            "callback_url": f"{settings.SERVER_URL}/ecommerce/woocommerce/callback",
         }
         auth_url = f"{store_url}/wc-auth/v1/authorize?{urlencode(params)}"
 

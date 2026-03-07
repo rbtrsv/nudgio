@@ -1143,7 +1143,7 @@ async def billing_subscribe(
         # Uses the SAME callback as standalone but passes embedded=true
         # so callback knows to redirect to /shopify/billing instead of /connections
         return_url = (
-            f"{settings.SERVER_URL}/api/v1/ecommerce/shopify/billing/callback"
+            f"{settings.SERVER_URL}/ecommerce/shopify/billing/callback"
             f"?connection_id={connection.id}&embedded=true"
         )
 

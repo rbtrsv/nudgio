@@ -127,7 +127,7 @@ async def subscribe(
             )
 
         # Step 5: Create Shopify subscription charge
-        return_url = f"{settings.SERVER_URL}/api/v1/ecommerce/shopify/billing/callback?connection_id={connection_id}"
+        return_url = f"{settings.SERVER_URL}/ecommerce/shopify/billing/callback?connection_id={connection_id}"
 
         subscription_result = await create_shopify_subscription(
             store_domain=connection.store_url,

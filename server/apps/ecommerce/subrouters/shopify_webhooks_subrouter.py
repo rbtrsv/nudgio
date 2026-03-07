@@ -242,7 +242,7 @@ async def app_subscriptions_update(
 
     Register in Shopify Partner Dashboard:
         topic: APP_SUBSCRIPTIONS_UPDATE
-        URL: https://server.nudgio.tech/api/v1/ecommerce/shopify/webhooks/app_subscriptions/update
+        URL: https://server.nudgio.tech/ecommerce/shopify/webhooks/app_subscriptions/update
     """
     # Step 1: Verify HMAC signature (raises 401 if invalid)
     body = await _verify_webhook_hmac(request)
