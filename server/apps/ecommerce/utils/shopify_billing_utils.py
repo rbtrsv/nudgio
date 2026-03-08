@@ -7,8 +7,21 @@ Standalone functions — not tied to ShopifyAdapter (which handles product/order
 Plan pricing constants are business logic (not config) — they map directly to the
 TIER_ORDER in subscription_utils.py and must match Shopify Partner Dashboard charges.
 
-Webhook handler processes APP_SUBSCRIPTIONS_UPDATE events from Shopify,
-updating ShopifyBilling records to reflect payment status changes.
+Billing Operations:
+    - create_shopify_subscription(store, token, plan, return_url, test) → confirmation_url + GID
+    - cancel_shopify_subscription(store, token, gid) → True
+    - get_shopify_subscription_status(store, token, gid) → subscription details
+
+Webhook:
+    - handle_shopify_billing_webhook(payload, shop, db) — processes APP_SUBSCRIPTIONS_UPDATE,
+      updates ShopifyBilling status (ACTIVE/PAST_DUE/CANCELED). Idempotent.
+
+Pricing changes (Shopify Dashboard):
+    Prices are managed via Shopify Managed Pricing (Partner Dashboard → Pricing).
+    SHOPIFY_PLAN_PRICES below are NOT used — kept only for manual pricing fallback.
+    When changing plans in Shopify Dashboard, keep in sync:
+    - map_shopify_plan_to_tier() — maps Shopify plan name ("Pro") to tier ("PRO")
+    - TIER_LIMITS in subscription_utils.py — defines what each tier gets
 """
 
 import logging

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
+from datetime import datetime, timezone
 
 from core.db import get_session
 from apps.accounts.models import User
@@ -80,7 +80,7 @@ async def get_bestsellers(
                 count=len(recommendations),
                 method=payload.method.value,
                 lookback_days=payload.lookback_days,
-                generated_at=datetime.utcnow().isoformat(),
+                generated_at=datetime.now(timezone.utc).isoformat(),
             ),
         )
     except HTTPException:
@@ -140,7 +140,7 @@ async def get_cross_sell(
                 method="cross_sell",
                 base_product_id=payload.product_id,
                 lookback_days=payload.lookback_days,
-                generated_at=datetime.utcnow().isoformat(),
+                generated_at=datetime.now(timezone.utc).isoformat(),
             ),
         )
     except HTTPException:
@@ -200,7 +200,7 @@ async def get_upsell(
                 method="upsell",
                 base_product_id=payload.product_id,
                 lookback_days=payload.lookback_days,
-                generated_at=datetime.utcnow().isoformat(),
+                generated_at=datetime.now(timezone.utc).isoformat(),
             ),
         )
     except HTTPException:
@@ -259,7 +259,7 @@ async def get_similar_products(
                 method="similar",
                 base_product_id=payload.product_id,
                 lookback_days=payload.lookback_days,
-                generated_at=datetime.utcnow().isoformat(),
+                generated_at=datetime.now(timezone.utc).isoformat(),
             ),
         )
     except HTTPException:

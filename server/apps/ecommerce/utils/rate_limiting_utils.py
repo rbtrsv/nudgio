@@ -9,6 +9,10 @@ Two backends:
 - "dragonfly" — DragonflyDB/Redis sorted sets (production, multi-worker)
 
 Switch backend by changing RATE_LIMIT_BACKEND constant below.
+
+Public API:
+    - check_rate_limit(org_id, tier) — checks per-minute + per-hour limits, raises 429
+    - rate_limiter — global backend instance, also used by widget_auth_utils.py
 """
 
 from typing import Dict, List

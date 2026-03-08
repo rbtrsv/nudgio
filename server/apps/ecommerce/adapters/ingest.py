@@ -10,7 +10,7 @@ own PostgreSQL, not an external database.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -63,7 +63,7 @@ class IngestAdapter:
 
     async def get_orders(self, lookback_days: int = 30, limit: int = 1000) -> List[Dict[str, Any]]:
         """Get orders from ingested_orders table"""
-        since = datetime.utcnow() - timedelta(days=lookback_days)
+        since = datetime.now(timezone.utc) - timedelta(days=lookback_days)
 
         result = await self.db.execute(
             select(IngestedOrder)
@@ -89,7 +89,7 @@ class IngestAdapter:
 
     async def get_order_items(self, lookback_days: int = 30, limit: int = 10000) -> List[Dict[str, Any]]:
         """Get order line items from ingested_order_items table"""
-        since = datetime.utcnow() - timedelta(days=lookback_days)
+        since = datetime.now(timezone.utc) - timedelta(days=lookback_days)
 
         result = await self.db.execute(
             select(IngestedOrderItem)
@@ -153,7 +153,7 @@ class IngestAdapter:
 
     async def get_order_count(self, lookback_days: int = 365) -> int:
         """Get total ingested order count for this connection within lookback window"""
-        since = datetime.utcnow() - timedelta(days=lookback_days)
+        since = datetime.now(timezone.utc) - timedelta(days=lookback_days)
         result = await self.db.execute(
             select(func.count(IngestedOrder.id))
             .where(

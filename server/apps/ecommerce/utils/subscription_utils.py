@@ -34,6 +34,15 @@ Stripe Dashboard setup (required once):
 
 These are pure helpers — not FastAPI dependencies. The dependency that
 uses them lives in dependency_utils.py (require_active_subscription).
+
+Pricing changes (Stripe Dashboard):
+    Prices are changed directly in Stripe Dashboard — code never checks amounts.
+    Only requirement: Stripe Product metadata "tier" must be "PRO" or "ENTERPRISE"
+    (must match TIER_ORDER below). Webhooks populate Subscription.plan_name from this.
+
+Pricing changes (Shopify Dashboard):
+    Same TIER_LIMITS apply. Plan name mapping lives in
+    shopify_billing_utils.py → map_shopify_plan_to_tier().
 """
 
 import logging

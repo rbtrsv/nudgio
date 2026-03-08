@@ -8,6 +8,12 @@ Two backends:
 - "dragonfly" — DragonflyDB/Redis via redis.asyncio (production, multi-worker)
 
 Switch backend by changing CACHE_BACKEND constant below.
+
+Public API:
+    - get_cached_recommendations(connection_id, rec_type, **params) → cached list or None
+    - set_cached_recommendations(connection_id, rec_type, recommendations, ttl, **params)
+
+Cache key = MD5 of prefix + sorted params → deterministic, collision-safe.
 """
 
 from typing import Any, Dict, List

@@ -1,7 +1,7 @@
 import logging
 from typing import List, Dict, Any, Optional
 import aiohttp
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from core.config import settings
 from ...models import EcommerceConnection
 
@@ -169,7 +169,7 @@ class ShopifyAdapter:
 
     async def get_order_count(self, lookback_days: int = 365) -> int:
         """Get total order count via GraphQL ordersCount with date filter"""
-        since_date = (datetime.utcnow() - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+        since_date = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
         query = """
         query($query: String) {
             ordersCount(limit: null, query: $query) {
@@ -243,7 +243,7 @@ class ShopifyAdapter:
     async def get_orders(self, lookback_days: int = 30, limit: int = 250) -> List[Dict[str, Any]]:
         """Get orders from Shopify GraphQL Admin API with cursor pagination"""
         # Calculate date filter
-        since_date = (datetime.utcnow() - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+        since_date = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
 
         query = """
         query($first: Int!, $after: String, $query: String!) {
@@ -291,7 +291,7 @@ class ShopifyAdapter:
         distinct line items are extremely rare in ecommerce (<0.1% of orders).
         """
         # Calculate date filter
-        since_date = (datetime.utcnow() - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+        since_date = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
 
         query = """
         query($first: Int!, $after: String, $query: String!) {

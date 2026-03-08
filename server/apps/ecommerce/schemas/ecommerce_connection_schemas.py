@@ -27,6 +27,14 @@ class ConnectionMethod(str, Enum):
     INGEST = "ingest"
 
 
+class SyncInterval(str, Enum):
+    """Auto-sync frequency — how often sync_connection_data() runs for this connection"""
+    HOURLY = "hourly"
+    EVERY_6_HOURS = "every_6_hours"
+    DAILY = "daily"
+    WEEKLY = "weekly"
+
+
 # ==========================================
 # Request Schemas
 # ==========================================
@@ -97,6 +105,9 @@ class EcommerceConnectionUpdate(BaseModel):
     db_user: str | None = Field(default=None, description="Database username")
     db_password: str | None = Field(default=None, description="Database password")
     db_port: int | None = Field(default=None, description="Database port")
+    # Auto-Sync settings — periodic data pull from platform adapters
+    auto_sync_enabled: bool | None = Field(default=None, description="Enable periodic auto-sync")
+    sync_interval: SyncInterval | None = Field(default=None, description="Sync frequency: hourly, every_6_hours, daily, weekly")
 
 
 # ==========================================
@@ -117,6 +128,12 @@ class EcommerceConnectionDetail(BaseModel):
     db_user: str | None = Field(default=None, description="Database username")
     db_port: int | None = Field(default=None, description="Database port")
     is_active: bool = Field(description="Whether connection has been tested and is active")
+    # Auto-Sync fields — periodic data pull status and schedule
+    auto_sync_enabled: bool = Field(description="Whether auto-sync is enabled")
+    sync_interval: str = Field(description="Sync frequency: hourly, every_6_hours, daily, weekly")
+    last_synced_at: datetime | None = Field(default=None, description="When last sync completed")
+    next_sync_at: datetime | None = Field(default=None, description="When next auto-sync is scheduled")
+    last_sync_status: str | None = Field(default=None, description="Last sync result: success or error")
     created_at: datetime = Field(description="When the connection was created")
     updated_at: datetime | None = Field(default=None, description="When the connection was last updated")
 

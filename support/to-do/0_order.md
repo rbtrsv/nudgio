@@ -1,5 +1,7 @@
 # Nudgio — To-Do List (Ordered by Importance)
 
+> **MANDATORY**: Never create migration files. The user creates and runs migrations themselves. Only add/modify model fields. DO NOT DELETE THIS RULE.
+
 ---
 
 ## ✅ Done
@@ -162,7 +164,7 @@
 - ✅ `widget_auth_utils.py` — HMAC-SHA256 verification (canonical query, URL-encoded, sorted), timestamp expiry, domain restriction, dedicated rate limiting
 - ✅ `widget_api_key_subrouter.py` — JWT-gated CRUD (generate/list/delete), plaintext secret shown once
 - ✅ API key management UI in dashboard — "API Keys" 3rd tab on connection detail page (hidden for Shopify)
-- ❌ Components page "Copy Snippet" — generates configured snippet instead of static HTML
+- ✅ Components page "Copy Snippet" — generates `<div>` + `<script>` snippet with API key + widget.js loader
 
 ### 7. WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
 - ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based rendering (HMAC-signed URLs, same pattern as Shopify)
@@ -173,30 +175,33 @@
 - ✅ Gutenberg block — `nudgio/recommendations` block with Columns RangeControl (2–6) + Size SelectControl (compact/default/spacious), live preview placeholder, block.json + index.js + render.php
 - ❌ Submit to WordPress Plugin Directory
 
-### 8. Data Ingestion + Local Storage (V3 Architecture)
+### 8. Data Ingestion + Local Storage (V3 Architecture) ✅ (Step 1+2)
 **Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.
 
-#### Step 1 — Push API + IngestAdapter (V2 foundation)
-- ❌ Models: `ingested_products`, `ingested_orders`, `ingested_order_items` — local storage tables per connection
-- ❌ Migration for new tables
-- ❌ `data_ingestion_subrouter.py` — `POST /ingest/products`, `POST /ingest/orders`, `POST /ingest/order-items` (auth via Widget API Key)
-- ❌ `IngestAdapter` — reads from ingested tables, same interface as ShopifyAdapter/WooCommerceApiAdapter
-- ❌ Wire IngestAdapter into adapter factory for connections with ingested data
+#### Step 1 — Push API + IngestAdapter ✅
+- ✅ Models: `IngestedProduct`, `IngestedOrder`, `IngestedOrderItem` — local storage tables per connection_id, unique constraints for upsert
+- ✅ Migration for 3 new tables (applied)
+- ✅ Import endpoints persist via upsert — `POST /data/import/{products,orders,order-items}` in `data_subrouter.py` using shared upsert helpers from `sync_utils.py`
+- ✅ `IngestAdapter` — reads from ingested tables, same interface as ShopifyAdapter/WooCommerceApiAdapter
+- ✅ Factory updated — `get_adapter(connection, db)` with optional `db` param, routes `connection_method="ingest"` to IngestAdapter
+- ✅ `"ingest"` added to `ConnectionMethod` enum
 
-#### Step 2 — Auto-Sync (V3 complete)
-- ❌ Periodic sync task — runs existing adapters (Shopify/WooCommerce/Magento) to populate ingested tables automatically
+#### Step 2 — Auto-Sync ✅ (manual sync, periodic task deferred)
+- ✅ `sync_utils.py` — shared upsert helpers (upsert_products, upsert_orders, upsert_order_items) + `sync_connection_data()` orchestration + ghost row pruning (`_prune_stale_rows`)
+- ✅ `POST /data/sync/{connection_id}` — triggers full sync via platform adapter → ingested tables
+- ❌ Periodic sync task — cron or FastAPI background task (deferred to future)
 - ❌ Sync settings per connection: interval (hourly/daily/weekly), enabled/disabled
 
 #### Step 3 — Granular Sync Filters (future)
 - ❌ Filter by category, price range, date range, product tags
 - ❌ Selective sync (specific products/categories only)
 
-### 9. Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
-- ❌ `widget.js` loader script — finds `.nudgio-widget` divs, reads `data-` attributes, calls `/widget/sign` endpoint, renders iframe
-- ❌ `/widget/sign` endpoint — server-side HMAC URL signing (secret never in JS)
-- ❌ Product auto-detection via `data-product-id` attribute or page meta
-- ❌ Components page "Copy Snippet" — generates `<div>` + `<script>` snippet instead of static HTML
-- ❌ For custom sites, Squarespace, Wix, etc. — any site that can paste a `<script>` tag
+### 9. Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites) ✅
+- ✅ `widget.js` loader — IIFE in `apps/ecommerce/static/widget.js`, finds `.nudgio-widget` divs, reads `data-*` attributes, XHR to `/ecommerce/widget/sign`, creates iframe with auto-resize + MutationObserver for SPA support
+- ✅ `widget_sign_subrouter.py` — `GET /ecommerce/widget/sign` endpoint, server-side HMAC URL signing (CORS `*`, rate limited, domain check, secret never in JS)
+- ✅ Product support via `data-product-id` attribute
+- ✅ Components page "Copy Snippet" — `generateEmbedCode()` outputs `<div>` + `<script>` snippet using API key, only non-default data attributes included
+- ✅ For custom sites, Squarespace, Wix, etc. — any site that can paste a `<script>` tag
 
 ### 10. Magento Adobe Commerce Extension
 - ❌ Magento 2 extension for Adobe Commerce Marketplace (harder — strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity)
@@ -228,10 +233,10 @@
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
 10. ✅ **Public Widget API** — DONE. `WidgetAPIKey` model (Fernet-encrypted), HMAC-signed URL auth, 4 public widget endpoints, key management UI (3rd tab), dedicated rate limiting. 66 routes total.
 11. ✅ **WooCommerce WordPress Plugin (R1)** — DONE. `[nudgio]` shortcode + WP Admin settings page + iframe rendering + HMAC signing + Test Connection. Verified on `wp.nudgio.tech`.
-12. **Data Ingestion + Local Storage (V3)** — Push API (3 POST endpoints, API Key auth) + ingested tables + IngestAdapter. Then auto-sync periodic task for existing adapters. Then granular filters.
-13. **Universal JS Widget Snippet** — `widget.js` + `/widget/sign` endpoint + Components page "Copy Snippet". Depends on #12 for custom sites.
+12. ✅ **Data Ingestion + Local Storage (V3)** — DONE. 3 ingested tables + migration + IngestAdapter + factory routing + shared upsert helpers + `sync_connection_data()` with ghost row pruning. Manual sync via `POST /data/sync/{connection_id}`. Periodic task deferred.
+13. ✅ **Universal JS Widget Snippet** — DONE. `widget.js` loader (IIFE, XHR, iframe, MutationObserver) + `widget_sign_subrouter.py` (HMAC signing, CORS) + Components page "Copy Snippet" (`generateEmbedCode()`).
 14. **Magento Adobe Commerce Extension** — harder (strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity). Smallest market, lowest priority.
-14. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
+15. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
 
 ---
 

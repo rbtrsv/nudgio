@@ -10,6 +10,8 @@ import { Badge } from '@/modules/shadcnui/components/ui/badge';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';
 import { Label } from '@/modules/shadcnui/components/ui/label';
+import { Switch } from '@/modules/shadcnui/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/modules/shadcnui/components/ui/tabs';
 import {
   Loader2,
@@ -26,10 +28,12 @@ import {
   Key,
   Copy,
   Plus,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import { WidgetAPIKeyDetail } from '@/modules/ecommerce/schemas/widget-api-keys.schemas';
 import { getWidgetAPIKeys, createWidgetAPIKey, deleteWidgetAPIKey } from '@/modules/ecommerce/service/widget-api-keys.service';
+import { syncConnection } from '@/modules/ecommerce/service/data.service';
 
 export default function ConnectionDetailPage() {
   const params = useParams();
@@ -73,6 +77,12 @@ export default function ConnectionDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
+  // Settings state — Auto-Sync
+  const [editAutoSyncEnabled, setEditAutoSyncEnabled] = useState(false);
+  const [editSyncInterval, setEditSyncInterval] = useState('daily');
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+
   // API Keys state
   const [apiKeys, setApiKeys] = useState<WidgetAPIKeyDetail[]>([]);
   const [isLoadingKeys, setIsLoadingKeys] = useState(false);
@@ -98,6 +108,9 @@ export default function ConnectionDetailPage() {
       setEditDbUser(connection.db_user || '');
       setEditDbPassword('');
       setEditDbPort(connection.db_port ? String(connection.db_port) : '');
+      // Auto-Sync fields
+      setEditAutoSyncEnabled(connection.auto_sync_enabled);
+      setEditSyncInterval(connection.sync_interval);
     }
   }, [connection]);
 
@@ -503,7 +516,7 @@ export default function ConnectionDetailPage() {
               setIsUpdating(true);
               try {
                 // Build update payload — only include non-empty fields
-                const updateData: Record<string, string | number | null | undefined> = {};
+                const updateData: Record<string, string | number | boolean | null | undefined> = {};
                 updateData.connection_name = editConnectionName || undefined;
 
                 if (connection.connection_method === 'api') {
@@ -517,6 +530,12 @@ export default function ConnectionDetailPage() {
                   updateData.db_user = editDbUser || undefined;
                   if (editDbPassword) updateData.db_password = editDbPassword;
                   updateData.db_port = editDbPort ? parseInt(editDbPort, 10) : undefined;
+                }
+
+                // Auto-Sync settings — always include (toggle + dropdown are always visible)
+                if (connection.connection_method !== 'ingest') {
+                  updateData.auto_sync_enabled = editAutoSyncEnabled;
+                  updateData.sync_interval = editSyncInterval;
                 }
 
                 await updateConnection(connectionId, updateData);
@@ -537,6 +556,134 @@ export default function ConnectionDetailPage() {
               'Save Changes'
             )}
           </Button>
+
+          {/* Data Sync — only for non-ingest connections (ingest receives data via Push API) */}
+          {connection.connection_method !== 'ingest' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Sync</CardTitle>
+                <CardDescription>Configure automatic data synchronization from your platform</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Auto-Sync toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="auto-sync-toggle">Auto-Sync</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically pull latest products and orders from your store
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto-sync-toggle"
+                    checked={editAutoSyncEnabled}
+                    onCheckedChange={setEditAutoSyncEnabled}
+                  />
+                </div>
+
+                {/* Sync interval — only visible when auto-sync is enabled */}
+                {editAutoSyncEnabled && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sync-interval">Sync Interval</Label>
+                    <Select value={editSyncInterval} onValueChange={setEditSyncInterval}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hourly">Hourly</SelectItem>
+                        <SelectItem value="every_6_hours">Every 6 Hours</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Sync status info — read-only */}
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Last Synced</p>
+                    <p className="text-sm font-medium">
+                      {connection.last_synced_at
+                        ? new Date(connection.last_synced_at).toLocaleString()
+                        : 'Never'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    {connection.last_sync_status ? (
+                      <Badge variant={connection.last_sync_status === 'success' ? 'default' : 'destructive'}>
+                        {connection.last_sync_status}
+                      </Badge>
+                    ) : (
+                      <p className="text-sm font-medium">—</p>
+                    )}
+                  </div>
+                  {connection.auto_sync_enabled && connection.next_sync_at && (
+                    <div className="col-span-2">
+                      <p className="text-sm text-muted-foreground">Next Sync</p>
+                      <p className="text-sm font-medium">
+                        {new Date(connection.next_sync_at).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sync Now button — manual trigger */}
+                {syncResult && (
+                  <Alert variant={syncResult.success ? 'default' : 'destructive'}>
+                    <div className="flex items-center gap-2">
+                      {syncResult.success ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <XCircle className="h-4 w-4" />
+                      )}
+                      <AlertDescription>{syncResult.message}</AlertDescription>
+                    </div>
+                  </Alert>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    setIsSyncing(true);
+                    setSyncResult(null);
+                    try {
+                      const result = await syncConnection(connectionId);
+                      setSyncResult({
+                        success: result.success,
+                        message: result.success
+                          ? `Sync complete. ${result.data?.products_count ?? 0} products, ${result.data?.orders_count ?? 0} orders.`
+                          : result.error || 'Sync failed',
+                      });
+                      // Refresh connection to update sync status fields
+                      await fetchConnections();
+                    } catch {
+                      setSyncResult({ success: false, message: 'Failed to sync' });
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  disabled={isSyncing || !connection.is_active}
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Sync Now
+                    </>
+                  )}
+                </Button>
+                {!connection.is_active && (
+                  <p className="text-xs text-muted-foreground">
+                    Test the connection first before syncing data.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Danger Zone */}
           <Card className="border-destructive">

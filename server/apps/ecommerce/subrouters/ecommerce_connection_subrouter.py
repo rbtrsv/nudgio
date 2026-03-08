@@ -23,6 +23,7 @@ from ..adapters.factory import get_adapter
 from ..utils.dependency_utils import get_user_connection
 from ..utils.encryption_utils import encrypt_password
 from ..utils.subscription_utils import get_org_subscription, is_over_connection_limit
+from ..utils.sync_scheduler import compute_next_sync_at
 
 # ==========================================
 # Ecommerce Connections Router
@@ -338,8 +339,20 @@ async def update_connection(
                 value = value.value
             setattr(connection, field, value)
 
+        # Compute next_sync_at when auto-sync settings change
+        # If enabled → schedule next sync based on interval
+        # If disabled → clear next_sync_at
+        if "auto_sync_enabled" in update_data or "sync_interval" in update_data:
+            if connection.auto_sync_enabled:
+                connection.next_sync_at = compute_next_sync_at(connection.sync_interval)
+            else:
+                connection.next_sync_at = None
+
         # Reset active status when connection details change (user must re-test)
-        connection.is_active = False
+        # Only reset if connection-critical fields changed (not sync settings)
+        connection_fields = {"platform", "connection_method", "store_url", "api_key", "api_secret", "db_host", "db_name", "db_user", "db_password", "db_port"}
+        if update_data.keys() & connection_fields:
+            connection.is_active = False
         connection.updated_by = user.id
 
         await db.commit()

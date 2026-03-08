@@ -26,7 +26,13 @@ export const PlatformTypeEnum = z.enum(['shopify', 'woocommerce', 'magento']);
  * Connection method options - matches backend ConnectionMethod enum
  * Backend: class ConnectionMethod(str, Enum)
  */
-export const ConnectionMethodEnum = z.enum(['api', 'database']);
+export const ConnectionMethodEnum = z.enum(['api', 'database', 'ingest']);
+
+/**
+ * Auto-sync frequency options - matches backend SyncInterval enum
+ * Backend: class SyncInterval(str, Enum)
+ */
+export const SyncIntervalEnum = z.enum(['hourly', 'every_6_hours', 'daily', 'weekly']);
 
 // ==========================================
 // Connection Schema (Full Representation)
@@ -51,6 +57,12 @@ export const ConnectionSchema = z.object({
   db_user: z.string().nullable(),
   db_port: z.number().nullable(),
   is_active: z.boolean(),
+  // Auto-Sync fields — periodic data pull status and schedule
+  auto_sync_enabled: z.boolean(),
+  sync_interval: z.string(),
+  last_synced_at: z.string().nullable(),
+  next_sync_at: z.string().nullable(),
+  last_sync_status: z.string().nullable(),
   created_at: z.string(),
   updated_at: z.string().nullable(),
 });
@@ -101,6 +113,9 @@ export const UpdateConnectionSchema = z.object({
   db_user: z.string().nullable().optional(),
   db_password: z.string().nullable().optional(),
   db_port: z.number().nullable().optional(),
+  // Auto-Sync settings
+  auto_sync_enabled: z.boolean().nullable().optional(),
+  sync_interval: SyncIntervalEnum.nullable().optional(),
 });
 
 // ==========================================
@@ -109,6 +124,7 @@ export const UpdateConnectionSchema = z.object({
 
 export type PlatformType = z.infer<typeof PlatformTypeEnum>;
 export type ConnectionMethod = z.infer<typeof ConnectionMethodEnum>;
+export type SyncInterval = z.infer<typeof SyncIntervalEnum>;
 export type Connection = z.infer<typeof ConnectionSchema>;
 export type CreateConnection = z.infer<typeof CreateConnectionSchema>;
 export type UpdateConnection = z.infer<typeof UpdateConnectionSchema>;

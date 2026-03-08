@@ -3,15 +3,22 @@ Nudgio Utils — Data Sync
 
 Shared upsert helpers for ingested tables + full sync orchestration.
 
-Upsert helpers (upsert_products, upsert_orders, upsert_order_items) are used by:
-- data_subrouter.py import endpoints (Push API — custom sites)
-- sync_connection_data() below (Auto-Sync — pulls from platform adapters)
+Upsert Helpers (single source of truth for INSERT ON CONFLICT UPDATE):
+    - upsert_products(db, rows) — by (connection_id, product_id)
+    - upsert_orders(db, rows) — by (connection_id, order_id)
+    - upsert_order_items(db, rows) — by (connection_id, order_id, product_id, variant_id)
 
-Single source of truth for INSERT ON CONFLICT UPDATE logic.
+Used by:
+    - data_subrouter.py import endpoints (Push API — custom sites)
+    - sync_connection_data() below (Auto-Sync — pulls from platform adapters)
+
+Sync Orchestration:
+    - sync_connection_data(connection, db) — fetches from platform adapter, upserts locally,
+      prunes ghost rows (products/orders deleted on platform)
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -170,7 +177,7 @@ async def sync_connection_data(
         Dict with products_synced, orders_synced, order_items_synced, errors
     """
     # Record start time — rows with ingested_at < this after upserts are ghost data
-    sync_started_at = datetime.utcnow()
+    sync_started_at = datetime.now(timezone.utc)
 
     # Don't pass db here — we want the PLATFORM adapter, not IngestAdapter
     adapter = get_adapter(connection)
@@ -220,7 +227,7 @@ async def sync_connection_data(
                     "customer_id": o.get("customer_id"),
                     "total_price": float(o.get("total_price", 0)),
                     "status": o.get("status", "unknown"),
-                    "order_date": _parse_datetime(o.get("order_date")) or datetime.utcnow(),
+                    "order_date": _parse_datetime(o.get("order_date")) or datetime.now(timezone.utc),
                 }
                 for o in orders
                 if o.get("order_id")
@@ -244,7 +251,7 @@ async def sync_connection_data(
                     "price": float(oi.get("price", 0)),
                     "product_title": oi.get("product_title"),
                     "customer_id": oi.get("customer_id"),
-                    "order_date": _parse_datetime(oi.get("order_date")) or datetime.utcnow(),
+                    "order_date": _parse_datetime(oi.get("order_date")) or datetime.now(timezone.utc),
                 }
                 for oi in order_items
                 if oi.get("order_id") and oi.get("product_id")
@@ -254,9 +261,16 @@ async def sync_connection_data(
         logger.error("Sync order items error for connection_id=%s: %s", connection.id, str(e))
         stats["errors"].append(f"Order items: {str(e)}")
 
-    # Step 4: Commit all upserts and update connection.updated_at as last_sync marker
+    # Step 4: Commit all upserts and update sync metadata
     try:
         connection.updated_at = func.now()
+        # Set sync status fields — visible on frontend and used by scheduler
+        connection.last_synced_at = datetime.now(timezone.utc)
+        connection.last_sync_status = "error" if stats["errors"] else "success"
+        # If auto-sync is enabled, schedule the next sync based on interval
+        if connection.auto_sync_enabled:
+            from .sync_scheduler import compute_next_sync_at
+            connection.next_sync_at = compute_next_sync_at(connection.sync_interval)
         await db.commit()
     except Exception as e:
         logger.error("Sync commit error for connection_id=%s: %s", connection.id, str(e))

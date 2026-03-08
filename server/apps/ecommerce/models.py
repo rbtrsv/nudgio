@@ -73,6 +73,14 @@ class EcommerceConnection(BaseMixin, Base):
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    # Auto-Sync schedule — periodic data pull from platform adapters
+    # Why: without these, sync is manual-only and data goes stale
+    auto_sync_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    sync_interval: Mapped[str] = mapped_column(String(50), default="daily")  # "hourly", "every_6_hours", "daily", "weekly"
+    last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    next_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_sync_status: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "success", "error"
+
     # Relationships
     settings: Mapped[Optional["RecommendationSettings"]] = relationship(back_populates="connection", uselist=False, cascade="all, delete-orphan")
     usage_tracking: Mapped[list["APIUsageTracking"]] = relationship(back_populates="connection", cascade="all, delete-orphan")

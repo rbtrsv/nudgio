@@ -16,6 +16,8 @@
 
 4. **Never guess patterns.** If unsure how a file should look, find and read a working example first.
 
+5. **Never create migration files.** The user creates and runs migrations themselves. Only add/modify model fields — never generate Alembic migration scripts. DO NOT DELETE THIS RULE.
+
 ---
 
 ## Context
@@ -1486,7 +1488,7 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ `columns` + `size` responsive params (full stack) — SIZE_MAP dict (13 CSS properties × 3 tiers), responsive grid `grid-cols-1 md:grid-cols-2 lg:grid-cols-{columns}`, server-side clamp (columns 2–6, size fallback "default"). `device` stays first-class API param (accepted but not used for rendering). `list` style removed. 4 subrouters updated (components, widget, app_proxy, embedded).
 - ✅ Frontend: `widget-api-keys.schemas.ts` (Zod), `widget-api-keys.service.ts` (CRUD), `api.endpoints.ts` (WIDGET_API_KEY_ENDPOINTS with trailing slashes), "API Keys" 3rd tab on connection detail page (hidden for Shopify)
 - ✅ Router: `widget_subrouter` on ungated (HMAC auth), `widget_api_key_subrouter` on gated (JWT auth). 66 routes total.
-- ❌ Components page "Copy Snippet" — replace static HTML copy with configured snippet (iframe + signed URL instructions)
+- ✅ Components page "Copy Snippet" — `generateEmbedCode()` outputs `<div>` + `<script>` snippet using API key + widget.js loader, only non-default data attributes included
 
 ### WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
 - ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based widget rendering (same pattern as Shopify Theme App Extension)
@@ -1500,18 +1502,21 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Gutenberg block (`nudgio/recommendations`) — block.json (columns + size attributes), index.js (Columns RangeControl 2–6, Size SelectControl compact/default/spacious, no Device), render.php (maps block attributes to shortcode atts)
 - ❌ Submit to WordPress Plugin Directory (free listing)
 
-### Data Ingestion + Local Storage (V3 Architecture)
+### Data Ingestion + Local Storage (V3 Architecture) ✅ (Step 1+2, periodic task deferred)
 **Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.
 
-#### Step 1 — Push API + IngestAdapter (V2 foundation)
-- ❌ Models: `IngestedProduct`, `IngestedOrder`, `IngestedOrderItem` — local storage tables per connection_id
-- ❌ Migration for new tables
-- ❌ `data_ingestion_subrouter.py` — `POST /ingest/products`, `POST /ingest/orders`, `POST /ingest/order-items` (auth via Widget API Key, batch up to 1000 items per request)
-- ❌ `IngestAdapter(PlatformAdapter)` — reads from ingested tables, same interface as ShopifyAdapter/WooCommerceApiAdapter (get_products, get_orders, get_product_count, get_order_count)
-- ❌ Wire IngestAdapter into adapter factory for connections with ingested data
+#### Step 1 — Push API + IngestAdapter ✅
+- ✅ Models: `IngestedProduct`, `IngestedOrder`, `IngestedOrderItem` — local storage tables per connection_id, unique constraints for upsert (no BaseMixin — bulk data tables)
+- ✅ Migration for 3 new tables (applied)
+- ✅ Import endpoints persist via upsert — `POST /data/import/{products,orders,order-items}` in `data_subrouter.py`, batch limit 1000, using shared upsert helpers from `sync_utils.py`
+- ✅ `IngestAdapter` in `adapters/ingest.py` — reads from ingested tables (get_products, get_orders, get_order_items, get_product_by_id, get_product_count, get_order_count, test_connection always True)
+- ✅ Factory updated — `get_adapter(connection, db)` with optional `db` param, routes `connection_method="ingest"` to IngestAdapter. All 7 subrouter callers updated to pass `db`.
+- ✅ `"ingest"` added to `ConnectionMethod` enum in `ecommerce_connection_schemas.py`
 
-#### Step 2 — Auto-Sync (V3 complete)
-- ❌ Periodic sync task — runs existing adapters (Shopify/WooCommerce/Magento) to populate ingested tables automatically
+#### Step 2 — Auto-Sync ✅ (manual sync done, periodic task deferred)
+- ✅ `sync_utils.py` — 3 shared upsert helpers (`upsert_products`, `upsert_orders`, `upsert_order_items`) used by both Push API imports and Auto-Sync. `sync_connection_data()` orchestration: fetch from platform adapter → upsert → commit → prune ghost rows (`_prune_stale_rows` deletes rows with `ingested_at < sync_started_at`). `_parse_datetime()` helper for adapter output.
+- ✅ `POST /data/sync/{connection_id}` — triggers full sync via platform adapter → ingested tables, returns stats
+- ❌ Periodic sync task — cron or FastAPI background task (deferred to future)
 - ❌ Sync settings per connection: interval (hourly/daily/weekly), enabled/disabled
 - ❌ Sync status tracking (last_synced_at, items_synced, errors)
 
@@ -1519,12 +1524,12 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ❌ Filter by category, price range, date range, product tags
 - ❌ Selective sync (specific products/categories only)
 
-### Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
-- ❌ `widget_sign_subrouter.py` — `GET /widget/sign` endpoint, server-side HMAC URL signing (CORS `*`, rate limited, secret never in JS)
-- ❌ `widget.js` — static JS loader served from `/static/widget.js`, finds `.nudgio-widget` divs, reads `data-*` attributes, calls sign endpoint, creates iframe with auto-resize
-- ❌ Product auto-detection via `data-product-id` attribute or page meta
-- ❌ Components page "Copy Snippet" — `generateEmbedCode()` outputs `<div>` + `<script>` snippet using API key, not raw HTML wrapper
-- ❌ Mount sign subrouter in `router.py` (ungated)
+### Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites) ✅
+- ✅ `widget_sign_subrouter.py` — `GET /ecommerce/widget/sign` endpoint + `OPTIONS` CORS preflight, looks up WidgetAPIKey, checks rate limit + domain restriction, decrypts secret, builds HMAC-SHA256 signed URL, returns `{"url": signed_url}` with `Access-Control-Allow-Origin: *`
+- ✅ `widget.js` — IIFE in `apps/ecommerce/static/widget.js` (served at `/ecommerce/static/widget.js`), auto-detects server URL from script src, finds `.nudgio-widget` divs, reads `data-*` attributes, XHR to sign endpoint, creates iframe, `postMessage` auto-resize listener, `MutationObserver` for SPA support, `data-nudgio-init` prevents double-init
+- ✅ Product support via `data-product-id` attribute
+- ✅ Components page "Copy Snippet" — `generateEmbedCode()` in `use-components.ts` outputs `<div>` + `<script>` snippet using API key, only non-default data attributes included. Components page shows embed code section with API key dropdown + copy button.
+- ✅ Mount sign subrouter in `router.py` (ungated), static files mount in `main.py` (`/ecommerce/static`)
 
 ### Magento Adobe Commerce Extension (Distribution)
 - ❌ Magento 2 extension for Adobe Commerce Marketplace — strict DI, layout XML, Block classes, `.phtml` templates
