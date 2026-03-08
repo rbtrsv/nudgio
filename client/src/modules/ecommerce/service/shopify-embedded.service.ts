@@ -225,8 +225,10 @@ export interface EmbeddedComponentParams {
   lookback_days?: number;
   method?: string;
   min_price_increase_percent?: number;
-  style?: 'card' | 'carousel' | 'list';
+  style?: 'card' | 'carousel';
   device?: 'desktop' | 'mobile';
+  columns?: number;
+  size?: 'compact' | 'default' | 'spacious';
   primary_color?: string;
   text_color?: string;
   bg_color?: string;
@@ -533,6 +535,8 @@ export const getComponentHtml = async (
   if (params.min_price_increase_percent !== undefined) searchParams.set('min_price_increase_percent', String(params.min_price_increase_percent));
   if (params.style) searchParams.set('style', params.style);
   if (params.device) searchParams.set('device', params.device);
+  if (params.columns !== undefined) searchParams.set('columns', String(params.columns));
+  if (params.size) searchParams.set('size', params.size);
   if (params.primary_color) searchParams.set('primary_color', params.primary_color);
   if (params.text_color) searchParams.set('text_color', params.text_color);
   if (params.bg_color) searchParams.set('bg_color', params.bg_color);

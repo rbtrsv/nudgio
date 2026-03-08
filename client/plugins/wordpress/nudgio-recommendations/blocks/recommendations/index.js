@@ -58,7 +58,12 @@
     var styleLabels = {
         card:     'Card Grid',
         carousel: 'Carousel',
-        list:     'List',
+    };
+
+    var sizeLabels = {
+        compact:  'Compact',
+        'default': 'Default',
+        spacious: 'Spacious',
     };
 
     // ==========================================
@@ -137,20 +142,31 @@
                     options: [
                         { label: 'Card Grid', value: 'card' },
                         { label: 'Carousel',  value: 'carousel' },
-                        { label: 'List',       value: 'list' },
                     ],
                     onChange: function ( val ) { setAttributes( { style: val } ); },
                 } ),
 
-                // Device dropdown
+                // Columns slider (2–6, max columns at full width)
+                el( RangeControl, {
+                    label: __( 'Columns', 'nudgio-recommendations' ),
+                    help: __( 'Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio-recommendations' ),
+                    value: attributes.columns,
+                    onChange: function ( val ) { setAttributes( { columns: val } ); },
+                    min: 2,
+                    max: 6,
+                } ),
+
+                // Size dropdown (compact / default / spacious)
                 el( SelectControl, {
-                    label: __( 'Device Layout', 'nudgio-recommendations' ),
-                    value: attributes.device,
+                    label: __( 'Size', 'nudgio-recommendations' ),
+                    help: __( 'Controls text, padding, and gap proportionally.', 'nudgio-recommendations' ),
+                    value: attributes.size,
                     options: [
-                        { label: 'Desktop', value: 'desktop' },
-                        { label: 'Mobile',  value: 'mobile' },
+                        { label: 'Compact',  value: 'compact' },
+                        { label: 'Default',  value: 'default' },
+                        { label: 'Spacious', value: 'spacious' },
                     ],
-                    onChange: function ( val ) { setAttributes( { device: val } ); },
+                    onChange: function ( val ) { setAttributes( { size: val } ); },
                 } ),
 
                 // Product ID — shown only for cross-sell, upsell, similar
@@ -276,7 +292,8 @@
             var summaryLine = ( typeLabels[ type ] || type )
                 + ' \u00B7 ' + attributes.count + ' products'
                 + ' \u00B7 ' + ( styleLabels[ attributes.style ] || attributes.style )
-                + ' \u00B7 ' + attributes.device;
+                + ' \u00B7 ' + attributes.columns + ' cols'
+                + ' \u00B7 ' + ( sizeLabels[ attributes.size ] || attributes.size );
 
             var swatches = el( 'div', { style: { display: 'flex', alignItems: 'flex-start', marginTop: '8px' } },
                 el( ColorSwatch, { color: attributes.primary_color, label: 'Primary' } ),

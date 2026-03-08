@@ -24,8 +24,9 @@ export default function ComponentsPage() {
   const [lookbackDays, setLookbackDays] = useState(30);
   const [method, setMethod] = useState<'volume' | 'value' | 'balanced'>('volume');
   const [minPriceIncrease, setMinPriceIncrease] = useState(10);
-  const [style, setStyle] = useState<'card' | 'carousel' | 'list'>('card');
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [style, setStyle] = useState<'card' | 'carousel'>('card');
+  const [columns, setColumns] = useState(4);
+  const [size, setSize] = useState<'compact' | 'default' | 'spacious'>('default');
   const [primaryColor, setPrimaryColor] = useState('#3B82F6');
   const [textColor, setTextColor] = useState('#1F2937');
   const [bgColor, setBgColor] = useState('#FFFFFF');
@@ -76,7 +77,8 @@ export default function ComponentsPage() {
       method: needsMethod ? method : undefined,
       min_price_increase: needsMinPriceIncrease ? minPriceIncrease : undefined,
       style,
-      device,
+      columns,
+      size,
       primary_color: primaryColor,
       text_color: textColor,
       bg_color: bgColor,
@@ -221,24 +223,31 @@ export default function ComponentsPage() {
               {/* Style */}
               <div className="space-y-2">
                 <Label>Style</Label>
-                <Select value={style} onValueChange={(v) => setStyle(v as 'card' | 'carousel' | 'list')}>
+                <Select value={style} onValueChange={(v) => setStyle(v as 'card' | 'carousel')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="card">Card</SelectItem>
+                    <SelectItem value="card">Card Grid</SelectItem>
                     <SelectItem value="carousel">Carousel</SelectItem>
-                    <SelectItem value="list">List</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Device */}
+              {/* Columns */}
               <div className="space-y-2">
-                <Label>Device</Label>
-                <Select value={device} onValueChange={(v) => setDevice(v as 'desktop' | 'mobile')}>
+                <Label>Columns</Label>
+                <Input type="number" min={2} max={6} value={columns} onChange={(e) => setColumns(parseInt(e.target.value) || 4)} />
+                <p className="text-xs text-muted-foreground">Max columns at full width (2–6). Responsive: 1→2→N.</p>
+              </div>
+
+              {/* Size */}
+              <div className="space-y-2">
+                <Label>Size</Label>
+                <Select value={size} onValueChange={(v) => setSize(v as 'compact' | 'default' | 'spacious')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="desktop">Desktop</SelectItem>
-                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="compact">Compact</SelectItem>
+                    <SelectItem value="default">Default</SelectItem>
+                    <SelectItem value="spacious">Spacious</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

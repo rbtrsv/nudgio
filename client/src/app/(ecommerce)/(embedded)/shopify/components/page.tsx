@@ -51,8 +51,9 @@ export default function ShopifyComponentsPage() {
   const [lookbackDays, setLookbackDays] = useState(30);
   const [method, setMethod] = useState<'volume' | 'value' | 'balanced'>('volume');
   const [minPriceIncrease, setMinPriceIncrease] = useState(10);
-  const [style, setStyle] = useState<'card' | 'carousel' | 'list'>('card');
-  const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [style, setStyle] = useState<'card' | 'carousel'>('card');
+  const [columns, setColumns] = useState(4);
+  const [size, setSize] = useState<'compact' | 'default' | 'spacious'>('default');
   const [primaryColor, setPrimaryColor] = useState('#3B82F6');
   const [textColor, setTextColor] = useState('#1F2937');
   const [bgColor, setBgColor] = useState('#FFFFFF');
@@ -121,7 +122,8 @@ export default function ShopifyComponentsPage() {
         method: needsMethod ? method : undefined,
         min_price_increase_percent: needsMinPriceIncrease ? minPriceIncrease : undefined,
         style,
-        device,
+        columns,
+        size,
         primary_color: primaryColor,
         text_color: textColor,
         bg_color: bgColor,
@@ -273,21 +275,36 @@ export default function ShopifyComponentsPage() {
             <s-select
               label="Style"
               value={style}
-              onChange={(e) => setStyle(e.currentTarget.value as 'card' | 'carousel' | 'list')}
+              onChange={(e) => setStyle(e.currentTarget.value as 'card' | 'carousel')}
             >
-              <s-option value="card">Card</s-option>
+              <s-option value="card">Card Grid</s-option>
               <s-option value="carousel">Carousel</s-option>
-              <s-option value="list">List</s-option>
             </s-select>
 
-            {/* Device */}
+            {/* Columns */}
+            <s-number-field
+              label="Columns"
+              min={2}
+              max={6}
+              step={1}
+              value={String(columns)}
+              onChange={(e) => {
+                const val = parseInt(e.currentTarget.value, 10);
+                if (!isNaN(val)) setColumns(val);
+              }}
+              details="Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop."
+            />
+
+            {/* Size */}
             <s-select
-              label="Device"
-              value={device}
-              onChange={(e) => setDevice(e.currentTarget.value as 'desktop' | 'mobile')}
+              label="Size"
+              value={size}
+              onChange={(e) => setSize(e.currentTarget.value as 'compact' | 'default' | 'spacious')}
+              details="Controls text, padding, and gap proportionally."
             >
-              <s-option value="desktop">Desktop</s-option>
-              <s-option value="mobile">Mobile</s-option>
+              <s-option value="compact">Compact</s-option>
+              <s-option value="default">Default</s-option>
+              <s-option value="spacious">Spacious</s-option>
             </s-select>
 
             {/* Colors */}

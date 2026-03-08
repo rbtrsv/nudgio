@@ -86,7 +86,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     </table>
     <p class="description" style="margin-top: 8px;">
         <?php esc_html_e(
-            'Available attributes: type, count, style, device, product_id, primary_color, text_color, bg_color, border_radius, lookback_days, method, min_price_increase_percent.',
+            'Available attributes: type, count, style, columns, size, device, product_id, primary_color, text_color, bg_color, border_radius, lookback_days, method, min_price_increase_percent.',
             'nudgio-recommendations'
         ); ?>
     </p>

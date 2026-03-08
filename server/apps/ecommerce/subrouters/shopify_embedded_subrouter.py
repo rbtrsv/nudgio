@@ -844,8 +844,10 @@ async def get_bestsellers_component(
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
     method: str = Query("volume", description="Bestseller calculation method: volume, value, or balanced"),
-    style: str = Query("card", description="Component style: card, carousel, list"),
+    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
+    columns: int = Query(4, description="Max columns at full width (2–6)"),
+    size: str = Query("default", description="Visual density: compact, default, spacious"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
@@ -903,6 +905,8 @@ async def get_bestsellers_component(
             recommendations=recs,
             style=style,
             device=device,
+            columns=columns,
+            size=size,
             colors={"primary": primary_color, "text": text_color, "bg": bg_color},
             border_radius=border_radius,
             rec_type="bestseller",
@@ -924,8 +928,10 @@ async def get_cross_sell_component(
     product_id: str = Query(..., description="Product ID for cross-sell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
-    style: str = Query("card", description="Component style: card, carousel, list"),
+    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
+    columns: int = Query(4, description="Max columns at full width (2–6)"),
+    size: str = Query("default", description="Visual density: compact, default, spacious"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
@@ -973,6 +979,7 @@ async def get_cross_sell_component(
 
         html = generate_recommendation_html(
             recommendations=recs, style=style, device=device,
+            columns=columns, size=size,
             colors={"primary": primary_color, "text": text_color, "bg": bg_color},
             border_radius=border_radius, rec_type="cross-sell", shop_urls=shop_urls,
         )
@@ -992,8 +999,10 @@ async def get_upsell_component(
     product_id: str = Query(..., description="Product ID for upsell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
     min_price_increase_percent: int = Query(10, description="Minimum price increase percentage for upsell candidates"),
-    style: str = Query("card", description="Component style: card, carousel, list"),
+    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
+    columns: int = Query(4, description="Max columns at full width (2–6)"),
+    size: str = Query("default", description="Visual density: compact, default, spacious"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
@@ -1041,6 +1050,7 @@ async def get_upsell_component(
 
         html = generate_recommendation_html(
             recommendations=recs, style=style, device=device,
+            columns=columns, size=size,
             colors={"primary": primary_color, "text": text_color, "bg": bg_color},
             border_radius=border_radius, rec_type="upsell", shop_urls=shop_urls,
         )
@@ -1059,8 +1069,10 @@ async def get_upsell_component(
 async def get_similar_component(
     product_id: str = Query(..., description="Product ID for similar product recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
-    style: str = Query("card", description="Component style: card, carousel, list"),
+    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
+    columns: int = Query(4, description="Max columns at full width (2–6)"),
+    size: str = Query("default", description="Visual density: compact, default, spacious"),
     primary_color: str = Query("#3B82F6", description="Primary color hex"),
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
@@ -1108,6 +1120,7 @@ async def get_similar_component(
 
         html = generate_recommendation_html(
             recommendations=recs, style=style, device=device,
+            columns=columns, size=size,
             colors={"primary": primary_color, "text": text_color, "bg": bg_color},
             border_radius=border_radius, rec_type="similar", shop_urls=shop_urls,
         )

@@ -58,6 +58,12 @@ function nudgio_activate() {
     if ( false === get_option( 'nudgio_default_device' ) ) {
         add_option( 'nudgio_default_device', 'desktop' );
     }
+    if ( false === get_option( 'nudgio_default_columns' ) ) {
+        add_option( 'nudgio_default_columns', '4' );
+    }
+    if ( false === get_option( 'nudgio_default_size' ) ) {
+        add_option( 'nudgio_default_size', 'default' );
+    }
     if ( false === get_option( 'nudgio_default_primary_color' ) ) {
         add_option( 'nudgio_default_primary_color', '#3B82F6' );
     }

@@ -29,12 +29,16 @@
         "style": {
             "type": "string",
             "default": "card",
-            "enum": [ "card", "carousel", "list" ]
+            "enum": [ "card", "carousel" ]
         },
-        "device": {
+        "columns": {
+            "type": "number",
+            "default": 4
+        },
+        "size": {
             "type": "string",
-            "default": "desktop",
-            "enum": [ "desktop", "mobile" ]
+            "default": "default",
+            "enum": [ "compact", "default", "spacious" ]
         },
         "product_id": {
             "type": "string",

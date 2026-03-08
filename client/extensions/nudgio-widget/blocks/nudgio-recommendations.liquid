@@ -24,6 +24,8 @@
 {% assign bg_encoded = block.settings.bg_color | url_encode %}
 {% assign params = "?top=" | append: block.settings.product_count %}
 {% assign params = params | append: "&style=" | append: block.settings.widget_style %}
+{% assign params = params | append: "&columns=" | append: block.settings.columns %}
+{% assign params = params | append: "&size=" | append: block.settings.widget_size %}
 {% assign params = params | append: "&primary_color=" | append: primary_encoded %}
 {% assign params = params | append: "&text_color=" | append: text_encoded %}
 {% assign params = params | append: "&bg_color=" | append: bg_encoded %}
@@ -93,6 +95,28 @@
         { "value": "card", "label": "Grid Cards" },
         { "value": "carousel", "label": "Carousel" }
       ]
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4,
+      "info": "Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop."
+    },
+    {
+      "type": "select",
+      "id": "widget_size",
+      "label": "Size",
+      "default": "default",
+      "options": [
+        { "value": "compact", "label": "Compact" },
+        { "value": "default", "label": "Default" },
+        { "value": "spacious", "label": "Spacious" }
+      ],
+      "info": "Controls text, padding, and gap proportionally."
     },
     {
       "type": "color",

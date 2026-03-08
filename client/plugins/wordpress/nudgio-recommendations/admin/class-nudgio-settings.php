@@ -158,15 +158,28 @@ class Nudgio_Settings {
             'nudgio_defaults_section'
         );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_device', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => 'desktop',
+        register_setting( 'nudgio_settings', 'nudgio_default_columns', array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => 4,
         ) );
         add_settings_field(
-            'nudgio_default_device',
-            __( 'Target Device', 'nudgio-recommendations' ),
-            array( $this, 'render_default_device_field' ),
+            'nudgio_default_columns',
+            __( 'Columns', 'nudgio-recommendations' ),
+            array( $this, 'render_default_columns_field' ),
+            'nudgio-recommendations',
+            'nudgio_defaults_section'
+        );
+
+        register_setting( 'nudgio_settings', 'nudgio_default_size', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'default',
+        ) );
+        add_settings_field(
+            'nudgio_default_size',
+            __( 'Size', 'nudgio-recommendations' ),
+            array( $this, 'render_default_size_field' ),
             'nudgio-recommendations',
             'nudgio_defaults_section'
         );
@@ -294,7 +307,6 @@ class Nudgio_Settings {
         $styles = array(
             'card'     => __( 'Card Grid', 'nudgio-recommendations' ),
             'carousel' => __( 'Carousel', 'nudgio-recommendations' ),
-            'list'     => __( 'List', 'nudgio-recommendations' ),
         );
         echo '<select name="nudgio_default_style">';
         foreach ( $styles as $k => $label ) {
@@ -303,17 +315,25 @@ class Nudgio_Settings {
         echo '</select>';
     }
 
-    public function render_default_device_field() {
-        $value = get_option( 'nudgio_default_device', 'desktop' );
-        $devices = array(
-            'desktop' => __( 'Desktop', 'nudgio-recommendations' ),
-            'mobile'  => __( 'Mobile', 'nudgio-recommendations' ),
+    public function render_default_columns_field() {
+        $value = get_option( 'nudgio_default_columns', 4 );
+        echo '<input type="number" name="nudgio_default_columns" value="' . esc_attr( $value ) . '" class="small-text" min="2" max="6" />';
+        echo '<p class="description">' . esc_html__( 'Max columns at full width (2–6). Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio-recommendations' ) . '</p>';
+    }
+
+    public function render_default_size_field() {
+        $value = get_option( 'nudgio_default_size', 'default' );
+        $sizes = array(
+            'compact'  => __( 'Compact', 'nudgio-recommendations' ),
+            'default'  => __( 'Default', 'nudgio-recommendations' ),
+            'spacious' => __( 'Spacious', 'nudgio-recommendations' ),
         );
-        echo '<select name="nudgio_default_device">';
-        foreach ( $devices as $k => $label ) {
+        echo '<select name="nudgio_default_size">';
+        foreach ( $sizes as $k => $label ) {
             echo '<option value="' . esc_attr( $k ) . '"' . selected( $value, $k, false ) . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select>';
+        echo '<p class="description">' . esc_html__( 'Controls text, padding, and gap proportionally.', 'nudgio-recommendations' ) . '</p>';
     }
 
     /**
