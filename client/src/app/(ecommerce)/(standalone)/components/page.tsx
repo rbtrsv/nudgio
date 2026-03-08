@@ -15,6 +15,7 @@ import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
 import { Textarea } from '@/modules/shadcnui/components/ui/textarea';
 import { Loader2, LayoutGrid, Copy, CheckCircle, AlertCircle, Code } from 'lucide-react';
+import { getPlatformLabel } from '@/modules/ecommerce/utils/format-utils';
 
 export default function ComponentsPage() {
   const { connections, activeConnectionId, setActiveConnection } = useConnections();
@@ -105,6 +106,7 @@ export default function ComponentsPage() {
       method: needsMethod ? method : undefined,
       min_price_increase: needsMinPriceIncrease ? minPriceIncrease : undefined,
       style,
+      device: 'desktop',
       columns,
       size,
       primary_color: primaryColor,
@@ -175,7 +177,7 @@ export default function ComponentsPage() {
               <SelectContent>
                 {connections.map((conn) => (
                   <SelectItem key={conn.id} value={String(conn.id)}>
-                    {conn.connection_name} ({conn.platform})
+                    {conn.connection_name} ({getPlatformLabel(conn.platform)})
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/modules/shadcnui/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/modules/shadcnui/components/ui/table';
 import { Badge } from '@/modules/shadcnui/components/ui/badge';
 import { Loader2, TrendingUp } from 'lucide-react';
+import { getPlatformLabel } from '@/modules/ecommerce/utils/format-utils';
 
 export default function RecommendationsPage() {
   const { connections, activeConnectionId, setActiveConnection } = useConnections();
@@ -111,7 +112,7 @@ export default function RecommendationsPage() {
               <SelectContent>
                 {connections.map((conn) => (
                   <SelectItem key={conn.id} value={String(conn.id)}>
-                    {conn.connection_name} ({conn.platform})
+                    {conn.connection_name} ({getPlatformLabel(conn.platform)})
                   </SelectItem>
                 ))}
               </SelectContent>

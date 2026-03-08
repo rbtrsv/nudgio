@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/mod
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
 import { Loader2, BarChart3, Package, ShoppingCart, Clock, CalendarDays } from 'lucide-react';
+import { getPlatformLabel } from '@/modules/ecommerce/utils/format-utils';
 
 export default function AnalyticsPage() {
   const { connections, activeConnectionId, setActiveConnection } = useConnections();
@@ -56,7 +57,7 @@ export default function AnalyticsPage() {
               <SelectContent>
                 {connections.map((conn) => (
                   <SelectItem key={conn.id} value={String(conn.id)}>
-                    {conn.connection_name} ({conn.platform})
+                    {conn.connection_name} ({getPlatformLabel(conn.platform)})
                   </SelectItem>
                 ))}
               </SelectContent>

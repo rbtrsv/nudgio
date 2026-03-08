@@ -150,10 +150,10 @@
 - ✅ Responsive `columns` + `size` params (full stack) — replaced `device`-based layout with responsive grid (`columns` 2–6, default 4: 1→2→N cascade) + density control (`size` compact/default/spacious: 13-property SIZE_MAP). `device` kept as first-class API param (not deprecated), hidden from UI. `list` style removed. 17 files across server (4 subrouters), WordPress plugin (7 files: shortcode, block.json, index.js, render.php, activation, settings, docs), Shopify extension (Liquid schema), Next.js client (5 files: Zod schema, 2 services, 2 component pages). Server-side validation: clamp columns 2–6, size fallback to "default". HMAC unchanged.
 - ✅ Managed Pricing billing page — billing page rewritten for Shopify Managed Pricing. Shows current plan + plan comparison + "Manage Plan on Shopify" button that opens `https://admin.shopify.com/store/{storeHandle}/charges/nudgio/pricing_plans`. Subscribe/cancel endpoints and service functions kept with comments for manual pricing revert. Partner Dashboard → Distribution → Manage listing → Pricing content → Settings → "Managed pricing" selected.
 
-### 4. Shopify App Store Submission (⏳ Automated Checks Running)
-- ⏳ Automated embedded app checks — auto-checked every 2 hours by Shopify. Verifying: latest App Bridge CDN, session token auth. Running since 2026-03-08.
-- ❌ App listing: description, screenshots, demo video
-- ❌ Submit for Shopify review (2-4 week review process)
+### 4. Shopify App Store Submission (⏳ Waiting on Automated Checks)
+- ⏳ Automated embedded app checks — auto-checked every 2 hours. **BLOCKER**: "Using latest App Bridge CDN" + "Using session tokens for auth" not yet passing. Must log in and interact with app on dev store to generate session data.
+- ✅ App listing: description, screenshots, demo video
+- ❌ Submit for Shopify review (2-4 week review process) — blocked by automated checks above
 
 ### 5. Legal Pages ✅
 - ✅ Privacy policy — `/legal/privacy-policy` (GDPR/CCPA, store data, credentials, Stripe)
@@ -174,8 +174,8 @@
 - ✅ WooCommerce feature compatibility, `uninstall.php`, GPL-2.0-or-later
 - ✅ Verified working on `wp.nudgio.tech`
 - ✅ Gutenberg block — `nudgio/recommendations` block with Columns RangeControl (2–6) + Size SelectControl (compact/default/spacious), live preview placeholder, block.json + index.js + render.php
-- ❌ Rename plugin directory `nudgio` → `nudgio` (Plugin Name: "Nudgio Technologies")
-- ❌ Submit to WordPress Plugin Directory
+- ✅ Rename plugin directory
+- ✅ Submit to WordPress Plugin Directory
 
 ### 8. Custom Integration Platform + Data Sync Tab ✅
 - ✅ `CUSTOM_INTEGRATION` added to `PlatformType` enum (backend + frontend)
@@ -240,7 +240,7 @@
 7b. ✅ **Storefront widget delivery (Stage 3)** — DONE. App Proxy subrouter (4 endpoints, HMAC hex verification per Shopify docs — decoded values, no separator join, duplicate keys with comma), `[app_proxy]` in `shopify.app.toml`, Theme App Extension (Liquid block + iframe auto-resize JS), deployed via `shopify app deploy`, Components page updated with storefront instructions. Verified working in Theme Editor with product images.
 7c. ✅ **Components product dropdown + guards** — DONE. Product dropdown (fetches from `GET /products`, ungated), Liquid guard for non-product pages, app proxy guard for missing product_id.
 7d. ✅ **Managed Pricing billing** — DONE. Billing page shows current plan + "Manage Plan on Shopify" button (opens Shopify-hosted pricing page). Subscribe/cancel code kept for manual pricing revert. Managed Pricing configured in Partner Dashboard.
-8. **App Store submission** — ⏳ automated embedded app checks running (every 2 hours). Listing, description, screenshots, demo video still needed. Submit for review (2-4 weeks).
+8. **App Store submission** — ⏳ listing done (description, screenshots, demo video). Blocked by automated embedded app checks (App Bridge CDN + session tokens). Submit for review after checks pass.
 
 ### 🟢 Low Priority — Future Expansions
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
