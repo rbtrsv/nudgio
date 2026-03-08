@@ -1483,27 +1483,48 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ `widget_api_key_subrouter.py` — JWT-gated CRUD on `/connections/{connection_id}/api-keys/`: POST (generate key, return plaintext once), GET (list with prefix only), DELETE (soft delete)
 - ✅ `widget_subrouter.py` — Public widget endpoints on `/widget` prefix (ungated, HMAC signed URL auth): 4 endpoints (bestsellers, cross-sell, upsell, similar), all HTMLResponse. Same engine + adapter logic as components.
 - ✅ `components_subrouter.py` — added `postMessage` height reporting to `generate_recommendation_html()` for iframe auto-resize
+- ✅ `columns` + `size` responsive params (full stack) — SIZE_MAP dict (13 CSS properties × 3 tiers), responsive grid `grid-cols-1 md:grid-cols-2 lg:grid-cols-{columns}`, server-side clamp (columns 2–6, size fallback "default"). `device` stays first-class API param (accepted but not used for rendering). `list` style removed. 4 subrouters updated (components, widget, app_proxy, embedded).
 - ✅ Frontend: `widget-api-keys.schemas.ts` (Zod), `widget-api-keys.service.ts` (CRUD), `api.endpoints.ts` (WIDGET_API_KEY_ENDPOINTS with trailing slashes), "API Keys" 3rd tab on connection detail page (hidden for Shopify)
 - ✅ Router: `widget_subrouter` on ungated (HMAC auth), `widget_api_key_subrouter` on gated (JWT auth). 66 routes total.
 - ❌ Components page "Copy Snippet" — replace static HTML copy with configured snippet (iframe + signed URL instructions)
 
 ### WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
 - ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based widget rendering (same pattern as Shopify Theme App Extension)
-- ✅ `[nudgio]` shortcode — generates HMAC-signed iframe URLs, API secret never in HTML. Params: type, count, style, device, colors, border_radius, lookback_days, method, min_price_increase_percent, product_id.
-- ✅ WP Admin settings page (Settings → Nudgio Recommendations) — Key ID, API Secret (encrypted via `openssl_encrypt` with `AUTH_KEY` salt before storing in `wp_options`), Server URL, default widget settings (type, count, style, device, colors, border radius)
+- ✅ `[nudgio]` shortcode — generates HMAC-signed iframe URLs, API secret never in HTML. Params: type, count, style, device, columns, size, colors, border_radius, lookback_days, method, min_price_increase_percent, product_id.
+- ✅ WP Admin settings page (Settings → Nudgio Recommendations) — Key ID, API Secret (encrypted via `openssl_encrypt` with `AUTH_KEY` salt before storing in `wp_options`), Server URL, default widget settings (type, count, style, columns, size, colors, border radius)
 - ✅ Auto-detects `$product->get_id()` on WooCommerce product pages for cross-sell/upsell/similar
 - ✅ Test Connection — generates signed URL server-side, calls via `wp_remote_get`, verifies API key works
 - ✅ WooCommerce feature compatibility declared (`custom_order_tables`, `cart_checkout_blocks`)
 - ✅ `uninstall.php` — removes all `nudgio_*` options on plugin deletion
 - ✅ Verified working on `wp.nudgio.tech` — Test Connection passes, shortcode renders bestsellers in iframe
-- ❌ Gutenberg block (`nudgio/recommendations`) — R2 scope (future)
+- ✅ Gutenberg block (`nudgio/recommendations`) — block.json (columns + size attributes), index.js (Columns RangeControl 2–6, Size SelectControl compact/default/spacious, no Device), render.php (maps block attributes to shortcode atts)
 - ❌ Submit to WordPress Plugin Directory (free listing)
 
+### Data Ingestion + Local Storage (V3 Architecture)
+**Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.
+
+#### Step 1 — Push API + IngestAdapter (V2 foundation)
+- ❌ Models: `IngestedProduct`, `IngestedOrder`, `IngestedOrderItem` — local storage tables per connection_id
+- ❌ Migration for new tables
+- ❌ `data_ingestion_subrouter.py` — `POST /ingest/products`, `POST /ingest/orders`, `POST /ingest/order-items` (auth via Widget API Key, batch up to 1000 items per request)
+- ❌ `IngestAdapter(PlatformAdapter)` — reads from ingested tables, same interface as ShopifyAdapter/WooCommerceApiAdapter (get_products, get_orders, get_product_count, get_order_count)
+- ❌ Wire IngestAdapter into adapter factory for connections with ingested data
+
+#### Step 2 — Auto-Sync (V3 complete)
+- ❌ Periodic sync task — runs existing adapters (Shopify/WooCommerce/Magento) to populate ingested tables automatically
+- ❌ Sync settings per connection: interval (hourly/daily/weekly), enabled/disabled
+- ❌ Sync status tracking (last_synced_at, items_synced, errors)
+
+#### Step 3 — Granular Sync Filters (future)
+- ❌ Filter by category, price range, date range, product tags
+- ❌ Selective sync (specific products/categories only)
+
 ### Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
-- ❌ `widget.js` loader script — served from `server.nudgio.tech/widget.js`, client-side fetch from public widget API
-- ❌ Finds all `.nudgio-widget` divs, reads `data-` attributes (type, count, style, colors, product-id), renders HTML
+- ❌ `widget_sign_subrouter.py` — `GET /widget/sign` endpoint, server-side HMAC URL signing (CORS `*`, rate limited, secret never in JS)
+- ❌ `widget.js` — static JS loader served from `/static/widget.js`, finds `.nudgio-widget` divs, reads `data-*` attributes, calls sign endpoint, creates iframe with auto-resize
 - ❌ Product auto-detection via `data-product-id` attribute or page meta
-- ❌ For Squarespace, Wix, custom sites — any site that can paste a `<script>` tag
+- ❌ Components page "Copy Snippet" — `generateEmbedCode()` outputs `<div>` + `<script>` snippet using API key, not raw HTML wrapper
+- ❌ Mount sign subrouter in `router.py` (ungated)
 
 ### Magento Adobe Commerce Extension (Distribution)
 - ❌ Magento 2 extension for Adobe Commerce Marketplace — strict DI, layout XML, Block classes, `.phtml` templates

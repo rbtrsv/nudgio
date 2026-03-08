@@ -81,25 +81,29 @@ def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[Re
             "base_url": settings.shop_base_url,
             "product_template": settings.product_url_template
         }
-    
+
+    # Strip protocol from store_url if already present (store_url is stored as "https://domain.com")
+    raw_host = connection.store_url or connection.db_host or ""
+    raw_host = raw_host.removeprefix("https://").removeprefix("http://").rstrip("/")
+
     # Default URL patterns by platform
     defaults = {
         PlatformType.SHOPIFY.value: {
-            "base_url": f"https://{connection.store_url or connection.db_host}",  # Shopify store domain
+            "base_url": f"https://{raw_host}",  # Shopify store domain
             "product_template": "/products/{handle}"
         },
         PlatformType.WOOCOMMERCE.value: {
-            "base_url": f"https://{connection.store_url or connection.db_host}",  # WordPress site domain
-            "product_template": "/product/{handle}"  # or "/shop/{handle}"
+            "base_url": f"https://{raw_host}",  # WordPress site domain
+            "product_template": "/product/{handle}"
         },
         PlatformType.MAGENTO.value: {
-            "base_url": f"https://{connection.store_url or connection.db_host}",  # Magento store domain
+            "base_url": f"https://{raw_host}",  # Magento store domain
             "product_template": "/catalog/product/view/id/{id}"
         }
     }
 
     return defaults.get(connection.platform, {
-        "base_url": f"https://{connection.store_url or connection.db_host}",
+        "base_url": f"https://{raw_host}",
         "product_template": "/products/{handle}"
     })
 
