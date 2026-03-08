@@ -1527,7 +1527,7 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ `uninstall.php` — removes all `nudgio_*` options on plugin deletion
 - ✅ Verified working on `wp.nudgio.tech` — Test Connection passes, shortcode renders bestsellers in iframe
 - ✅ Gutenberg block (`nudgio/recommendations`) — block.json (columns + size attributes), index.js (Columns RangeControl 2–6, Size SelectControl compact/default/spacious, no Device), render.php (maps block attributes to shortcode atts)
-- ❌ Submit to WordPress Plugin Directory (free listing)
+- ✅ Submit to WordPress Plugin Directory (free listing) — submitted as "Nudgio Technologies" (slug: `nudgio-technologies`), Plugin Check passes clean, awaiting manual review (~11 days)
 
 ### Data Ingestion + Local Storage (V3 Architecture) ✅
 **Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.

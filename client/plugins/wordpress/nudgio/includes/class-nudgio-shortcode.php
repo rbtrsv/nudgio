@@ -156,7 +156,7 @@ class Nudgio_Shortcode {
         $output .= ' src="' . esc_url( $url ) . '"';
         $output .= ' style="width:100%;border:none;overflow:hidden;min-height:200px;"';
         $output .= ' loading="lazy"';
-        $output .= ' title="' . esc_attr__( 'Nudgio Product Recommendations', 'nudgio' ) . '"';
+        $output .= ' title="' . esc_attr__( 'Nudgio Product Recommendations', 'nudgio-technologies' ) . '"';
         $output .= '></iframe>';
 
         // Auto-resize JS — listens for postMessage from iframe content

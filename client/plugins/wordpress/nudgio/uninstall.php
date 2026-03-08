@@ -29,6 +29,6 @@ $nudgio_options = array(
     'nudgio_default_border_radius',
 );
 
-foreach ( $nudgio_options as $option ) {
-    delete_option( $option );
+foreach ( $nudgio_options as $nudgio_option ) {
+    delete_option( $nudgio_option );
 }

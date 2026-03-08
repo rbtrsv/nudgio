@@ -1,8 +1,8 @@
 === Nudgio Technologies ===
 Contributors: burarotechnologies
 Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
-Requires at least: 6.0
-Tested up to: 6.7
+Requires at least: 6.1
+Tested up to: 6.9
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPLv2 or later

@@ -7,11 +7,10 @@
  * Requires at least: 6.1
  * Requires PHP: 8.0
  * Author: Buraro Technologies
- * Author URI: https://www.nudgio.tech
+ * Author URI: https://www.buraro.com
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: nudgio
- * Domain Path: /languages
+ * Text Domain: nudgio-technologies
  * WC requires at least: 7.0
  * WC tested up to: 9.0
  */
@@ -111,7 +110,7 @@ add_action( 'plugins_loaded', 'nudgio_init_admin' );
  */
 function nudgio_settings_link( $links ) {
     $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=nudgio' ) ) . '">'
-        . esc_html__( 'Settings', 'nudgio' ) . '</a>';
+        . esc_html__( 'Settings', 'nudgio-technologies' ) . '</a>';
     array_unshift( $links, $settings_link );
     return $links;
 }
