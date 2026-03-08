@@ -78,13 +78,26 @@ register_activation_hook( __FILE__, 'nudgio_activate' );
 // ==========================================
 
 /**
+ * Declare WooCommerce feature compatibility.
+ * Our plugin only reads product IDs — it does not interact with orders,
+ * cart, or checkout. Safe to declare compatible with all WC features.
+ */
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+    }
+} );
+
+/**
  * Initialize the admin settings page.
- * Registers settings, sections, and fields via WP Settings API.
+ * Must run on plugins_loaded — admin_menu fires BEFORE admin_init,
+ * so the menu registration inside the constructor needs to be hooked early enough.
  */
 function nudgio_init_admin() {
     new Nudgio_Settings();
 }
-add_action( 'admin_init', 'nudgio_init_admin' );
+add_action( 'plugins_loaded', 'nudgio_init_admin' );
 
 /**
  * Add settings link to the plugins list page.

@@ -68,8 +68,9 @@ export const DATA_ENDPOINTS = {
  * Backend: /server/apps/ecommerce/subrouters/widget_api_key_subrouter.py
  */
 export const WIDGET_API_KEY_ENDPOINTS = {
-  LIST: (connId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys`,
-  CREATE: (connId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys`,
+  // Trailing slash required on collection endpoints to avoid FastAPI 307 redirect (http:// scheme behind proxy)
+  LIST: (connId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys/`,
+  CREATE: (connId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys/`,
   DELETE: (connId: number, keyId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys/${keyId}`,
 };
 
