@@ -46,7 +46,7 @@ Pricing changes (Shopify Dashboard):
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlalchemy import select, func, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -299,7 +299,6 @@ def is_shopify_billing_active(shopify_billing: ShopifyBilling | None) -> bool:
     # CANCELED/PAST_DUE — check grace period
     if shopify_billing.billing_status in ("CANCELED", "PAST_DUE"):
         if shopify_billing.end_date:
-            from datetime import timedelta
             grace_deadline = shopify_billing.end_date + timedelta(days=GRACE_PERIOD_DAYS)
             if datetime.now(timezone.utc) < grace_deadline:
                 return True
@@ -375,7 +374,6 @@ async def is_service_active(org_id: int, session: AsyncSession) -> bool:
     # Canceled/past_due/unpaid — check grace period
     if subscription.subscription_status in ("CANCELED", "PAST_DUE", "UNPAID"):
         if subscription.end_date:
-            from datetime import timedelta
             grace_deadline = subscription.end_date + timedelta(days=GRACE_PERIOD_DAYS)
             if datetime.now(timezone.utc) < grace_deadline:
                 return True
@@ -421,7 +419,6 @@ async def is_service_active_with_subscription(
     # Canceled/past_due/unpaid — check grace period
     if subscription.subscription_status in ("CANCELED", "PAST_DUE", "UNPAID"):
         if subscription.end_date:
-            from datetime import timedelta
             grace_deadline = subscription.end_date + timedelta(days=GRACE_PERIOD_DAYS)
             if datetime.now(timezone.utc) < grace_deadline:
                 return True

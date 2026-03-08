@@ -373,6 +373,7 @@ async def get_dashboard(
 @router.get("/products")
 async def get_products(
     connection: EcommerceConnection = Depends(get_shopify_connection),
+    db: AsyncSession = Depends(get_session),
 ):
     """
     Get a simplified product list for the admin Components page dropdown.
@@ -597,6 +598,7 @@ async def reset_settings(
 async def get_bestsellers(
     payload: EmbeddedBestsellerRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
+    db: AsyncSession = Depends(get_session),
 ):
     """
     Get bestselling products for the embedded app's connection.
@@ -658,6 +660,7 @@ async def get_bestsellers(
 async def get_cross_sell(
     payload: EmbeddedCrossSellRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
+    db: AsyncSession = Depends(get_session),
 ):
     """
     Get frequently bought together products for the embedded app's connection.
@@ -720,6 +723,7 @@ async def get_cross_sell(
 async def get_upsell(
     payload: EmbeddedUpsellRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
+    db: AsyncSession = Depends(get_session),
 ):
     """
     Get higher-priced alternatives for the embedded app's connection.
@@ -782,6 +786,7 @@ async def get_upsell(
 async def get_similar_products(
     payload: EmbeddedSimilarRequest,
     connection: EcommerceConnection = Depends(get_shopify_connection),
+    db: AsyncSession = Depends(get_session),
 ):
     """
     Get similar products for the embedded app's connection.

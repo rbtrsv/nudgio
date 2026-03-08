@@ -126,7 +126,6 @@ async def customers_data_request(request: Request):
     """
     body = await _verify_webhook_hmac(request)
 
-    import json
     payload = json.loads(body)
     shop_domain = payload.get("shop_domain", "unknown")
 
@@ -153,7 +152,6 @@ async def customers_redact(request: Request):
     """
     body = await _verify_webhook_hmac(request)
 
-    import json
     payload = json.loads(body)
     shop_domain = payload.get("shop_domain", "unknown")
 
@@ -185,7 +183,6 @@ async def shop_redact(
     """
     body = await _verify_webhook_hmac(request)
 
-    import json
     payload = json.loads(body)
     shop_domain = payload.get("shop_domain", "unknown")
 
@@ -248,7 +245,6 @@ async def app_subscriptions_update(
     body = await _verify_webhook_hmac(request)
 
     # Step 2: Parse payload
-    import json
     payload = json.loads(body)
     shop_domain = request.headers.get("X-Shopify-Shop-Domain", "unknown")
 

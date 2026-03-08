@@ -24,7 +24,7 @@ from typing import Dict, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.sql import func
-from sqlalchemy import and_
+from sqlalchemy import and_, delete
 
 from ..models import EcommerceConnection, IngestedProduct, IngestedOrder, IngestedOrderItem
 from ..adapters.factory import get_adapter
@@ -315,7 +315,6 @@ async def _prune_stale_rows(
     Only called by sync_connection_data() — Push API imports do NOT prune
     because partial uploads are expected.
     """
-    from sqlalchemy import delete
 
     # Prune products
     await db.execute(
