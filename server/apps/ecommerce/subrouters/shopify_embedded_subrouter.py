@@ -172,7 +172,7 @@ async def _build_dashboard_response(
     products_count = 0
     orders_count = 0
     try:
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         products_count = await adapter.get_product_count()
         orders_count = await adapter.get_order_count(lookback_days=365)
     except Exception as e:
@@ -388,7 +388,7 @@ async def get_products(
     """
     try:
         # Step 2–3: Fetch products from store adapter
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         raw_products = await adapter.get_products(limit=250)
 
         # Step 4: Return simplified list for dropdown
@@ -611,7 +611,7 @@ async def get_bestsellers(
     """
     try:
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -672,7 +672,7 @@ async def get_cross_sell(
     """
     try:
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -734,7 +734,7 @@ async def get_upsell(
     """
     try:
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -796,7 +796,7 @@ async def get_similar_products(
     """
     try:
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -880,7 +880,7 @@ async def get_bestsellers_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -960,7 +960,7 @@ async def get_cross_sell_component(
         rec_settings = settings_result.scalar_one_or_none()
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -1031,7 +1031,7 @@ async def get_upsell_component(
         rec_settings = settings_result.scalar_one_or_none()
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -1101,7 +1101,7 @@ async def get_similar_component(
         rec_settings = settings_result.scalar_one_or_none()
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first

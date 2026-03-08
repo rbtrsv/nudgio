@@ -4,7 +4,7 @@ Nudgio Models — Ecommerce
 Platform connections, recommendation settings, API usage tracking, recommendation analytics.
 """
 
-from sqlalchemy import Integer, String, Boolean, DateTime, ForeignKey, Text
+from sqlalchemy import Integer, String, Boolean, DateTime, Float, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -79,6 +79,9 @@ class EcommerceConnection(BaseMixin, Base):
     analytics: Mapped[list["RecommendationAnalytics"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
     shopify_billing: Mapped[Optional["ShopifyBilling"]] = relationship(back_populates="connection", uselist=False, cascade="all, delete-orphan")
     widget_api_keys: Mapped[list["WidgetAPIKey"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
+    ingested_products: Mapped[list["IngestedProduct"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
+    ingested_orders: Mapped[list["IngestedOrder"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
+    ingested_order_items: Mapped[list["IngestedOrderItem"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
 
 
 # ==========================================
@@ -227,3 +230,103 @@ class WidgetAPIKey(BaseMixin, Base):
 
     # Relationships
     connection: Mapped["EcommerceConnection"] = relationship(back_populates="widget_api_keys")
+
+
+# ==========================================
+# 7. INGESTED PRODUCTS
+# ==========================================
+
+class IngestedProduct(Base):
+    """
+    Purpose: Locally stored product data — populated via Push API or Auto-Sync.
+    Scope: Per-connection product catalog mirror.
+    Usage: "Product 123 from My WooCommerce Store, synced 2 hours ago".
+
+    No BaseMixin — bulk data table, same pattern as APIUsageTracking and RecommendationAnalytics.
+    """
+    __tablename__ = "ingested_products"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    connection_id: Mapped[int] = mapped_column(Integer, ForeignKey("ecommerce_connections.id", ondelete="CASCADE"), nullable=False)
+    product_id: Mapped[str] = mapped_column(String(255), nullable=False)  # Platform product ID (unique per connection)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    handle: Mapped[str | None] = mapped_column(String(500), nullable=True)  # URL slug
+    product_type: Mapped[str | None] = mapped_column(String(255), nullable=True)  # Category
+    vendor: Mapped[str | None] = mapped_column(String(255), nullable=True)  # Brand
+    sku: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    image_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)  # Primary image URL
+    inventory_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="active")  # active, draft, archived
+    platform_created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)  # When created on platform
+    platform_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)  # When updated on platform
+    ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())  # When we stored it
+
+    # Upsert by (connection_id, product_id)
+    __table_args__ = (UniqueConstraint("connection_id", "product_id", name="uq_ingested_products_connection_product"),)
+
+    # Relationships
+    connection: Mapped["EcommerceConnection"] = relationship(back_populates="ingested_products")
+
+
+# ==========================================
+# 8. INGESTED ORDERS
+# ==========================================
+
+class IngestedOrder(Base):
+    """
+    Purpose: Locally stored order data — populated via Push API or Auto-Sync.
+    Scope: Per-connection order history mirror.
+    Usage: "Order #1001 from My WooCommerce Store, synced 2 hours ago".
+
+    No BaseMixin — bulk data table.
+    """
+    __tablename__ = "ingested_orders"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    connection_id: Mapped[int] = mapped_column(Integer, ForeignKey("ecommerce_connections.id", ondelete="CASCADE"), nullable=False)
+    order_id: Mapped[str] = mapped_column(String(255), nullable=False)  # Platform order ID
+    customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    total_price: Mapped[float] = mapped_column(Float, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False)  # completed, processing, etc.
+    order_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())  # When we stored it
+
+    # Upsert by (connection_id, order_id)
+    __table_args__ = (UniqueConstraint("connection_id", "order_id", name="uq_ingested_orders_connection_order"),)
+
+    # Relationships
+    connection: Mapped["EcommerceConnection"] = relationship(back_populates="ingested_orders")
+
+
+# ==========================================
+# 9. INGESTED ORDER ITEMS
+# ==========================================
+
+class IngestedOrderItem(Base):
+    """
+    Purpose: Locally stored order line item data — populated via Push API or Auto-Sync.
+    Scope: Per-connection order line items mirror.
+    Usage: "Product 123 x2 in Order #1001 from My WooCommerce Store".
+
+    No BaseMixin — bulk data table.
+    """
+    __tablename__ = "ingested_order_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    connection_id: Mapped[int] = mapped_column(Integer, ForeignKey("ecommerce_connections.id", ondelete="CASCADE"), nullable=False)
+    order_id: Mapped[str] = mapped_column(String(255), nullable=False)  # Platform order ID (not FK — just reference)
+    product_id: Mapped[str] = mapped_column(String(255), nullable=False)  # Platform product ID
+    variant_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)  # Price per unit
+    product_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    customer_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    order_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())  # When we stored it
+
+    # Upsert by (connection_id, order_id, product_id, variant_id)
+    __table_args__ = (UniqueConstraint("connection_id", "order_id", "product_id", "variant_id", name="uq_ingested_order_items_connection_order_product_variant"),)
+
+    # Relationships
+    connection: Mapped["EcommerceConnection"] = relationship(back_populates="ingested_order_items")

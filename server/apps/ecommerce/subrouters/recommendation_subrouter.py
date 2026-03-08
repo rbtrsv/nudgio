@@ -50,7 +50,7 @@ async def get_bestsellers(
         connection = await get_active_connection(payload.connection_id, user.id, db)
 
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -109,7 +109,7 @@ async def get_cross_sell(
         connection = await get_active_connection(payload.connection_id, user.id, db)
 
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -169,7 +169,7 @@ async def get_upsell(
         connection = await get_active_connection(payload.connection_id, user.id, db)
 
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -229,7 +229,7 @@ async def get_similar_products(
         connection = await get_active_connection(payload.connection_id, user.id, db)
 
         # Create adapter and engine
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         # Check cache first

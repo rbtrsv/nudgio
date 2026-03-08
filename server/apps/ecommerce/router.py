@@ -48,6 +48,9 @@ from .subrouters.widget_subrouter import router as widget_router
 # Widget API key management (JWT-gated CRUD)
 from .subrouters.widget_api_key_subrouter import router as widget_api_key_router
 
+# Widget sign endpoint (public — generates HMAC-signed URLs for JS loader)
+from .subrouters.widget_sign_subrouter import router as widget_sign_router
+
 
 router = APIRouter(prefix="/ecommerce")
 
@@ -59,6 +62,7 @@ router.include_router(shopify_billing_router)  # Mixed gating handled internally
 router.include_router(shopify_embedded_router)  # Session token auth handled internally
 router.include_router(shopify_app_proxy_router)  # HMAC auth handled internally
 router.include_router(widget_router)  # HMAC signed URL auth handled internally
+router.include_router(widget_sign_router)  # Public sign endpoint (generates signed URLs for widget.js)
 
 # Gated — everything else requires active service
 # See require_active_subscription in dependency_utils.py for details.

@@ -15,6 +15,23 @@ import {
 export type WidgetType = 'bestsellers' | 'cross-sell' | 'upsell' | 'similar';
 
 /**
+ * Default values — only include data attributes that differ from these
+ */
+const EMBED_DEFAULTS: Record<string, string> = {
+  top: '4',
+  style: 'card',
+  columns: '4',
+  size: 'default',
+  'primary-color': '#3B82F6',
+  'text-color': '#1F2937',
+  'bg-color': '#FFFFFF',
+  'border-radius': '8px',
+  'lookback-days': '30',
+  method: 'volume',
+  'min-price-increase': '10',
+};
+
+/**
  * Stateless hook for fetching embeddable HTML widget components
  *
  * No store/provider needed — uses local useState for loading/error/html.
@@ -67,14 +84,68 @@ export function useComponents() {
   }, []);
 
   /**
-   * Generate an embed code snippet for the current widget HTML
-   * @returns Embed code string or null if no HTML is loaded
+   * Generate a universal embed code snippet using data-attribute based widget.js loader.
+   *
+   * Takes widget config + API key ID + server URL. Returns a <div> + <script> snippet
+   * that works on any website (no platform plugin required).
+   *
+   * Only includes data attributes that differ from defaults to minimize snippet size.
+   * product_id is intentionally omitted — user adds per page.
+   *
+   * @param keyId Widget API key ID (from WidgetAPIKey model)
+   * @param serverUrl Nudgio server URL (e.g., "https://server.nudgio.tech")
+   * @param widgetType Widget type: bestsellers, cross-sell, upsell, similar
+   * @param config Widget configuration values
+   * @returns Embed code string
    */
-  const generateEmbedCode = useCallback((): string | null => {
-    if (!html) return null;
+  const generateEmbedCode = useCallback((
+    keyId: number,
+    serverUrl: string,
+    widgetType: WidgetType,
+    config: {
+      top?: number;
+      style?: string;
+      columns?: number;
+      size?: string;
+      primaryColor?: string;
+      textColor?: string;
+      bgColor?: string;
+      borderRadius?: string;
+      lookbackDays?: number;
+      method?: string;
+      minPriceIncrease?: number;
+    },
+  ): string => {
+    // Build data attributes — only include non-default values
+    const attrs: string[] = [
+      `data-key-id="${keyId}"`,
+      `data-type="${widgetType}"`,
+    ];
 
-    return `<!-- Nudgio Recommendation Widget -->\n<div class="nudgio-widget">\n${html}\n</div>`;
-  }, [html]);
+    const attrMap: Record<string, string> = {
+      top: String(config.top ?? 4),
+      style: config.style ?? 'card',
+      columns: String(config.columns ?? 4),
+      size: config.size ?? 'default',
+      'primary-color': config.primaryColor ?? '#3B82F6',
+      'text-color': config.textColor ?? '#1F2937',
+      'bg-color': config.bgColor ?? '#FFFFFF',
+      'border-radius': config.borderRadius ?? '8px',
+      'lookback-days': String(config.lookbackDays ?? 30),
+      method: config.method ?? 'volume',
+      'min-price-increase': String(config.minPriceIncrease ?? 10),
+    };
+
+    for (const [key, value] of Object.entries(attrMap)) {
+      if (value !== EMBED_DEFAULTS[key]) {
+        attrs.push(`data-${key}="${value}"`);
+      }
+    }
+
+    const attrStr = attrs.join('\n     ');
+
+    return `<!-- Nudgio Recommendation Widget -->\n<div class="nudgio-widget"\n     ${attrStr}>\n</div>\n<script src="${serverUrl}/ecommerce/static/widget.js" async defer></script>`;
+  }, []);
 
   return {
     html,

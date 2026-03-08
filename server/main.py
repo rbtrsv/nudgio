@@ -15,8 +15,9 @@ app = FastAPI(
     description=settings.DESCRIPTION,
 )
 
-# Mount static files
+# Mount static files — each app owns its own static directory
 app.mount("/static", StaticFiles(directory="apps/main/static"), name="static")
+app.mount("/ecommerce/static", StaticFiles(directory="apps/ecommerce/static"), name="ecommerce-static")
 
 # Set all CORS enabled origins
 if settings.BACKEND_CORS_ORIGINS:

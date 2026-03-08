@@ -21,9 +21,10 @@ class PlatformType(str, Enum):
 
 
 class ConnectionMethod(str, Enum):
-    """Connection method: API (REST) or DATABASE (direct SQL)"""
+    """Connection method: API (REST), DATABASE (direct SQL), or INGEST (local push/sync)"""
     API = "api"
     DATABASE = "database"
+    INGEST = "ingest"
 
 
 # ==========================================
@@ -77,6 +78,9 @@ class EcommerceConnectionCreate(BaseModel):
                     self.db_port = 443
                 else:
                     self.db_port = 3306  # MySQL default for WooCommerce/Magento
+        elif self.connection_method == ConnectionMethod.INGEST:
+            # Ingest connections receive data via Push API or Auto-Sync — no credentials needed
+            pass
         return self
 
 

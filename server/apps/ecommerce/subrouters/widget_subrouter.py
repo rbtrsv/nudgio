@@ -165,7 +165,7 @@ async def get_bestsellers_widget(
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Step 3: Create adapter + engine, check cache or generate
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         cached = await get_cached_recommendations(
@@ -263,7 +263,7 @@ async def get_cross_sell_widget(
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Step 4: Create adapter + engine, check cache or generate
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         cached = await get_cached_recommendations(
@@ -360,7 +360,7 @@ async def get_upsell_widget(
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Step 4: Create adapter + engine, check cache or generate
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         cached = await get_cached_recommendations(
@@ -456,7 +456,7 @@ async def get_similar_widget(
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Step 4: Create adapter + engine, check cache or generate
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
         cached = await get_cached_recommendations(

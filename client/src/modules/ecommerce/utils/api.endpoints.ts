@@ -75,6 +75,14 @@ export const WIDGET_API_KEY_ENDPOINTS = {
 };
 
 /**
+ * API endpoints for widget sign (public — generates HMAC-signed URLs for widget.js)
+ * Backend: /server/apps/ecommerce/subrouters/widget_sign_subrouter.py
+ */
+export const WIDGET_SIGN_ENDPOINTS = {
+  SIGN: `${API_BASE_URL}/ecommerce/widget/sign`,
+};
+
+/**
  * API endpoints for Shopify OAuth
  * Backend: /server/apps/ecommerce/subrouters/shopify_oauth_subrouter.py
  */

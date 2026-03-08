@@ -140,7 +140,7 @@ async def get_bestsellers_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -215,7 +215,7 @@ async def get_cross_sell_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -289,7 +289,7 @@ async def get_upsell_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
         # Check cache first
@@ -362,7 +362,7 @@ async def get_similar_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
         # Check cache first

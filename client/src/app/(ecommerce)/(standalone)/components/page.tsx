@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
 import { useComponents, type WidgetType } from '@/modules/ecommerce/hooks/use-components';
 import { getProducts, type DataProduct } from '@/modules/ecommerce/service/data.service';
+import { getWidgetAPIKeys } from '@/modules/ecommerce/service/widget-api-keys.service';
+import { type WidgetAPIKeyDetail } from '@/modules/ecommerce/schemas/widget-api-keys.schemas';
+import { API_BASE_URL } from '@/modules/accounts/utils/api.endpoints';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';
@@ -11,7 +14,7 @@ import { Label } from '@/modules/shadcnui/components/ui/label';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
 import { Textarea } from '@/modules/shadcnui/components/ui/textarea';
-import { Loader2, LayoutGrid, Copy, CheckCircle } from 'lucide-react';
+import { Loader2, LayoutGrid, Copy, CheckCircle, AlertCircle, Code } from 'lucide-react';
 
 export default function ComponentsPage() {
   const { connections, activeConnectionId, setActiveConnection } = useConnections();
@@ -38,10 +41,35 @@ export default function ComponentsPage() {
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsFetched, setProductsFetched] = useState(false);
 
+  // API keys state (for embed code generation)
+  const [apiKeys, setApiKeys] = useState<WidgetAPIKeyDetail[]>([]);
+  const [apiKeysLoading, setApiKeysLoading] = useState(false);
+
   const needsProductId = widgetType !== 'bestsellers';
   const needsLookback = widgetType === 'bestsellers' || widgetType === 'cross-sell';
   const needsMethod = widgetType === 'bestsellers';
   const needsMinPriceIncrease = widgetType === 'upsell';
+
+  // Fetch API keys when connection changes
+  useEffect(() => {
+    if (!activeConnectionId) {
+      setApiKeys([]);
+      return;
+    }
+
+    const fetchApiKeys = async () => {
+      setApiKeysLoading(true);
+      const response = await getWidgetAPIKeys(activeConnectionId);
+      if (response.success && response.data) {
+        setApiKeys(response.data);
+      } else {
+        setApiKeys([]);
+      }
+      setApiKeysLoading(false);
+    };
+
+    fetchApiKeys();
+  }, [activeConnectionId]);
 
   // Fetch products when a non-bestseller widget type is selected and connection is active
   useEffect(() => {
@@ -86,14 +114,35 @@ export default function ComponentsPage() {
     });
   };
 
+  // Generate embed code using first active API key
+  const getEmbedSnippet = useCallback((): string | null => {
+    if (!apiKeys.length) return null;
+
+    // Use the first active API key
+    const firstKey = apiKeys[0];
+    return generateEmbedCode(firstKey.id, API_BASE_URL, widgetType, {
+      top,
+      style,
+      columns,
+      size,
+      primaryColor,
+      textColor,
+      bgColor,
+      borderRadius,
+      lookbackDays: needsLookback ? lookbackDays : undefined,
+      method: needsMethod ? method : undefined,
+      minPriceIncrease: needsMinPriceIncrease ? minPriceIncrease : undefined,
+    });
+  }, [apiKeys, widgetType, top, style, columns, size, primaryColor, textColor, bgColor, borderRadius, lookbackDays, method, minPriceIncrease, needsLookback, needsMethod, needsMinPriceIncrease, generateEmbedCode]);
+
   const handleCopy = useCallback(() => {
-    const code = generateEmbedCode();
+    const code = getEmbedSnippet();
     if (code) {
       navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
-  }, [generateEmbedCode]);
+  }, [getEmbedSnippet]);
 
   return (
     <div className="space-y-6">
@@ -314,33 +363,58 @@ export default function ComponentsPage() {
         </Card>
       )}
 
-      {/* Embed Code */}
-      {html && (
+      {/* Embed Code — shown when connection is selected (independent of preview) */}
+      {activeConnectionId && (
         <Card>
           <CardHeader>
-            <CardTitle>Embed Code</CardTitle>
-            <CardDescription>Copy and paste this code into your website</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <Code className="h-5 w-5" />
+              Embed Code
+            </CardTitle>
+            <CardDescription>Copy and paste this code into your website to display the widget</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea
-              readOnly
-              value={generateEmbedCode() || ''}
-              rows={6}
-              className="font-mono text-sm"
-            />
-            <Button variant="outline" onClick={handleCopy}>
-              {copied ? (
-                <>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy to Clipboard
-                </>
-              )}
-            </Button>
+            {apiKeysLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading API keys...
+              </div>
+            ) : apiKeys.length === 0 ? (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Create a Widget API Key first. Go to Settings → Widget API Keys to generate one.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <Textarea
+                  readOnly
+                  value={getEmbedSnippet() || ''}
+                  rows={8}
+                  className="font-mono text-sm"
+                />
+                {needsProductId && (
+                  <p className="text-sm text-muted-foreground">
+                    Add <code className="bg-muted px-1 rounded">data-product-id=&quot;YOUR_PRODUCT_ID&quot;</code> to
+                    the div for product-specific recommendations. Each page needs its own product ID.
+                  </p>
+                )}
+                <Button variant="outline" onClick={handleCopy}>
+                  {copied ? (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy to Clipboard
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       )}

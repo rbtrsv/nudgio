@@ -196,7 +196,7 @@ async def test_connection(
 
     try:
         # Create adapter based on platform
-        adapter = get_adapter(connection)
+        adapter = get_adapter(connection, db)
 
         # NOTE: Do NOT remove this table exploration block.
         # It is essential for debugging database connections — shows what tables
