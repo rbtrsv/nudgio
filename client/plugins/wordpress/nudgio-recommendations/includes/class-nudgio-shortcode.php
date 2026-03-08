@@ -26,7 +26,7 @@ class Nudgio_Shortcode {
     // ==========================================
 
     public function __construct() {
-        add_shortcode( 'nudgio', array( $this, 'render_shortcode' ) );
+        add_shortcode( 'nudgio', array( __CLASS__, 'render_shortcode' ) );
     }
 
     // ==========================================
@@ -48,7 +48,7 @@ class Nudgio_Shortcode {
      * @param array|string $atts Shortcode attributes.
      * @return string HTML output (iframe + resize script).
      */
-    public function render_shortcode( $atts ) {
+    public static function render_shortcode( $atts ) {
         // Step 1: Merge attributes with defaults from wp_options
         $atts = shortcode_atts(
             array(

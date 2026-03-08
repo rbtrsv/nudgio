@@ -113,6 +113,8 @@ adapters/
 - `data_subrouter.py` — raw product/order data
 - `shopify_oauth_subrouter.py` — Shopify OAuth 2.0 flow (`/shopify/auth` + `/shopify/callback`)
 - `woocommerce_auth_subrouter.py` — WooCommerce auto-auth (`/woocommerce/auth` + `/woocommerce/callback`)
+- `widget_api_key_subrouter.py` — JWT-gated CRUD for widget API keys (`/connections/{id}/api-keys/`)
+- `widget_subrouter.py` — Public widget endpoints (`/widget/*`), HMAC signed URL auth, HTMLResponse
 
 ### Utils (`server/apps/ecommerce/utils/`)
 
@@ -121,6 +123,7 @@ adapters/
 - `cache_utils.py` — recommendation caching with ABC + two backends: `InMemoryCacheBackend` (development) + `DragonflyCacheBackend` (production). Switch via `CACHE_BACKEND` constant in file.
 - `encryption_utils.py` — Fernet symmetric encryption (AES-128-CBC) for credentials. Integrated: encrypt on create/update, decrypt in adapter factory.
 - `rate_limiting_utils.py` — API rate limiting per organization with ABC + two backends: `InMemoryRateLimitBackend` (development) + `DragonflyRateLimitBackend` (production). Reads limits from `subscription_utils.TIER_LIMITS`. Switch via `RATE_LIMIT_BACKEND` constant in file.
+- `widget_auth_utils.py` — HMAC-SHA256 signature verification for public widget endpoints (canonical query, URL-encoded, sorted), timestamp expiry (5 min), domain restriction (secondary signal), dedicated rate limiting (per key_id: 60/min, per IP: 120/min)
 
 ### Schemas (`server/apps/ecommerce/schemas/`)
 
@@ -128,16 +131,17 @@ adapters/
 - `recommendation_settings_schemas.py` — `BestsellerMethod` enum + Create, Detail, Response, ListResponse, MessageResponse
 - `recommendation_schemas.py` — `RecommendationType` enum + Response schemas
 - `data_schemas.py` — Product, Order, OrderItem data schemas
+- `widget_api_key_schemas.py` — WidgetAPIKeyCreate, WidgetAPIKeyCreatedDetail (plaintext shown once), WidgetAPIKeyDetail (prefix only), response wrappers
 
 All schema fields have `Field(description="...")`.
 
 ### Router (`server/apps/ecommerce/router.py`)
 
 Prefix: `/ecommerce`. Split into ungated and gated groups:
-- **Ungated**: Shopify OAuth + WooCommerce auth callbacks + webhooks + billing + embedded (session token auth) + App Proxy (HMAC auth)
-- **Gated**: Everything else via `APIRouter(dependencies=[Depends(require_active_subscription)])` — connections, settings, recommendations, components, data. All endpoints return 403 when subscription is inactive.
+- **Ungated**: Shopify OAuth + WooCommerce auth callbacks + webhooks + billing + embedded (session token auth) + App Proxy (HMAC auth) + Widget (HMAC signed URL auth)
+- **Gated**: Everything else via `APIRouter(dependencies=[Depends(require_active_subscription)])` — connections, settings, recommendations, components, data, widget API keys. All endpoints return 403 when subscription is inactive.
 
-9 subrouters, 59 routes total (added GET /shopify/embedded/products + GET /data/products/{connection_id} for admin dropdowns).
+11 subrouters, 66 routes total.
 
 ### Frontend (`client/src/`)
 
@@ -1472,20 +1476,28 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Managed Pricing billing page — rewritten for Shopify Managed Pricing. "Manage Plan on Shopify" button opens `https://admin.shopify.com/store/{storeHandle}/charges/nudgio/pricing_plans`. Subscribe/cancel code kept with revert instructions.
 - ✅ Bug fixes — Token Exchange typo (`id-token` → `id_token`), GraphQL error parsing (str/dict/list normalization in 3 files), engine image_url mapping (Shopify `image_url` string vs WooCommerce `images` list), removed `/api/v1/` prefix from all server URLs, App Proxy HMAC rewritten per Shopify docs, Liquid template color URL encoding fix
 
-### Public Widget API (Shared Prerequisite — API-Key Auth)
-- ❌ `WidgetAPIKey` model — key (hashed), connection_id, allowed_domains, created_at, is_active
-- ❌ Public widget subrouter — API-key auth (not JWT), returns fresh recommendation HTML. Endpoints: `GET /widget/bestsellers`, `GET /widget/cross-sell`, `GET /widget/upsell`, `GET /widget/similar`. Same engine + adapter logic as `/components/*` but authenticated via `?api_key=` query param.
-- ❌ API key management endpoints — generate/revoke per connection, domain restriction (referer check)
-- ❌ API key management UI in dashboard — generate/revoke keys, show allowed domains
-- ❌ Components page "Copy Snippet" — replace static HTML copy with configured snippet (API key + div tag)
+### Public Widget API (Shared Prerequisite — HMAC-Signed URL Auth) ✅
+- ✅ `WidgetAPIKey` model — Fernet-encrypted secret, connection_id (FK CASCADE), api_key_prefix (`nk_` + 8 hex), name, allowed_domains, is_active. Reverse relationship on `EcommerceConnection`.
+- ✅ `widget_api_key_schemas.py` — Pydantic schemas: `WidgetAPIKeyCreate`, `WidgetAPIKeyCreatedDetail` (plaintext shown once), `WidgetAPIKeyDetail` (prefix only), response wrappers
+- ✅ `widget_auth_utils.py` — HMAC-SHA256 signature verification (canonical query = all params except sig, sorted alphabetically, URL-encoded via `urlencode` to match PHP's `http_build_query`), timestamp expiry (5 min), domain restriction (secondary signal), dedicated rate limiting (per key_id: 60/min, per IP: 120/min)
+- ✅ `widget_api_key_subrouter.py` — JWT-gated CRUD on `/connections/{connection_id}/api-keys/`: POST (generate key, return plaintext once), GET (list with prefix only), DELETE (soft delete)
+- ✅ `widget_subrouter.py` — Public widget endpoints on `/widget` prefix (ungated, HMAC signed URL auth): 4 endpoints (bestsellers, cross-sell, upsell, similar), all HTMLResponse. Same engine + adapter logic as components.
+- ✅ `components_subrouter.py` — added `postMessage` height reporting to `generate_recommendation_html()` for iframe auto-resize
+- ✅ Frontend: `widget-api-keys.schemas.ts` (Zod), `widget-api-keys.service.ts` (CRUD), `api.endpoints.ts` (WIDGET_API_KEY_ENDPOINTS with trailing slashes), "API Keys" 3rd tab on connection detail page (hidden for Shopify)
+- ✅ Router: `widget_subrouter` on ungated (HMAC auth), `widget_api_key_subrouter` on gated (JWT auth). 66 routes total.
+- ❌ Components page "Copy Snippet" — replace static HTML copy with configured snippet (iframe + signed URL instructions)
 
-### WooCommerce WordPress Plugin (Server-Side PHP — Independent of JS Snippet)
-- ❌ PHP plugin (Tailwind CSS + shadcn if possible, otherwise Tailwind only) — server-to-server `wp_remote_get()` calls from PHP to Nudgio public widget API
-- ❌ Gutenberg block (`nudgio/recommendations`) + `[nudgio]` shortcode — renders recommendation HTML server-side in PHP, no client-side JS needed
-- ❌ WP Admin settings page — API key stored in `wp_options`, default widget type/count/style/colors
-- ❌ Auto-detects `$product->get_id()` on WooCommerce product pages for cross-sell/upsell/similar
+### WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
+- ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based widget rendering (same pattern as Shopify Theme App Extension)
+- ✅ `[nudgio]` shortcode — generates HMAC-signed iframe URLs, API secret never in HTML. Params: type, count, style, device, colors, border_radius, lookback_days, method, min_price_increase_percent, product_id.
+- ✅ WP Admin settings page (Settings → Nudgio Recommendations) — Key ID, API Secret (encrypted via `openssl_encrypt` with `AUTH_KEY` salt before storing in `wp_options`), Server URL, default widget settings (type, count, style, device, colors, border radius)
+- ✅ Auto-detects `$product->get_id()` on WooCommerce product pages for cross-sell/upsell/similar
+- ✅ Test Connection — generates signed URL server-side, calls via `wp_remote_get`, verifies API key works
+- ✅ WooCommerce feature compatibility declared (`custom_order_tables`, `cart_checkout_blocks`)
+- ✅ `uninstall.php` — removes all `nudgio_*` options on plugin deletion
+- ✅ Verified working on `wp.nudgio.tech` — Test Connection passes, shortcode renders bestsellers in iframe
+- ❌ Gutenberg block (`nudgio/recommendations`) — R2 scope (future)
 - ❌ Submit to WordPress Plugin Directory (free listing)
-- Note: easier than Shopify — standard WordPress plugin patterns
 
 ### Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
 - ❌ `widget.js` loader script — served from `server.nudgio.tech/widget.js`, client-side fetch from public widget API

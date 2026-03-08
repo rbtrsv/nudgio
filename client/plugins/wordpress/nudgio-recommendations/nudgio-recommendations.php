@@ -4,7 +4,7 @@
  * Plugin URI: https://www.nudgio.tech
  * Description: Display AI-powered product recommendations on your WooCommerce store using Nudgio's recommendation engine. Supports bestsellers, cross-sell, upsell, and similar products via simple shortcodes.
  * Version: 1.0.0
- * Requires at least: 6.0
+ * Requires at least: 6.1
  * Requires PHP: 8.0
  * Author: Buraro Technologies
  * Author URI: https://www.nudgio.tech
@@ -119,3 +119,19 @@ function nudgio_init_shortcode() {
     new Nudgio_Shortcode();
 }
 add_action( 'init', 'nudgio_init_shortcode' );
+
+// ==========================================
+// Gutenberg Block Registration
+// ==========================================
+
+/**
+ * Register the nudgio/recommendations Gutenberg block.
+ *
+ * Uses block.json metadata (apiVersion 3) with server-side rendering via render.php.
+ * render.php delegates to Nudgio_Shortcode::render_shortcode() — zero duplication.
+ * Requires WordPress 6.1+ for render file support in block.json.
+ */
+function nudgio_register_block() {
+    register_block_type( NUDGIO_PLUGIN_DIR . 'blocks/recommendations' );
+}
+add_action( 'init', 'nudgio_register_block' );

@@ -155,17 +155,21 @@
 - ✅ Privacy policy — `/legal/privacy-policy` (GDPR/CCPA, store data, credentials, Stripe)
 - ✅ Terms of service — `/legal/terms-of-service` (SaaS terms, subscriptions, liability, Romanian jurisdiction)
 
-### 6. Public Widget API (Shared Prerequisite — API-Key Auth)
-- ❌ `WidgetAPIKey` model — key, connection_id, allowed_domains, created_at, is_active
-- ❌ Public widget endpoints — new subrouter, API-key auth (not JWT), returns fresh recommendation HTML. Endpoints: `/widget/bestsellers`, `/widget/cross-sell`, `/widget/upsell`, `/widget/similar`
-- ❌ API key management UI in dashboard — generate/revoke per connection, domain restriction
+### 6. Public Widget API (HMAC-Signed URL Auth) ✅
+- ✅ `WidgetAPIKey` model — Fernet-encrypted secret, connection_id, api_key_prefix, name, allowed_domains, is_active
+- ✅ Public widget endpoints — `widget_subrouter.py` (ungated, HMAC signed URL auth), 4 endpoints: `/widget/bestsellers`, `/widget/cross-sell`, `/widget/upsell`, `/widget/similar`, all HTMLResponse
+- ✅ `widget_auth_utils.py` — HMAC-SHA256 verification (canonical query, URL-encoded, sorted), timestamp expiry, domain restriction, dedicated rate limiting
+- ✅ `widget_api_key_subrouter.py` — JWT-gated CRUD (generate/list/delete), plaintext secret shown once
+- ✅ API key management UI in dashboard — "API Keys" 3rd tab on connection detail page (hidden for Shopify)
 - ❌ Components page "Copy Snippet" — generates configured snippet instead of static HTML
 
-### 7. WooCommerce WordPress Plugin (Server-Side PHP — Independent)
-- ❌ PHP plugin (Tailwind CSS + shadcn if possible, otherwise Tailwind only) — server-to-server calls from PHP to Nudgio public widget API
-- ❌ Gutenberg block + `[nudgio]` shortcode — renders recommendation HTML server-side (no client-side JS needed)
-- ❌ WP Admin settings page — store API key in `wp_options`, configure defaults
-- ❌ Auto-detects `$product->get_id()` on product pages for cross-sell/upsell/similar
+### 7. WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
+- ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based rendering (HMAC-signed URLs, same pattern as Shopify)
+- ✅ `[nudgio]` shortcode — signed iframe URLs, auto-resize JS, auto-detects product ID on WooCommerce product pages
+- ✅ WP Admin settings page — Key ID, encrypted API Secret, Server URL, default widget settings, Test Connection
+- ✅ WooCommerce feature compatibility, `uninstall.php`, GPL-2.0-or-later
+- ✅ Verified working on `wp.nudgio.tech`
+- ❌ Gutenberg block — R2 scope (future)
 - ❌ Submit to WordPress Plugin Directory
 
 ### 8. Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
@@ -201,8 +205,8 @@
 
 ### 🟢 Low Priority — Future Expansions
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
-10. **Public Widget API** — API-key model, public endpoints (`/widget/*`), key management UI, Components page "Copy Snippet". Shared prerequisite for items 11-13.
-11. **WooCommerce WordPress Plugin** — independent PHP plugin, server-to-server calls to public widget API. Gutenberg block + shortcode. Easier than Shopify.
+10. ✅ **Public Widget API** — DONE. `WidgetAPIKey` model (Fernet-encrypted), HMAC-signed URL auth, 4 public widget endpoints, key management UI (3rd tab), dedicated rate limiting. 66 routes total.
+11. ✅ **WooCommerce WordPress Plugin (R1)** — DONE. `[nudgio]` shortcode + WP Admin settings page + iframe rendering + HMAC signing + Test Connection. Verified on `wp.nudgio.tech`.
 12. **Universal JS Widget Snippet** — `widget.js` for non-WordPress/non-Shopify sites (Squarespace, Wix, custom). Client-side fetch from public widget API.
 13. **Magento Adobe Commerce Extension** — harder (strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity). Smallest market, lowest priority.
 14. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
