@@ -177,7 +177,17 @@
 - ❌ Rename plugin directory `nudgio` → `nudgio` (Plugin Name: "Nudgio Technologies")
 - ❌ Submit to WordPress Plugin Directory
 
-### 8. Data Ingestion + Local Storage (V3 Architecture) ✅
+### 8. Custom Integration Platform + Data Sync Tab ✅
+- ✅ `CUSTOM_INTEGRATION` added to `PlatformType` enum (backend + frontend)
+- ✅ Create connection form — "Custom Integration" platform option, ingest-only form (connection name + info banner, no credentials)
+- ✅ Connection detail page — Data Sync moved from Settings to own top-level tab (hidden for ingest connections)
+- ✅ Tab layout: Shopify API → 3 tabs (Overview, Data Sync, Settings), WooCommerce/Magento → 4 tabs (+API Keys), Custom Integration ingest → 3 tabs (Overview, Settings, API Keys — no Data Sync)
+- ✅ Settings tab for ingest connections — only connection_name editable + Danger Zone (no credential fields)
+- ✅ `format-utils.ts` — `getPlatformLabel()` + `getConnectionMethodLabel()` mappers (no snake_case in UI)
+- ✅ Push API Integration Guide — card in API Keys tab for ingest connections (Connection ID with copy-to-clipboard, endpoints, auth method, example request)
+- ✅ Connections list page — proper platform/method labels, "Data: Push API" for ingest cards
+
+### 9. Data Ingestion + Local Storage (V3 Architecture) ✅
 **Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.
 
 #### Step 1 — Push API + IngestAdapter ✅
@@ -236,10 +246,11 @@
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
 10. ✅ **Public Widget API** — DONE. `WidgetAPIKey` model (Fernet-encrypted), HMAC-signed URL auth, 4 public widget endpoints, key management UI (3rd tab), dedicated rate limiting. 66 routes total.
 11. ✅ **WooCommerce WordPress Plugin (R1)** — DONE. `[nudgio]` shortcode + WP Admin settings page + iframe rendering + HMAC signing + Test Connection. Verified on `wp.nudgio.tech`.
-12. ✅ **Data Ingestion + Local Storage (V3)** — DONE. 3 ingested tables + migration + IngestAdapter + factory routing + shared upsert helpers + `sync_connection_data()` with ghost row pruning + periodic sync scheduler (asyncio loop, `SKIP LOCKED`, lifespan) + per-connection sync settings (5 fields, SyncInterval enum, PATCH logic) + frontend Data Sync card (toggle, interval, status, Sync Now).
-13. ✅ **Universal JS Widget Snippet** — DONE. `widget.js` loader (IIFE, XHR, iframe, MutationObserver) + `widget_sign_subrouter.py` (HMAC signing, CORS) + Components page "Copy Snippet" (`generateEmbedCode()`).
-14. 🚫 **Magento Adobe Commerce Extension** — ABANDONED. Too much work for too little market.
-15. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
+12. ✅ **Custom Integration Platform + Data Sync Tab** — DONE. `CUSTOM_INTEGRATION` enum, ingest-only create form, Data Sync as own tab (hidden for ingest), `format-utils.ts` label mappers, Push API Integration Guide in API Keys tab.
+13. ✅ **Data Ingestion + Local Storage (V3)** — DONE. 3 ingested tables + migration + IngestAdapter + factory routing + shared upsert helpers + `sync_connection_data()` with ghost row pruning + periodic sync scheduler (asyncio loop, `SKIP LOCKED`, lifespan) + per-connection sync settings (5 fields, SyncInterval enum, PATCH logic) + frontend Data Sync card (toggle, interval, status, Sync Now).
+14. ✅ **Universal JS Widget Snippet** — DONE. `widget.js` loader (IIFE, XHR, iframe, MutationObserver) + `widget_sign_subrouter.py` (HMAC signing, CORS) + Components page "Copy Snippet" (`generateEmbedCode()`).
+15. 🚫 **Magento Adobe Commerce Extension** — ABANDONED. Too much work for too little market.
+16. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
 
 ---
 

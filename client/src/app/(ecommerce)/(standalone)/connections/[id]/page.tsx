@@ -29,11 +29,13 @@ import {
   Copy,
   Plus,
   RefreshCw,
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
 import { WidgetAPIKeyDetail } from '@/modules/ecommerce/schemas/widget-api-keys.schemas';
 import { getWidgetAPIKeys, createWidgetAPIKey, deleteWidgetAPIKey } from '@/modules/ecommerce/service/widget-api-keys.service';
 import { syncConnection } from '@/modules/ecommerce/service/data.service';
+import { getPlatformLabel, getConnectionMethodLabel } from '@/modules/ecommerce/utils/format-utils';
 
 export default function ConnectionDetailPage() {
   const params = useParams();
@@ -92,6 +94,7 @@ export default function ConnectionDetailPage() {
   const [createdKeySecret, setCreatedKeySecret] = useState<string | null>(null);
   const [createdKeyId, setCreatedKeyId] = useState<number | null>(null);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const [copiedConnectionId, setCopiedConnectionId] = useState(false);
   const [deletingKeyId, setDeletingKeyId] = useState<number | null>(null);
 
   // Initialize edit form when connection loads
@@ -183,8 +186,8 @@ export default function ConnectionDetailPage() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{connection.connection_name}</h1>
             <div className="flex items-center gap-2 mt-1">
-              <Badge variant="secondary" className="capitalize">{connection.platform}</Badge>
-              <Badge variant="outline" className="uppercase">{connection.connection_method}</Badge>
+              <Badge variant="secondary">{getPlatformLabel(connection.platform)}</Badge>
+              <Badge variant="outline">{getConnectionMethodLabel(connection.connection_method)}</Badge>
               <Badge variant={connection.is_active ? 'default' : 'secondary'}>
                 {connection.is_active ? 'Active' : 'Inactive'}
               </Badge>
@@ -194,11 +197,27 @@ export default function ConnectionDetailPage() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className={`grid w-full ${connection.platform !== 'shopify' ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        {/* Tab visibility:
+            - Data Sync: shown when connection_method !== 'ingest' (ingest receives data via Push API)
+            - API Keys: shown when platform !== 'shopify' (Shopify uses App Proxy HMAC) */}
+        <TabsList className={`grid w-full ${
+          connection.connection_method !== 'ingest' && connection.platform !== 'shopify'
+            ? 'grid-cols-4'  // Overview, Data Sync, Settings, API Keys
+            : connection.connection_method !== 'ingest' || connection.platform !== 'shopify'
+              ? 'grid-cols-3'  // Overview + two of: Data Sync / Settings / API Keys
+              : 'grid-cols-2'  // Overview, Settings (Shopify ingest — unlikely but handled)
+        }`}>
           <TabsTrigger value="overview">
             <PlugZap className="h-4 w-4" />
             Overview
           </TabsTrigger>
+          {/* Data Sync tab — only for non-ingest connections (ingest receives data via Push API) */}
+          {connection.connection_method !== 'ingest' && (
+            <TabsTrigger value="data-sync">
+              <RefreshCw className="h-4 w-4" />
+              Data Sync
+            </TabsTrigger>
+          )}
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4" />
             Settings
@@ -223,11 +242,11 @@ export default function ConnectionDetailPage() {
             <CardContent className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Platform</p>
-                <p className="text-lg font-medium capitalize">{connection.platform}</p>
+                <p className="text-lg font-medium">{getPlatformLabel(connection.platform)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Connection Method</p>
-                <p className="text-lg font-medium uppercase">{connection.connection_method}</p>
+                <p className="text-lg font-medium">{getConnectionMethodLabel(connection.connection_method)}</p>
               </div>
               {/* API connection fields */}
               {connection.connection_method === 'api' && connection.store_url && (
@@ -360,13 +379,174 @@ export default function ConnectionDetailPage() {
           )}
         </TabsContent>
 
+        {/* ========== DATA SYNC TAB ========== */}
+        {/* Only rendered for non-ingest connections — ingest receives data via Push API */}
+        {connection.connection_method !== 'ingest' && (
+          <TabsContent value="data-sync" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Sync</CardTitle>
+                <CardDescription>Configure automatic data synchronization from your platform</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Auto-Sync toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="auto-sync-toggle">Auto-Sync</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically pull latest products and orders from your store
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto-sync-toggle"
+                    checked={editAutoSyncEnabled}
+                    onCheckedChange={setEditAutoSyncEnabled}
+                  />
+                </div>
+
+                {/* Sync interval — only visible when auto-sync is enabled */}
+                {editAutoSyncEnabled && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sync-interval">Sync Interval</Label>
+                    <Select value={editSyncInterval} onValueChange={setEditSyncInterval}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hourly">Hourly</SelectItem>
+                        <SelectItem value="every_6_hours">Every 6 Hours</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Save Auto-Sync settings */}
+                <Button
+                  onClick={async () => {
+                    setIsUpdating(true);
+                    try {
+                      await updateConnection(connectionId, {
+                        auto_sync_enabled: editAutoSyncEnabled,
+                        sync_interval: editSyncInterval,
+                      });
+                      await fetchConnections();
+                    } finally {
+                      setIsUpdating(false);
+                    }
+                  }}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Sync Settings'
+                  )}
+                </Button>
+
+                {/* Sync status info — read-only */}
+                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Last Synced</p>
+                    <p className="text-sm font-medium">
+                      {connection.last_synced_at
+                        ? new Date(connection.last_synced_at).toLocaleString()
+                        : 'Never'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    {connection.last_sync_status ? (
+                      <Badge variant={connection.last_sync_status === 'success' ? 'default' : 'destructive'}>
+                        {connection.last_sync_status}
+                      </Badge>
+                    ) : (
+                      <p className="text-sm font-medium">—</p>
+                    )}
+                  </div>
+                  {connection.auto_sync_enabled && connection.next_sync_at && (
+                    <div className="col-span-2">
+                      <p className="text-sm text-muted-foreground">Next Sync</p>
+                      <p className="text-sm font-medium">
+                        {new Date(connection.next_sync_at).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sync Now button — manual trigger */}
+                {syncResult && (
+                  <Alert variant={syncResult.success ? 'default' : 'destructive'}>
+                    <div className="flex items-center gap-2">
+                      {syncResult.success ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <XCircle className="h-4 w-4" />
+                      )}
+                      <AlertDescription>{syncResult.message}</AlertDescription>
+                    </div>
+                  </Alert>
+                )}
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    setIsSyncing(true);
+                    setSyncResult(null);
+                    try {
+                      const result = await syncConnection(connectionId);
+                      setSyncResult({
+                        success: result.success,
+                        message: result.success
+                          ? `Sync complete. ${result.data?.products_count ?? 0} products, ${result.data?.orders_count ?? 0} orders.`
+                          : result.error || 'Sync failed',
+                      });
+                      // Refresh connection to update sync status fields
+                      await fetchConnections();
+                    } catch {
+                      setSyncResult({ success: false, message: 'Failed to sync' });
+                    } finally {
+                      setIsSyncing(false);
+                    }
+                  }}
+                  disabled={isSyncing || !connection.is_active}
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Sync Now
+                    </>
+                  )}
+                </Button>
+                {!connection.is_active && (
+                  <p className="text-xs text-muted-foreground">
+                    Test the connection first before syncing data.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
         {/* ========== SETTINGS TAB ========== */}
         <TabsContent value="settings" className="space-y-4">
           {/* Connection Details */}
           <Card>
             <CardHeader>
               <CardTitle>Connection Details</CardTitle>
-              <CardDescription>Update connection name and credentials</CardDescription>
+              <CardDescription>
+                {connection.connection_method === 'ingest'
+                  ? 'Update connection name'
+                  : 'Update connection name and credentials'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -378,7 +558,7 @@ export default function ConnectionDetailPage() {
                 />
               </div>
 
-              {/* API connection fields */}
+              {/* API connection fields — hidden for ingest connections (no credentials) */}
               {connection.connection_method === 'api' && (
                 <>
                   <div className="space-y-2">
@@ -519,24 +699,20 @@ export default function ConnectionDetailPage() {
                 const updateData: Record<string, string | number | boolean | null | undefined> = {};
                 updateData.connection_name = editConnectionName || undefined;
 
+                // Credential fields — only for non-ingest connections (ingest has no credentials)
                 if (connection.connection_method === 'api') {
                   updateData.store_url = editStoreUrl || undefined;
                   // Only send credentials if user typed something (empty = keep current)
                   if (editApiKey) updateData.api_key = editApiKey;
                   if (editApiSecret) updateData.api_secret = editApiSecret;
-                } else {
+                } else if (connection.connection_method === 'database') {
                   updateData.db_host = editDbHost || undefined;
                   updateData.db_name = editDbName || undefined;
                   updateData.db_user = editDbUser || undefined;
                   if (editDbPassword) updateData.db_password = editDbPassword;
                   updateData.db_port = editDbPort ? parseInt(editDbPort, 10) : undefined;
                 }
-
-                // Auto-Sync settings — always include (toggle + dropdown are always visible)
-                if (connection.connection_method !== 'ingest') {
-                  updateData.auto_sync_enabled = editAutoSyncEnabled;
-                  updateData.sync_interval = editSyncInterval;
-                }
+                // ingest connections: only connection_name is editable, no credentials or sync settings
 
                 await updateConnection(connectionId, updateData);
                 // Refresh list data after update to keep store in sync
@@ -556,134 +732,6 @@ export default function ConnectionDetailPage() {
               'Save Changes'
             )}
           </Button>
-
-          {/* Data Sync — only for non-ingest connections (ingest receives data via Push API) */}
-          {connection.connection_method !== 'ingest' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Data Sync</CardTitle>
-                <CardDescription>Configure automatic data synchronization from your platform</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Auto-Sync toggle */}
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="auto-sync-toggle">Auto-Sync</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Automatically pull latest products and orders from your store
-                    </p>
-                  </div>
-                  <Switch
-                    id="auto-sync-toggle"
-                    checked={editAutoSyncEnabled}
-                    onCheckedChange={setEditAutoSyncEnabled}
-                  />
-                </div>
-
-                {/* Sync interval — only visible when auto-sync is enabled */}
-                {editAutoSyncEnabled && (
-                  <div className="space-y-2">
-                    <Label htmlFor="sync-interval">Sync Interval</Label>
-                    <Select value={editSyncInterval} onValueChange={setEditSyncInterval}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hourly">Hourly</SelectItem>
-                        <SelectItem value="every_6_hours">Every 6 Hours</SelectItem>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Sync status info — read-only */}
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Last Synced</p>
-                    <p className="text-sm font-medium">
-                      {connection.last_synced_at
-                        ? new Date(connection.last_synced_at).toLocaleString()
-                        : 'Never'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Status</p>
-                    {connection.last_sync_status ? (
-                      <Badge variant={connection.last_sync_status === 'success' ? 'default' : 'destructive'}>
-                        {connection.last_sync_status}
-                      </Badge>
-                    ) : (
-                      <p className="text-sm font-medium">—</p>
-                    )}
-                  </div>
-                  {connection.auto_sync_enabled && connection.next_sync_at && (
-                    <div className="col-span-2">
-                      <p className="text-sm text-muted-foreground">Next Sync</p>
-                      <p className="text-sm font-medium">
-                        {new Date(connection.next_sync_at).toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Sync Now button — manual trigger */}
-                {syncResult && (
-                  <Alert variant={syncResult.success ? 'default' : 'destructive'}>
-                    <div className="flex items-center gap-2">
-                      {syncResult.success ? (
-                        <CheckCircle className="h-4 w-4" />
-                      ) : (
-                        <XCircle className="h-4 w-4" />
-                      )}
-                      <AlertDescription>{syncResult.message}</AlertDescription>
-                    </div>
-                  </Alert>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    setIsSyncing(true);
-                    setSyncResult(null);
-                    try {
-                      const result = await syncConnection(connectionId);
-                      setSyncResult({
-                        success: result.success,
-                        message: result.success
-                          ? `Sync complete. ${result.data?.products_count ?? 0} products, ${result.data?.orders_count ?? 0} orders.`
-                          : result.error || 'Sync failed',
-                      });
-                      // Refresh connection to update sync status fields
-                      await fetchConnections();
-                    } catch {
-                      setSyncResult({ success: false, message: 'Failed to sync' });
-                    } finally {
-                      setIsSyncing(false);
-                    }
-                  }}
-                  disabled={isSyncing || !connection.is_active}
-                >
-                  {isSyncing ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Syncing...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Sync Now
-                    </>
-                  )}
-                </Button>
-                {!connection.is_active && (
-                  <p className="text-xs text-muted-foreground">
-                    Test the connection first before syncing data.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
 
           {/* Danger Zone */}
           <Card className="border-destructive">
@@ -752,6 +800,85 @@ export default function ConnectionDetailPage() {
         {/* ========== API KEYS TAB ========== */}
         {connection.platform !== 'shopify' && (
           <TabsContent value="api-keys" className="space-y-4">
+            {/* Push API Integration Guide — only for ingest connections */}
+            {connection.connection_method === 'ingest' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Info className="h-5 w-5" />
+                    Push API Integration Guide
+                  </CardTitle>
+                  <CardDescription>
+                    Use these details to push data from your system to Nudgio via the Data Ingestion API
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Connection ID — primary key for integration */}
+                  <div className="space-y-2">
+                    <Label>Connection ID</Label>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 rounded bg-muted px-3 py-2 text-sm font-mono">
+                        {connectionId}
+                      </code>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(String(connectionId));
+                          setCopiedConnectionId(true);
+                          setTimeout(() => setCopiedConnectionId(false), 2000);
+                        }}
+                      >
+                        {copiedConnectionId ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Endpoints */}
+                  <div className="space-y-2">
+                    <Label>Endpoints</Label>
+                    <div className="rounded bg-muted px-3 py-2 text-sm font-mono space-y-1">
+                      <p>POST /ecommerce/data/import/products</p>
+                      <p>POST /ecommerce/data/import/orders</p>
+                      <p>POST /ecommerce/data/import/order-items</p>
+                    </div>
+                  </div>
+
+                  {/* Authentication */}
+                  <div className="space-y-2">
+                    <Label>Authentication</Label>
+                    <p className="text-sm text-muted-foreground">
+                      All requests require a Bearer token in the <code className="text-xs bg-muted px-1 py-0.5 rounded">Authorization</code> header.
+                      Each request body must include <code className="text-xs bg-muted px-1 py-0.5 rounded">connection_id: {connectionId}</code>.
+                    </p>
+                  </div>
+
+                  {/* Example request */}
+                  <div className="space-y-2">
+                    <Label>Example Request</Label>
+                    <pre className="rounded bg-muted px-3 py-2 text-xs font-mono overflow-x-auto whitespace-pre">{`POST /ecommerce/data/import/products
+Authorization: Bearer <your-jwt-token>
+Content-Type: application/json
+
+{
+  "connection_id": ${connectionId},
+  "products": [
+    {
+      "platform_id": "SKU-001",
+      "title": "Product Name",
+      "price": 29.99
+    }
+  ]
+}`}</pre>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Generate New Key */}
             <Card>
               <CardHeader>

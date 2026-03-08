@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert'
 import { Badge } from '@/modules/shadcnui/components/ui/badge';
 import { PlugZap, Plus, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { getPlatformLabel, getConnectionMethodLabel } from '@/modules/ecommerce/utils/format-utils';
 
 function ConnectionsPageContent() {
   const router = useRouter();
@@ -129,27 +130,32 @@ function ConnectionsPageContent() {
                     {conn.connection_name}
                   </CardTitle>
                   <CardDescription className="flex gap-2">
-                    <Badge variant="secondary" className="capitalize">
-                      {conn.platform}
+                    <Badge variant="secondary">
+                      {getPlatformLabel(conn.platform)}
                     </Badge>
-                    <Badge variant="outline" className="uppercase">
-                      {conn.connection_method}
+                    <Badge variant="outline">
+                      {getConnectionMethodLabel(conn.connection_method)}
                     </Badge>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
                     <div className="text-sm">
-                      {/* Show store_url for API connections, db_host for database connections */}
+                      {/* Show store_url for API, db_host for database, Push API note for ingest */}
                       {conn.connection_method === 'api' ? (
                         <>
                           <span className="text-muted-foreground">Store: </span>
                           {conn.store_url || '—'}
                         </>
-                      ) : (
+                      ) : conn.connection_method === 'database' ? (
                         <>
                           <span className="text-muted-foreground">Host: </span>
                           {conn.db_host || '—'}
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-muted-foreground">Data: </span>
+                          Push API
                         </>
                       )}
                     </div>

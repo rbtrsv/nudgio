@@ -20,7 +20,7 @@ import { z } from 'zod';
  * Supported ecommerce platforms - matches backend PlatformType enum
  * Backend: class PlatformType(str, Enum)
  */
-export const PlatformTypeEnum = z.enum(['shopify', 'woocommerce', 'magento']);
+export const PlatformTypeEnum = z.enum(['shopify', 'woocommerce', 'magento', 'custom_integration']);
 
 /**
  * Connection method options - matches backend ConnectionMethod enum

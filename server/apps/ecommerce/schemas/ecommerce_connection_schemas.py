@@ -18,6 +18,7 @@ class PlatformType(str, Enum):
     SHOPIFY = "shopify"
     WOOCOMMERCE = "woocommerce"
     MAGENTO = "magento"
+    CUSTOM_INTEGRATION = "custom_integration"
 
 
 class ConnectionMethod(str, Enum):

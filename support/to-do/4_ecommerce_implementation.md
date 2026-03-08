@@ -44,10 +44,37 @@ This is not user-friendly. Most merchants are non-technical and cannot provide d
 | WooCommerce | Database | MySQL host, name, user, password, port | wp-config.php or hosting panel (advanced) |
 | Magento | REST API | Store URL + Integration access token | Magento Admin > System > Integrations > Add New > Activate |
 | Magento | Database | MySQL host, name, user, password, port | env.php or hosting panel (advanced) |
+| Custom Integration | Ingest (Push API) | Connection name only | No credentials — data pushed via Data Ingestion API |
 
 ---
 
-## Current State (Updated 2026-03-04, Session 2)
+## Custom Integration Platform (Added 2026-03-08)
+
+**`CUSTOM_INTEGRATION`** is a 4th platform type for users who push data via the Data Ingestion API. No platform credentials needed.
+
+### Files Modified
+- `server/apps/ecommerce/schemas/ecommerce_connection_schemas.py` — `CUSTOM_INTEGRATION = "custom_integration"` in `PlatformType`
+- `client/src/modules/ecommerce/schemas/ecommerce-connections.schemas.ts` — `'custom_integration'` in `PlatformTypeEnum`
+- `client/src/app/(ecommerce)/(standalone)/connections/new/page.tsx` — Custom Integration platform option, `handleIngestSubmit`, ingest-only form
+- `client/src/app/(ecommerce)/(standalone)/connections/[id]/page.tsx` — Data Sync tab (own top-level tab), Push API Integration Guide, label mappers
+- `client/src/app/(ecommerce)/(standalone)/connections/page.tsx` — label mappers, "Data: Push API" for ingest cards
+- `client/src/modules/ecommerce/utils/format-utils.ts` — `getPlatformLabel()` + `getConnectionMethodLabel()`
+
+### Tab Layout per Connection Type
+| Connection | Tabs |
+|---|---|
+| Shopify (API) | Overview, Data Sync, Settings |
+| WooCommerce/Magento (API/DB) | Overview, Data Sync, Settings, API Keys |
+| Custom Integration (ingest) | Overview, Settings, API Keys |
+
+### Key Decisions
+- Data Sync tab hidden for ingest connections (data is pushed, not pulled)
+- API Keys tab shows Push API Integration Guide for ingest connections (Connection ID, endpoints, auth, example request)
+- `format-utils.ts` decouples backend enum values from UI labels (no snake_case in badges)
+
+---
+
+## Current State (Updated 2026-03-08)
 
 ### Model (`server/apps/ecommerce/models.py`)
 

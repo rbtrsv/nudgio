@@ -13,7 +13,7 @@ import { Label } from '@/modules/shadcnui/components/ui/label';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/modules/shadcnui/components/ui/tabs';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, Info } from 'lucide-react';
 import Link from 'next/link';
 
 // Default connection method tab per platform
@@ -21,6 +21,7 @@ const DEFAULT_TAB: Record<PlatformType, string> = {
   shopify: 'oauth',
   woocommerce: 'auto-auth',
   magento: 'api',
+  custom_integration: 'ingest',
 };
 
 export default function CreateConnectionPage() {
@@ -118,6 +119,45 @@ export default function CreateConnectionPage() {
     } catch {
       setOauthError('An unexpected error occurred');
       setIsRedirecting(false);
+    }
+  };
+
+  // Handle Custom Integration form submission (ingest method — no credentials)
+  const handleIngestSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+
+    // Validate connection name
+    if (connectionName.trim().length < 3) {
+      setValidationError('Connection name must be at least 3 characters');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const success = await createConnection({
+        connection_name: connectionName.trim(),
+        platform: 'custom_integration',
+        connection_method: 'ingest',
+        // No credentials for ingest connections
+        store_url: null,
+        api_key: null,
+        api_secret: null,
+        db_host: null,
+        db_name: null,
+        db_user: null,
+        db_password: null,
+        db_port: null,
+      });
+
+      if (success) {
+        router.push('/connections');
+      }
+      // Error is handled by store and displayed via storeError
+    } catch {
+      // Swallow — store handles error display
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -233,6 +273,7 @@ export default function CreateConnectionPage() {
               <SelectItem value="shopify">Shopify</SelectItem>
               <SelectItem value="woocommerce">WooCommerce</SelectItem>
               <SelectItem value="magento">Magento</SelectItem>
+              <SelectItem value="custom_integration">Custom Integration</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
@@ -735,6 +776,60 @@ export default function CreateConnectionPage() {
             </Card>
           </TabsContent>
         </Tabs>
+      )}
+
+      {/* ==========================================
+          Custom Integration — Ingest (Push API)
+          ========================================== */}
+      {platform === 'custom_integration' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Custom Integration</CardTitle>
+            <CardDescription>
+              Push data to Nudgio via the Data Ingestion API. No platform credentials needed.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Info banner explaining the Push API flow */}
+            <Alert className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Custom integrations receive data via the Push API (ingest method).
+                After creating this connection, use the Data Ingestion API endpoints
+                to push products, orders, and customers directly from your system.
+              </AlertDescription>
+            </Alert>
+            <form onSubmit={handleIngestSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="custom-conn-name">Connection Name</Label>
+                <Input
+                  id="custom-conn-name"
+                  value={connectionName}
+                  onChange={(e) => setConnectionName(e.target.value)}
+                  placeholder="e.g., My Custom Store"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Connection'
+                  )}
+                </Button>
+                <Link href="/connections" className="flex-1">
+                  <Button type="button" variant="outline" disabled={isSubmitting} className="w-full">
+                    Cancel
+                  </Button>
+                </Link>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
