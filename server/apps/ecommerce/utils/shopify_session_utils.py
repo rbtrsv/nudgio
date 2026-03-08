@@ -434,6 +434,9 @@ async def auto_provision_shopify_merchant(
 # FastAPI Dependency
 # ==========================================
 
+# ⚠️ SHOPIFY EMBEDDED ONLY — used by all /shopify/embedded/* endpoints.
+# Standalone endpoints use get_active_connection (dependency_utils.py) instead.
+# Changes here do NOT affect standalone auth flow.
 async def get_shopify_connection(
     request: Request,
     db: AsyncSession = Depends(get_session),

@@ -33,7 +33,7 @@ from dataclasses import dataclass
 from typing import Optional
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, or_
 
 from ..models import EcommerceConnection, ShopifyBilling
 from .subscription_utils import (
@@ -89,6 +89,9 @@ async def get_user_connection(connection_id: int, user_id: int, db: AsyncSession
     return connection
 
 
+# ⚠️ STANDALONE ONLY — used by standalone endpoints (recommendations, components, data).
+# Shopify embedded endpoints use get_shopify_connection (shopify_session_utils.py) instead.
+# Changes here do NOT affect Shopify embedded auth flow.
 async def get_active_connection(connection_id: int, user_id: int, db: AsyncSession):
     """
     Get and validate that the user owns an active connection.
@@ -107,12 +110,17 @@ async def get_active_connection(connection_id: int, user_id: int, db: AsyncSessi
     Raises:
         HTTPException 404 if connection not found, not owned, or not active
     """
+    # Ingest connections are active by definition (no credentials to test),
+    # so we skip the is_active check for them
     result = await db.execute(
         select(EcommerceConnection).where(
             and_(
                 EcommerceConnection.id == connection_id,
                 EcommerceConnection.user_id == user_id,
-                EcommerceConnection.is_active == True,
+                or_(
+                    EcommerceConnection.is_active == True,
+                    EcommerceConnection.connection_method == "ingest",
+                ),
                 EcommerceConnection.deleted_at == None,  # Soft delete filter
             )
         )

@@ -80,6 +80,8 @@ export default function ShopifyComponentsPage() {
   // Fetch products for dropdown (once, when first needed)
   // ==========================================
 
+  // ⚠️ Product fetch must surface errors to the UI — never silently swallow.
+  // A silent catch leaves the dropdown stuck on "Loading products..." forever.
   // Fetch products when a product-specific widget type is selected
   useEffect(() => {
     if (!needsProductId || productsFetched || fetchingRef.current) return;
@@ -94,6 +96,7 @@ export default function ShopifyComponentsPage() {
         setProductsFetched(true);
       } catch (err) {
         console.error('Failed to fetch products:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load products');
       } finally {
         setProductsLoading(false);
         fetchingRef.current = false;
@@ -209,7 +212,7 @@ export default function ShopifyComponentsPage() {
                   disabled={productsLoading || undefined}
                 >
                   <s-option value="">
-                    {productsLoading ? 'Loading products...' : 'Select a product'}
+                    {productsLoading ? 'Loading products...' : productsFetched ? 'Select a product' : 'Failed to load — retry'}
                   </s-option>
                   {products.map((p) => (
                     <s-option key={p.product_id} value={p.product_id}>
