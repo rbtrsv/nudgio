@@ -24,6 +24,7 @@ import hmac as hmac_mod
 import hashlib
 import time
 import logging
+from urllib.parse import urlencode
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -147,8 +148,9 @@ async def verify_widget_signature(
         raise WidgetAuthError("Internal authentication error")
 
     # Step 7: Sort remaining params alphabetically, rebuild canonical query string
-    sorted_keys = sorted(params.keys())
-    canonical = "&".join(f"{k}={params[k]}" for k in sorted_keys)
+    # Use urlencode to match PHP's http_build_query (URL-encodes values like # → %23)
+    sorted_params = sorted(params.items())
+    canonical = urlencode(sorted_params)
 
     # Step 8: Compute HMAC-SHA256(canonical_query, decrypted_key)
     computed = hmac_mod.new(
