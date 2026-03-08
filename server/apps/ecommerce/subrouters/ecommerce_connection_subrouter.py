@@ -11,6 +11,7 @@ from apps.accounts.utils.auth_utils import get_current_user
 from ..models import EcommerceConnection
 from ..schemas.ecommerce_connection_schemas import (
     PlatformType,
+    ConnectionMethod,
     EcommerceConnectionCreate,
     EcommerceConnectionUpdate,
     EcommerceConnectionDetail,
@@ -100,7 +101,8 @@ async def create_connection(
             db_user=payload.db_user,
             db_password=encrypt_password(payload.db_password) if payload.db_password else None,
             db_port=payload.db_port,
-            is_active=False,
+            # Ingest connections are auto-activated (no credentials to test)
+            is_active=(payload.connection_method == ConnectionMethod.INGEST),
             created_by=user.id,
         )
         db.add(new_connection)

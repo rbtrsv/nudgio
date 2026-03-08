@@ -19,7 +19,7 @@ import { getPlatformLabel } from '@/modules/ecommerce/utils/format-utils';
 
 export default function ComponentsPage() {
   const { connections, activeConnectionId, setActiveConnection } = useConnections();
-  const { html, isLoading, error, fetchWidget, generateEmbedCode } = useComponents();
+  const { html, isLoading, error, status, fetchWidget, generateEmbedCode } = useComponents();
 
   // Widget config state
   const [widgetType, setWidgetType] = useState<WidgetType>('bestsellers');
@@ -347,6 +347,18 @@ export default function ComponentsPage() {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {/* Waiting for Data — shown when ingest connection has no products yet */}
+      {status === 'waiting_for_data' && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Your integration is active but we haven&apos;t received any data yet.
+            Push product and order data via the API to generate recommendations.
+            Check the <strong>API Keys</strong> tab on your connection page for integration instructions.
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Live Preview */}

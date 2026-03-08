@@ -49,9 +49,11 @@ export type WidgetParams = z.infer<typeof WidgetParamsSchema>;
 
 /**
  * Response containing rendered widget HTML
+ * status: optional backend status code (e.g., "waiting_for_data" for ingest connections with no data)
  */
 export type WidgetResponse = {
   success: boolean;
   html?: string;
   error?: string;
+  status?: string;
 };

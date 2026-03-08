@@ -23,7 +23,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useEmbedded } from '../layout';
 import {
   getComponentHtml,
@@ -63,6 +63,8 @@ export default function ShopifyComponentsPage() {
   const [products, setProducts] = useState<EmbeddedProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
   const [productsFetched, setProductsFetched] = useState(false);
+  // Ref guard to prevent duplicate fetch calls during render cycles
+  const fetchingRef = useRef(false);
 
   // Preview state
   const [html, setHtml] = useState<string | null>(null);
@@ -78,27 +80,28 @@ export default function ShopifyComponentsPage() {
   // Fetch products for dropdown (once, when first needed)
   // ==========================================
 
-  const fetchProducts = useCallback(async () => {
-    if (productsFetched || productsLoading) return;
-    try {
-      setProductsLoading(true);
-      const token = await getSessionToken();
-      const result = await getProducts(token);
-      setProducts(result.products);
-      setProductsFetched(true);
-    } catch (err) {
-      console.error('Failed to fetch products:', err);
-    } finally {
-      setProductsLoading(false);
-    }
-  }, [productsFetched, productsLoading, getSessionToken]);
-
   // Fetch products when a product-specific widget type is selected
   useEffect(() => {
-    if (needsProductId && !productsFetched) {
-      fetchProducts();
-    }
-  }, [needsProductId, productsFetched, fetchProducts]);
+    if (!needsProductId || productsFetched || fetchingRef.current) return;
+
+    const fetchProducts = async () => {
+      fetchingRef.current = true;
+      setProductsLoading(true);
+      try {
+        const token = await getSessionToken();
+        const result = await getProducts(token);
+        setProducts(result.products);
+        setProductsFetched(true);
+      } catch (err) {
+        console.error('Failed to fetch products:', err);
+      } finally {
+        setProductsLoading(false);
+        fetchingRef.current = false;
+      }
+    };
+
+    fetchProducts();
+  }, [needsProductId, productsFetched, getSessionToken]);
 
   // ==========================================
   // Generate preview

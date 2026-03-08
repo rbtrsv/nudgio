@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import Optional, List, Dict
 from core.db import get_session
 from apps.accounts.models import User
 from apps.accounts.utils.auth_utils import get_current_user
-from ..models import EcommerceConnection, RecommendationSettings
+from ..models import EcommerceConnection, RecommendationSettings, IngestedProduct
 from ..schemas.ecommerce_connection_schemas import PlatformType
 from ..schemas.recommendation_schemas import BestsellerMethod
 from ..adapters.factory import get_adapter
@@ -108,6 +108,39 @@ def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[Re
     })
 
 
+async def _check_ingest_has_data(connection: EcommerceConnection, session: AsyncSession) -> Optional[JSONResponse]:
+    """
+    Check if an ingest connection has ingested data (products).
+
+    For ingest connections with zero products, returns a JSON response
+    with waiting_for_data status instead of letting the engine fail
+    with a cryptic error.
+
+    Returns:
+        JSONResponse if no data (caller should return it), None if data exists
+    """
+    if connection.connection_method != "ingest":
+        return None
+
+    result = await session.execute(
+        select(func.count()).select_from(IngestedProduct).where(
+            IngestedProduct.connection_id == connection.id
+        )
+    )
+    product_count = result.scalar() or 0
+
+    if product_count == 0:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "waiting_for_data",
+                "message": "Connection is active but no data has been ingested yet. Push product and order data via the API to generate recommendations.",
+            },
+        )
+
+    return None
+
+
 @router.get("/bestsellers", response_class=HTMLResponse)
 async def get_bestsellers_component(
     connection_id: int = Query(..., description="Connection ID to use for recommendations"),
@@ -128,6 +161,11 @@ async def get_bestsellers_component(
     """Get bestsellers HTML component"""
     try:
         connection = await get_active_connection(connection_id, current_user.id, session)
+
+        # Check if ingest connection has data before attempting recommendations
+        no_data_response = await _check_ingest_has_data(connection, session)
+        if no_data_response:
+            return no_data_response
 
         # Get shop URL settings
         settings_result = await session.execute(
@@ -179,6 +217,8 @@ async def get_bestsellers_component(
 
         return HTMLResponse(content=html)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating component: {str(e)}")
 
@@ -203,6 +243,11 @@ async def get_cross_sell_component(
     """Get cross-sell HTML component"""
     try:
         connection = await get_active_connection(connection_id, current_user.id, session)
+
+        # Check if ingest connection has data before attempting recommendations
+        no_data_response = await _check_ingest_has_data(connection, session)
+        if no_data_response:
+            return no_data_response
 
         # Get shop URL settings
         settings_result = await session.execute(
@@ -253,6 +298,8 @@ async def get_cross_sell_component(
 
         return HTMLResponse(content=html)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating component: {str(e)}")
 
@@ -277,6 +324,11 @@ async def get_upsell_component(
     """Get upsell HTML component"""
     try:
         connection = await get_active_connection(connection_id, current_user.id, session)
+
+        # Check if ingest connection has data before attempting recommendations
+        no_data_response = await _check_ingest_has_data(connection, session)
+        if no_data_response:
+            return no_data_response
 
         # Get shop URL settings
         settings_result = await session.execute(
@@ -327,6 +379,8 @@ async def get_upsell_component(
 
         return HTMLResponse(content=html)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating component: {str(e)}")
 
@@ -350,6 +404,11 @@ async def get_similar_component(
     """Get similar products HTML component"""
     try:
         connection = await get_active_connection(connection_id, current_user.id, session)
+
+        # Check if ingest connection has data before attempting recommendations
+        no_data_response = await _check_ingest_has_data(connection, session)
+        if no_data_response:
+            return no_data_response
 
         # Get shop URL settings
         settings_result = await session.execute(
@@ -400,6 +459,8 @@ async def get_similar_component(
 
         return HTMLResponse(content=html)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating component: {str(e)}")
 

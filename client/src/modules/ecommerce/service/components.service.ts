@@ -54,10 +54,27 @@ const fetchWidget = async (baseUrl: string, params: WidgetParams): Promise<Widge
       };
     }
 
-    const html = await response.text();
+    // Check Content-Type to distinguish HTML from JSON (waiting_for_data response)
+    const contentType = response.headers.get('content-type') || '';
+    const body = await response.text();
+
+    if (contentType.includes('application/json')) {
+      // Backend returned a JSON status (e.g., waiting_for_data for ingest connections with no data)
+      try {
+        const json = JSON.parse(body);
+        return {
+          success: false,
+          status: json.status,
+          error: json.message || 'Unknown status',
+        };
+      } catch {
+        return { success: false, error: body };
+      }
+    }
+
     return {
       success: true,
-      html,
+      html: body,
       error: undefined,
     };
   } catch (error) {

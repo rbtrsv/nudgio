@@ -41,6 +41,8 @@ export function useComponents() {
   const [html, setHtml] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Backend status for non-error states (e.g., "waiting_for_data" for ingest connections with no data)
+  const [status, setStatus] = useState<string | null>(null);
 
   /**
    * Fetch a widget by type
@@ -50,6 +52,7 @@ export function useComponents() {
   const fetchWidget = useCallback(async (type: WidgetType, params: WidgetParams) => {
     setIsLoading(true);
     setError(null);
+    setStatus(null);
 
     try {
       let response;
@@ -71,6 +74,10 @@ export function useComponents() {
 
       if (response.success && response.html) {
         setHtml(response.html);
+      } else if (response.status === 'waiting_for_data') {
+        // Ingest connection with no data — not an error, just a state
+        setStatus('waiting_for_data');
+        setHtml(null);
       } else {
         setError(response.error || 'Failed to fetch widget');
         setHtml(null);
@@ -151,6 +158,7 @@ export function useComponents() {
     html,
     isLoading,
     error,
+    status,
     fetchWidget,
     generateEmbedCode,
   };
