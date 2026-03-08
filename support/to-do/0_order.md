@@ -155,14 +155,29 @@
 - ✅ Privacy policy — `/legal/privacy-policy` (GDPR/CCPA, store data, credentials, Stripe)
 - ✅ Terms of service — `/legal/terms-of-service` (SaaS terms, subscriptions, liability, Romanian jurisdiction)
 
-### 6. WooCommerce WordPress Plugin
-- ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets
+### 6. Public Widget API (Shared Prerequisite — API-Key Auth)
+- ❌ `WidgetAPIKey` model — key, connection_id, allowed_domains, created_at, is_active
+- ❌ Public widget endpoints — new subrouter, API-key auth (not JWT), returns fresh recommendation HTML. Endpoints: `/widget/bestsellers`, `/widget/cross-sell`, `/widget/upsell`, `/widget/similar`
+- ❌ API key management UI in dashboard — generate/revoke per connection, domain restriction
+- ❌ Components page "Copy Snippet" — generates configured snippet instead of static HTML
+
+### 7. WooCommerce WordPress Plugin (Server-Side PHP — Independent)
+- ❌ PHP plugin (Tailwind CSS + shadcn if possible, otherwise Tailwind only) — server-to-server calls from PHP to Nudgio public widget API
+- ❌ Gutenberg block + `[nudgio]` shortcode — renders recommendation HTML server-side (no client-side JS needed)
+- ❌ WP Admin settings page — store API key in `wp_options`, configure defaults
+- ❌ Auto-detects `$product->get_id()` on product pages for cross-sell/upsell/similar
 - ❌ Submit to WordPress Plugin Directory
 
-### 7. Magento Adobe Commerce Extension
-- ❌ Magento extension for Adobe Commerce Marketplace (lower priority — smaller market)
+### 8. Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
+- ❌ `widget.js` loader script — finds `.nudgio-widget` divs, reads `data-` attributes, fetches from public widget API, renders HTML
+- ❌ Product auto-detection via `data-product-id` attribute or page meta
+- ❌ For custom sites, Squarespace, Wix, etc. — any site that can paste a `<script>` tag
 
-### 8. Nice to Have
+### 9. Magento Adobe Commerce Extension
+- ❌ Magento 2 extension for Adobe Commerce Marketplace (harder — strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity)
+- ❌ Lower priority — smaller market
+
+### 10. Nice to Have
 - ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page with plan display + Shopify upgrade redirect; Standalone: Stripe via accounts module)
 
 ---
@@ -186,9 +201,11 @@
 
 ### 🟢 Low Priority — Future Expansions
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
-10. **WooCommerce WordPress Plugin** — PHP plugin for WordPress Plugin Directory.
-11. **Magento Adobe Commerce Extension** — smaller market, lowest priority.
-12. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
+10. **Public Widget API** — API-key model, public endpoints (`/widget/*`), key management UI, Components page "Copy Snippet". Shared prerequisite for items 11-13.
+11. **WooCommerce WordPress Plugin** — independent PHP plugin, server-to-server calls to public widget API. Gutenberg block + shortcode. Easier than Shopify.
+12. **Universal JS Widget Snippet** — `widget.js` for non-WordPress/non-Shopify sites (Squarespace, Wix, custom). Client-side fetch from public widget API.
+13. **Magento Adobe Commerce Extension** — harder (strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity). Smallest market, lowest priority.
+14. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
 
 ---
 
@@ -197,8 +214,10 @@
 - Items 1-5 are blockers — Shopify App Store will reject without them
 - Items 6-8 are Shopify embedded app requirements
 - Item 9 is on hold until DragonflyDB is provisioned in Coolify
-- Items 10-11 are future platform expansions
-- Item 12 is DONE — Shopify uses Managed Pricing, standalone uses Stripe via accounts module
+- Item 10 (Public Widget API) is prerequisite for items 11-13 — all delivery methods use it
+- Item 11 (WooCommerce) is independent PHP, server-to-server — no JS snippet dependency
+- Item 12 (Universal JS) is for sites without a dedicated plugin (Squarespace, Wix, custom)
+- Item 13 (Magento) is harder — Magento 2 module architecture is strict and complex, similar effort to Shopify
 - Backend recommendation engine is complete (adapters, scoring, widget generation, analytics tracking)
 - Accounts module is shared and complete (auth, organizations, subscriptions, Stripe)
 - Landing page is complete and deployed at www.nudgio.tech (Vercel)

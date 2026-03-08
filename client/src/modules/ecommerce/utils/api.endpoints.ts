@@ -64,6 +64,16 @@ export const DATA_ENDPOINTS = {
 };
 
 /**
+ * API endpoints for widget API key management
+ * Backend: /server/apps/ecommerce/subrouters/widget_api_key_subrouter.py
+ */
+export const WIDGET_API_KEY_ENDPOINTS = {
+  LIST: (connId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys`,
+  CREATE: (connId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys`,
+  DELETE: (connId: number, keyId: number) => `${API_BASE_URL}/ecommerce/connections/${connId}/api-keys/${keyId}`,
+};
+
+/**
  * API endpoints for Shopify OAuth
  * Backend: /server/apps/ecommerce/subrouters/shopify_oauth_subrouter.py
  */

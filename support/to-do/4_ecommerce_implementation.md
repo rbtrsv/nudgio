@@ -137,7 +137,7 @@ Prefix: `/ecommerce`. Split into ungated and gated groups:
 - **Ungated**: Shopify OAuth + WooCommerce auth callbacks + webhooks + billing + embedded (session token auth) + App Proxy (HMAC auth)
 - **Gated**: Everything else via `APIRouter(dependencies=[Depends(require_active_subscription)])` — connections, settings, recommendations, components, data. All endpoints return 403 when subscription is inactive.
 
-9 subrouters, 58 routes total (added GET /shopify/embedded/products for admin dropdown).
+9 subrouters, 59 routes total (added GET /shopify/embedded/products + GET /data/products/{connection_id} for admin dropdowns).
 
 ### Frontend (`client/src/`)
 
@@ -1468,14 +1468,34 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ App Bridge integration — CDN-loaded App Bridge + Polaris web components, session token auth (JWT HS256), Token Exchange API, auto-provisioning (User + Org + Connection)
 - ✅ Embedded dashboard pages — 5 pages: dashboard, settings, recommendations, components (preview only), billing. 16 embedded endpoints (53 total routes). Security gating (subscription + rate limit + monthly order limit via EmbeddedOrgContext)
 - ✅ Storefront widget delivery (Stage 3) — `shopify_app_proxy_subrouter.py` (4 widget endpoints, HMAC-SHA256 hex verification per Shopify docs — decoded values, no separator join, duplicate keys with comma, entitlement check), `[app_proxy]` in `shopify.app.toml`, Theme App Extension `extensions/nudgio-widget/` (Liquid block with separate color URL-encoding + iframe auto-resize JS, deployed to Shopify CDN via `shopify app deploy`). Verified working in Theme Editor.
-- ✅ Bug fixes — Token Exchange typo (`id-token` → `id_token`), GraphQL error parsing (str/dict/list normalization in 3 files), engine image_url mapping (Shopify `image_url` string vs WooCommerce `images` list), removed `/api/v1/` prefix from all server URLs
+- ✅ Components product dropdown — embedded (`<s-select>` via `GET /shopify/embedded/products`, ungated) + standalone (shadcn `<Select>` via `GET /data/products/{connection_id}`). Liquid guard for non-product pages.
+- ✅ Managed Pricing billing page — rewritten for Shopify Managed Pricing. "Manage Plan on Shopify" button opens `https://admin.shopify.com/store/{storeHandle}/charges/nudgio/pricing_plans`. Subscribe/cancel code kept with revert instructions.
+- ✅ Bug fixes — Token Exchange typo (`id-token` → `id_token`), GraphQL error parsing (str/dict/list normalization in 3 files), engine image_url mapping (Shopify `image_url` string vs WooCommerce `images` list), removed `/api/v1/` prefix from all server URLs, App Proxy HMAC rewritten per Shopify docs, Liquid template color URL encoding fix
 
-### WooCommerce WordPress Plugin (Distribution)
-- ❌ PHP plugin for WordPress Plugin Directory — shortcodes or Gutenberg blocks for recommendation widgets
+### Public Widget API (Shared Prerequisite — API-Key Auth)
+- ❌ `WidgetAPIKey` model — key (hashed), connection_id, allowed_domains, created_at, is_active
+- ❌ Public widget subrouter — API-key auth (not JWT), returns fresh recommendation HTML. Endpoints: `GET /widget/bestsellers`, `GET /widget/cross-sell`, `GET /widget/upsell`, `GET /widget/similar`. Same engine + adapter logic as `/components/*` but authenticated via `?api_key=` query param.
+- ❌ API key management endpoints — generate/revoke per connection, domain restriction (referer check)
+- ❌ API key management UI in dashboard — generate/revoke keys, show allowed domains
+- ❌ Components page "Copy Snippet" — replace static HTML copy with configured snippet (API key + div tag)
+
+### WooCommerce WordPress Plugin (Server-Side PHP — Independent of JS Snippet)
+- ❌ PHP plugin (Tailwind CSS + shadcn if possible, otherwise Tailwind only) — server-to-server `wp_remote_get()` calls from PHP to Nudgio public widget API
+- ❌ Gutenberg block (`nudgio/recommendations`) + `[nudgio]` shortcode — renders recommendation HTML server-side in PHP, no client-side JS needed
+- ❌ WP Admin settings page — API key stored in `wp_options`, default widget type/count/style/colors
+- ❌ Auto-detects `$product->get_id()` on WooCommerce product pages for cross-sell/upsell/similar
 - ❌ Submit to WordPress Plugin Directory (free listing)
+- Note: easier than Shopify — standard WordPress plugin patterns
+
+### Universal JS Widget Snippet (For Non-WordPress/Non-Shopify Sites)
+- ❌ `widget.js` loader script — served from `server.nudgio.tech/widget.js`, client-side fetch from public widget API
+- ❌ Finds all `.nudgio-widget` divs, reads `data-` attributes (type, count, style, colors, product-id), renders HTML
+- ❌ Product auto-detection via `data-product-id` attribute or page meta
+- ❌ For Squarespace, Wix, custom sites — any site that can paste a `<script>` tag
 
 ### Magento Adobe Commerce Extension (Distribution)
-- ❌ Magento extension for Adobe Commerce Marketplace — lower priority (smaller market)
+- ❌ Magento 2 extension for Adobe Commerce Marketplace — strict DI, layout XML, Block classes, `.phtml` templates
+- ❌ Harder than WordPress, closer to Shopify complexity. Smallest market, lowest priority.
 
 ### Landing Page + Legal
 - ✅ Landing page — deployed at www.nudgio.tech (Vercel), hero + features + how it works + contact form + blog
@@ -1483,4 +1503,4 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Terms of service — `/legal/terms-of-service` (SaaS terms, Romanian jurisdiction)
 
 ### Nice to Have
-- ❌ Frontend subscription page — show current tier, usage stats, upgrade/downgrade buttons (match nexotype/finpy pattern)
+- ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page; Standalone: Stripe via accounts module)

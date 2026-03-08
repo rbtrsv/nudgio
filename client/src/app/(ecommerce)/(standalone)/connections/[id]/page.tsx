@@ -23,8 +23,13 @@ import {
   Settings,
   Eye,
   EyeOff,
+  Key,
+  Copy,
+  Plus,
 } from 'lucide-react';
 import Link from 'next/link';
+import { WidgetAPIKeyDetail } from '@/modules/ecommerce/schemas/widget-api-keys.schemas';
+import { getWidgetAPIKeys, createWidgetAPIKey, deleteWidgetAPIKey } from '@/modules/ecommerce/service/widget-api-keys.service';
 
 export default function ConnectionDetailPage() {
   const params = useParams();
@@ -68,6 +73,17 @@ export default function ConnectionDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
+  // API Keys state
+  const [apiKeys, setApiKeys] = useState<WidgetAPIKeyDetail[]>([]);
+  const [isLoadingKeys, setIsLoadingKeys] = useState(false);
+  const [isCreatingKey, setIsCreatingKey] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [newKeyDomains, setNewKeyDomains] = useState('');
+  const [createdKeySecret, setCreatedKeySecret] = useState<string | null>(null);
+  const [createdKeyId, setCreatedKeyId] = useState<number | null>(null);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+  const [deletingKeyId, setDeletingKeyId] = useState<number | null>(null);
+
   // Initialize edit form when connection loads
   useEffect(() => {
     if (connection) {
@@ -98,6 +114,20 @@ export default function ConnectionDetailPage() {
       });
     }
   }, [connectionId, connection?.is_active, fetchConnectionStats]);
+
+  // Fetch API keys for non-Shopify connections
+  useEffect(() => {
+    if (connectionId && connection && connection.platform !== 'shopify') {
+      setIsLoadingKeys(true);
+      getWidgetAPIKeys(connectionId)
+        .then((res) => {
+          if (res.success && res.data) {
+            setApiKeys(res.data);
+          }
+        })
+        .finally(() => setIsLoadingKeys(false));
+    }
+  }, [connectionId, connection]);
 
   if (isLoading) {
     return (
@@ -151,7 +181,7 @@ export default function ConnectionDetailPage() {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className={`grid w-full ${connection.platform !== 'shopify' ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger value="overview">
             <PlugZap className="h-4 w-4" />
             Overview
@@ -160,6 +190,13 @@ export default function ConnectionDetailPage() {
             <Settings className="h-4 w-4" />
             Settings
           </TabsTrigger>
+          {/* API Keys tab — only for non-Shopify connections (Shopify uses App Proxy HMAC) */}
+          {connection.platform !== 'shopify' && (
+            <TabsTrigger value="api-keys">
+              <Key className="h-4 w-4" />
+              API Keys
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* ========== OVERVIEW TAB ========== */}
@@ -564,6 +601,185 @@ export default function ConnectionDetailPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* ========== API KEYS TAB ========== */}
+        {connection.platform !== 'shopify' && (
+          <TabsContent value="api-keys" className="space-y-4">
+            {/* Generate New Key */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Generate API Key</CardTitle>
+                <CardDescription>
+                  Create a new key for HMAC-signed widget URLs. The secret is shown once — save it immediately.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Created key secret — shown once */}
+                {createdKeySecret && (
+                  <Alert>
+                    <div className="space-y-2">
+                      <AlertDescription className="font-medium">
+                        Save this key now — it cannot be shown again.
+                      </AlertDescription>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 rounded bg-muted px-3 py-2 text-sm font-mono break-all">
+                          {createdKeySecret}
+                        </code>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(createdKeySecret);
+                            setCopiedSecret(true);
+                            setTimeout(() => setCopiedSecret(false), 2000);
+                          }}
+                        >
+                          {copiedSecret ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Key ID: {createdKeyId} — use this as key_id in your widget configuration.
+                      </p>
+                    </div>
+                  </Alert>
+                )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="new-key-name">Key Name</Label>
+                  <Input
+                    id="new-key-name"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                    placeholder="e.g., Production key"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-key-domains">Allowed Domains (optional)</Label>
+                  <Input
+                    id="new-key-domains"
+                    value={newKeyDomains}
+                    onChange={(e) => setNewKeyDomains(e.target.value)}
+                    placeholder="e.g., myshop.com, www.myshop.com"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Comma-separated domains. Secondary signal only — HMAC signature is primary auth.
+                  </p>
+                </div>
+                <Button
+                  onClick={async () => {
+                    if (!newKeyName.trim()) return;
+                    setIsCreatingKey(true);
+                    setCreatedKeySecret(null);
+                    setCreatedKeyId(null);
+                    try {
+                      const res = await createWidgetAPIKey(connectionId, {
+                        name: newKeyName.trim(),
+                        allowed_domains: newKeyDomains.trim() || null,
+                      });
+                      if (res.success && res.data) {
+                        setCreatedKeySecret(res.data.api_key);
+                        setCreatedKeyId(res.data.id);
+                        setNewKeyName('');
+                        setNewKeyDomains('');
+                        // Refresh the key list
+                        const listRes = await getWidgetAPIKeys(connectionId);
+                        if (listRes.success && listRes.data) {
+                          setApiKeys(listRes.data);
+                        }
+                      }
+                    } finally {
+                      setIsCreatingKey(false);
+                    }
+                  }}
+                  disabled={isCreatingKey || !newKeyName.trim()}
+                >
+                  {isCreatingKey ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Generate Key
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Existing Keys */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Existing Keys</CardTitle>
+                <CardDescription>
+                  Active API keys for this connection. Secrets are not shown — only the prefix is displayed.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoadingKeys ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : apiKeys.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No API keys yet. Generate one above to get started.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {apiKeys.map((k) => (
+                      <div
+                        key={k.id}
+                        className="flex items-center justify-between rounded-lg border p-3"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm">{k.name}</p>
+                            <Badge variant={k.is_active ? 'default' : 'secondary'} className="text-xs">
+                              {k.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <code>{k.api_key_prefix}...</code>
+                            <span>ID: {k.id}</span>
+                            <span>{new Date(k.created_at).toLocaleDateString()}</span>
+                            {k.allowed_domains && <span>Domains: {k.allowed_domains}</span>}
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            setDeletingKeyId(k.id);
+                            try {
+                              const res = await deleteWidgetAPIKey(connectionId, k.id);
+                              if (res.success) {
+                                setApiKeys((prev) => prev.filter((key) => key.id !== k.id));
+                              }
+                            } finally {
+                              setDeletingKeyId(null);
+                            }
+                          }}
+                          disabled={deletingKeyId === k.id}
+                        >
+                          {deletingKeyId === k.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

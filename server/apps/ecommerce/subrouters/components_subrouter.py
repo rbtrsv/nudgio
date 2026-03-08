@@ -400,6 +400,12 @@ def generate_recommendation_html(
         </div>
         
         <script>
+            // Report content height to parent frame for auto-resize (iframe embedding)
+            window.addEventListener('load', () => {{
+                const height = document.body.scrollHeight;
+                window.parent.postMessage({{ type: 'nudgio-resize', height: height }}, '*');
+            }});
+
             // Track recommendation clicks
             document.querySelectorAll('[data-rec-click]').forEach(el => {{
                 el.addEventListener('click', (e) => {{

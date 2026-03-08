@@ -78,6 +78,7 @@ class EcommerceConnection(BaseMixin, Base):
     usage_tracking: Mapped[list["APIUsageTracking"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
     analytics: Mapped[list["RecommendationAnalytics"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
     shopify_billing: Mapped[Optional["ShopifyBilling"]] = relationship(back_populates="connection", uselist=False, cascade="all, delete-orphan")
+    widget_api_keys: Mapped[list["WidgetAPIKey"]] = relationship(back_populates="connection", cascade="all, delete-orphan")
 
 
 # ==========================================
@@ -196,3 +197,33 @@ class ShopifyBilling(BaseMixin, Base):
 
     # Relationships
     connection: Mapped["EcommerceConnection"] = relationship(back_populates="shopify_billing")
+
+
+# ==========================================
+# 6. WIDGET API KEYS
+# ==========================================
+
+class WidgetAPIKey(BaseMixin, Base):
+    """
+    Purpose: Stores HMAC signing keys for public widget endpoints (non-Shopify platforms).
+    Scope: Per-connection — each connection can have multiple API keys.
+    Usage: "Production key for My WooCommerce Store" with signed iframe URLs.
+
+    Security model:
+    - api_key_encrypted: Fernet-encrypted secret used for HMAC-SHA256 verification
+    - api_key_prefix: "nk_" + first 8 hex chars — safe to display in dashboard
+    - The plaintext key is shown ONCE on creation, never retrievable again
+    - Signed URLs use key_id (this model's PK) + HMAC signature
+    """
+    __tablename__ = "widget_api_keys"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    connection_id: Mapped[int] = mapped_column(Integer, ForeignKey("ecommerce_connections.id", ondelete="CASCADE"), nullable=False)
+    api_key_encrypted: Mapped[str] = mapped_column(String(512), nullable=False)  # Fernet-encrypted secret
+    api_key_prefix: Mapped[str] = mapped_column(String(20), nullable=False)  # "nk_" + first 8 hex chars (display only)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)  # Human-readable label (e.g., "Production key")
+    allowed_domains: Mapped[str | None] = mapped_column(String(1000), nullable=True)  # Comma-separated domains — secondary signal, not primary auth
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Relationships
+    connection: Mapped["EcommerceConnection"] = relationship(back_populates="widget_api_keys")
