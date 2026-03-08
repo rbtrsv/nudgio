@@ -1,5 +1,5 @@
 /**
- * Nudgio Recommendations — Gutenberg Block (Editor Script)
+ * Nudgio Technologies — Gutenberg Block (Editor Script)
  *
  * Vanilla JS using wp.element.createElement() — no build process, no JSX.
  * Registers the nudgio/recommendations block with:
@@ -111,11 +111,11 @@
             // ------------------------------------------
             // Panel 1: Widget Settings
             // ------------------------------------------
-            var widgetSettingsPanel = el( PanelBody, { title: __( 'Widget Settings', 'nudgio-recommendations' ), initialOpen: true },
+            var widgetSettingsPanel = el( PanelBody, { title: __( 'Widget Settings', 'nudgio' ), initialOpen: true },
 
                 // Type dropdown
                 el( SelectControl, {
-                    label: __( 'Recommendation Type', 'nudgio-recommendations' ),
+                    label: __( 'Recommendation Type', 'nudgio' ),
                     value: type,
                     options: [
                         { label: 'Bestsellers',  value: 'bestsellers' },
@@ -128,7 +128,7 @@
 
                 // Count slider
                 el( RangeControl, {
-                    label: __( 'Number of Products', 'nudgio-recommendations' ),
+                    label: __( 'Number of Products', 'nudgio' ),
                     value: attributes.count,
                     onChange: function ( val ) { setAttributes( { count: val } ); },
                     min: 1,
@@ -137,7 +137,7 @@
 
                 // Style dropdown
                 el( SelectControl, {
-                    label: __( 'Display Style', 'nudgio-recommendations' ),
+                    label: __( 'Display Style', 'nudgio' ),
                     value: attributes.style,
                     options: [
                         { label: 'Card Grid', value: 'card' },
@@ -148,8 +148,8 @@
 
                 // Columns slider (2–6, max columns at full width)
                 el( RangeControl, {
-                    label: __( 'Columns', 'nudgio-recommendations' ),
-                    help: __( 'Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio-recommendations' ),
+                    label: __( 'Columns', 'nudgio' ),
+                    help: __( 'Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio' ),
                     value: attributes.columns,
                     onChange: function ( val ) { setAttributes( { columns: val } ); },
                     min: 2,
@@ -158,8 +158,8 @@
 
                 // Size dropdown (compact / default / spacious)
                 el( SelectControl, {
-                    label: __( 'Size', 'nudgio-recommendations' ),
-                    help: __( 'Controls text, padding, and gap proportionally.', 'nudgio-recommendations' ),
+                    label: __( 'Size', 'nudgio' ),
+                    help: __( 'Controls text, padding, and gap proportionally.', 'nudgio' ),
                     value: attributes.size,
                     options: [
                         { label: 'Compact',  value: 'compact' },
@@ -171,8 +171,8 @@
 
                 // Product ID — shown only for cross-sell, upsell, similar
                 vis.product_id ? el( TextControl, {
-                    label: __( 'Product ID', 'nudgio-recommendations' ),
-                    help: __( 'Leave empty to auto-detect on product pages.', 'nudgio-recommendations' ),
+                    label: __( 'Product ID', 'nudgio' ),
+                    help: __( 'Leave empty to auto-detect on product pages.', 'nudgio' ),
                     value: attributes.product_id,
                     onChange: function ( val ) { setAttributes( { product_id: val } ); },
                 } ) : null
@@ -191,8 +191,8 @@
                     typeSpecificControls.push(
                         el( RangeControl, {
                             key: 'lookback_days',
-                            label: __( 'Lookback Days', 'nudgio-recommendations' ),
-                            help: __( 'Number of days to analyze for recommendations.', 'nudgio-recommendations' ),
+                            label: __( 'Lookback Days', 'nudgio' ),
+                            help: __( 'Number of days to analyze for recommendations.', 'nudgio' ),
                             value: attributes.lookback_days,
                             onChange: function ( val ) { setAttributes( { lookback_days: val } ); },
                             min: 1,
@@ -206,7 +206,7 @@
                     typeSpecificControls.push(
                         el( SelectControl, {
                             key: 'method',
-                            label: __( 'Ranking Method', 'nudgio-recommendations' ),
+                            label: __( 'Ranking Method', 'nudgio' ),
                             value: attributes.method,
                             options: [
                                 { label: 'Volume (units sold)',       value: 'volume' },
@@ -223,8 +223,8 @@
                     typeSpecificControls.push(
                         el( RangeControl, {
                             key: 'min_price_increase_percent',
-                            label: __( 'Min Price Increase %', 'nudgio-recommendations' ),
-                            help: __( 'Only show products at least this % more expensive.', 'nudgio-recommendations' ),
+                            label: __( 'Min Price Increase %', 'nudgio' ),
+                            help: __( 'Only show products at least this % more expensive.', 'nudgio' ),
                             value: attributes.min_price_increase_percent,
                             onChange: function ( val ) { setAttributes( { min_price_increase_percent: val } ); },
                             min: 1,
@@ -234,7 +234,7 @@
                 }
 
                 typeSpecificPanel = el( PanelBody, {
-                    title: __( 'Type-Specific Settings', 'nudgio-recommendations' ),
+                    title: __( 'Type-Specific Settings', 'nudgio' ),
                     initialOpen: false,
                 }, typeSpecificControls );
             }
@@ -243,23 +243,23 @@
             // Panel 3: Color Settings
             // ------------------------------------------
             var colorPanel = el( PanelColorSettings, {
-                title: __( 'Color Settings', 'nudgio-recommendations' ),
+                title: __( 'Color Settings', 'nudgio' ),
                 initialOpen: false,
                 colorSettings: [
                     {
                         value: attributes.primary_color,
                         onChange: function ( val ) { setAttributes( { primary_color: val || '#3B82F6' } ); },
-                        label: __( 'Primary Color', 'nudgio-recommendations' ),
+                        label: __( 'Primary Color', 'nudgio' ),
                     },
                     {
                         value: attributes.text_color,
                         onChange: function ( val ) { setAttributes( { text_color: val || '#1F2937' } ); },
-                        label: __( 'Text Color', 'nudgio-recommendations' ),
+                        label: __( 'Text Color', 'nudgio' ),
                     },
                     {
                         value: attributes.bg_color,
                         onChange: function ( val ) { setAttributes( { bg_color: val || '#FFFFFF' } ); },
-                        label: __( 'Background Color', 'nudgio-recommendations' ),
+                        label: __( 'Background Color', 'nudgio' ),
                     },
                 ],
             } );
@@ -267,10 +267,10 @@
             // ------------------------------------------
             // Panel 4: Appearance
             // ------------------------------------------
-            var appearancePanel = el( PanelBody, { title: __( 'Appearance', 'nudgio-recommendations' ), initialOpen: false },
+            var appearancePanel = el( PanelBody, { title: __( 'Appearance', 'nudgio' ), initialOpen: false },
                 el( TextControl, {
-                    label: __( 'Border Radius', 'nudgio-recommendations' ),
-                    help: __( 'CSS value, e.g. 8px, 0.5rem, 0', 'nudgio-recommendations' ),
+                    label: __( 'Border Radius', 'nudgio' ),
+                    help: __( 'CSS value, e.g. 8px, 0.5rem, 0', 'nudgio' ),
                     value: attributes.border_radius,
                     onChange: function ( val ) { setAttributes( { border_radius: val } ); },
                 } )
@@ -306,7 +306,7 @@
 
             var placeholder = el( Placeholder, {
                 icon: 'products',
-                label: __( 'Nudgio Recommendations', 'nudgio-recommendations' ),
+                label: __( 'Nudgio Technologies', 'nudgio' ),
             },
                 el( 'span', { style: { fontSize: '13px', color: '#555' } }, summaryLine ),
                 swatches

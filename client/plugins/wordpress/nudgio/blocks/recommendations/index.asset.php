@@ -1,6 +1,6 @@
 <?php
 /**
- * Asset manifest for the Nudgio Recommendations block editor script.
+ * Asset manifest for the Nudgio Technologies block editor script.
  *
  * Replaces the auto-generated asset file from @wordpress/scripts.
  * Lists the WordPress global packages that index.js depends on.

@@ -1,4 +1,4 @@
-=== Nudgio Recommendations ===
+=== Nudgio Technologies ===
 Contributors: burarotechnologies
 Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.0
@@ -12,7 +12,7 @@ Display AI-powered product recommendations on your WooCommerce store — bestsel
 
 == Description ==
 
-Nudgio Recommendations connects your WooCommerce store to the Nudgio recommendation engine to display personalized product recommendations on your storefront.
+Nudgio Technologies connects your WooCommerce store to the Nudgio recommendation engine to display personalized product recommendations on your storefront.
 
 **Features:**
 
@@ -36,9 +36,9 @@ Nudgio Recommendations connects your WooCommerce store to the Nudgio recommendat
 
 == Installation ==
 
-1. Upload the `nudgio-recommendations` folder to `/wp-content/plugins/`
+1. Upload the `nudgio` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Go to Settings → Nudgio Recommendations
+3. Go to Settings → Nudgio Technologies
 4. Enter your Key ID and API Secret from the Nudgio dashboard
 5. Click "Test Connection" to verify
 6. Add `[nudgio]` shortcodes to your pages or posts

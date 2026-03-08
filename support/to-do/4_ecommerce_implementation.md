@@ -1491,7 +1491,7 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Components page "Copy Snippet" — `generateEmbedCode()` outputs `<div>` + `<script>` snippet using API key + widget.js loader, only non-default data attributes included
 
 ### WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
-- ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based widget rendering (same pattern as Shopify Theme App Extension)
+- ✅ WordPress plugin at `client/plugins/wordpress/nudgio/` — iframe-based widget rendering (same pattern as Shopify Theme App Extension)
 - ✅ `[nudgio]` shortcode — generates HMAC-signed iframe URLs, API secret never in HTML. Params: type, count, style, device, columns, size, colors, border_radius, lookback_days, method, min_price_increase_percent, product_id.
 - ✅ WP Admin settings page (Settings → Nudgio Recommendations) — Key ID, API Secret (encrypted via `openssl_encrypt` with `AUTH_KEY` salt before storing in `wp_options`), Server URL, default widget settings (type, count, style, columns, size, colors, border radius)
 - ✅ Auto-detects `$product->get_id()` on WooCommerce product pages for cross-sell/upsell/similar
@@ -1502,7 +1502,7 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Gutenberg block (`nudgio/recommendations`) — block.json (columns + size attributes), index.js (Columns RangeControl 2–6, Size SelectControl compact/default/spacious, no Device), render.php (maps block attributes to shortcode atts)
 - ❌ Submit to WordPress Plugin Directory (free listing)
 
-### Data Ingestion + Local Storage (V3 Architecture) ✅ (Step 1+2, periodic task deferred)
+### Data Ingestion + Local Storage (V3 Architecture) ✅
 **Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.
 
 #### Step 1 — Push API + IngestAdapter ✅
@@ -1513,12 +1513,13 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Factory updated — `get_adapter(connection, db)` with optional `db` param, routes `connection_method="ingest"` to IngestAdapter. All 7 subrouter callers updated to pass `db`.
 - ✅ `"ingest"` added to `ConnectionMethod` enum in `ecommerce_connection_schemas.py`
 
-#### Step 2 — Auto-Sync ✅ (manual sync done, periodic task deferred)
-- ✅ `sync_utils.py` — 3 shared upsert helpers (`upsert_products`, `upsert_orders`, `upsert_order_items`) used by both Push API imports and Auto-Sync. `sync_connection_data()` orchestration: fetch from platform adapter → upsert → commit → prune ghost rows (`_prune_stale_rows` deletes rows with `ingested_at < sync_started_at`). `_parse_datetime()` helper for adapter output.
+#### Step 2 — Auto-Sync ✅
+- ✅ `sync_utils.py` — 3 shared upsert helpers (`upsert_products`, `upsert_orders`, `upsert_order_items`) used by both Push API imports and Auto-Sync. `sync_connection_data()` orchestration: fetch from platform adapter → upsert → commit → prune ghost rows (`_prune_stale_rows` deletes rows with `ingested_at < sync_started_at`). `_parse_datetime()` helper for adapter output. Now also sets `last_synced_at`, `last_sync_status`, `next_sync_at` on each sync.
 - ✅ `POST /data/sync/{connection_id}` — triggers full sync via platform adapter → ingested tables, returns stats
-- ❌ Periodic sync task — cron or FastAPI background task (deferred to future)
-- ❌ Sync settings per connection: interval (hourly/daily/weekly), enabled/disabled
-- ❌ Sync status tracking (last_synced_at, items_synced, errors)
+- ✅ Periodic sync scheduler — `sync_scheduler.py`: asyncio background loop in FastAPI lifespan, checks every 5 min for due connections (`next_sync_at <= now`), `FOR UPDATE SKIP LOCKED` for multi-instance safety, skips ingest connections
+- ✅ Sync settings per connection — 5 new fields on `EcommerceConnection`: `auto_sync_enabled`, `sync_interval` (hourly/every_6_hours/daily/weekly), `last_synced_at`, `next_sync_at`, `last_sync_status`. `SyncInterval` enum in schemas. PATCH endpoint computes `next_sync_at` via `compute_next_sync_at()`. Smart `is_active` reset (only on connection-critical field changes, not sync settings).
+- ✅ FastAPI lifespan in `main.py` — `start_sync_scheduler()` on startup, `stop_sync_scheduler()` on shutdown
+- ✅ Frontend — Data Sync card in Settings tab: Switch toggle (auto-sync on/off), Select dropdown (interval), read-only status (last synced, status badge, next sync), Sync Now button. `syncConnection()` service + `DATA_ENDPOINTS.SYNC`.
 
 #### Step 3 — Granular Sync Filters (future)
 - ❌ Filter by category, price range, date range, product tags
@@ -1531,9 +1532,9 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Components page "Copy Snippet" — `generateEmbedCode()` in `use-components.ts` outputs `<div>` + `<script>` snippet using API key, only non-default data attributes included. Components page shows embed code section with API key dropdown + copy button.
 - ✅ Mount sign subrouter in `router.py` (ungated), static files mount in `main.py` (`/ecommerce/static`)
 
-### Magento Adobe Commerce Extension (Distribution)
-- ❌ Magento 2 extension for Adobe Commerce Marketplace — strict DI, layout XML, Block classes, `.phtml` templates
-- ❌ Harder than WordPress, closer to Shopify complexity. Smallest market, lowest priority.
+### Magento Adobe Commerce Extension (Distribution) 🚫 Abandoned
+- 🚫 Magento 2 extension for Adobe Commerce Marketplace — strict DI, layout XML, Block classes, `.phtml` templates
+- 🚫 Too much work for too little market. Will not be implemented.
 
 ### Landing Page + Legal
 - ✅ Landing page — deployed at www.nudgio.tech (Vercel), hero + features + how it works + contact form + blog

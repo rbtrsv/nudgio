@@ -150,7 +150,8 @@
 - ✅ Responsive `columns` + `size` params (full stack) — replaced `device`-based layout with responsive grid (`columns` 2–6, default 4: 1→2→N cascade) + density control (`size` compact/default/spacious: 13-property SIZE_MAP). `device` kept as first-class API param (not deprecated), hidden from UI. `list` style removed. 17 files across server (4 subrouters), WordPress plugin (7 files: shortcode, block.json, index.js, render.php, activation, settings, docs), Shopify extension (Liquid schema), Next.js client (5 files: Zod schema, 2 services, 2 component pages). Server-side validation: clamp columns 2–6, size fallback to "default". HMAC unchanged.
 - ✅ Managed Pricing billing page — billing page rewritten for Shopify Managed Pricing. Shows current plan + plan comparison + "Manage Plan on Shopify" button that opens `https://admin.shopify.com/store/{storeHandle}/charges/nudgio/pricing_plans`. Subscribe/cancel endpoints and service functions kept with comments for manual pricing revert. Partner Dashboard → Distribution → Manage listing → Pricing content → Settings → "Managed pricing" selected.
 
-### 4. Shopify App Store Submission
+### 4. Shopify App Store Submission (⏳ Automated Checks Running)
+- ⏳ Automated embedded app checks — auto-checked every 2 hours by Shopify. Verifying: latest App Bridge CDN, session token auth. Running since 2026-03-08.
 - ❌ App listing: description, screenshots, demo video
 - ❌ Submit for Shopify review (2-4 week review process)
 
@@ -167,15 +168,16 @@
 - ✅ Components page "Copy Snippet" — generates `<div>` + `<script>` snippet with API key + widget.js loader
 
 ### 7. WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
-- ✅ WordPress plugin at `client/plugins/wordpress/nudgio-recommendations/` — iframe-based rendering (HMAC-signed URLs, same pattern as Shopify)
+- ✅ WordPress plugin at `client/plugins/wordpress/nudgio/` — iframe-based rendering (HMAC-signed URLs, same pattern as Shopify)
 - ✅ `[nudgio]` shortcode — signed iframe URLs, auto-resize JS, auto-detects product ID on WooCommerce product pages
 - ✅ WP Admin settings page — Key ID, encrypted API Secret, Server URL, default widget settings, Test Connection
 - ✅ WooCommerce feature compatibility, `uninstall.php`, GPL-2.0-or-later
 - ✅ Verified working on `wp.nudgio.tech`
 - ✅ Gutenberg block — `nudgio/recommendations` block with Columns RangeControl (2–6) + Size SelectControl (compact/default/spacious), live preview placeholder, block.json + index.js + render.php
+- ❌ Rename plugin directory `nudgio` → `nudgio` (Plugin Name: "Nudgio Technologies")
 - ❌ Submit to WordPress Plugin Directory
 
-### 8. Data Ingestion + Local Storage (V3 Architecture) ✅ (Step 1+2)
+### 8. Data Ingestion + Local Storage (V3 Architecture) ✅
 **Goal:** Store product/order data locally so engine reads from DB, not live API calls. Enables custom sites + faster reads for all platforms.
 
 #### Step 1 — Push API + IngestAdapter ✅
@@ -186,11 +188,13 @@
 - ✅ Factory updated — `get_adapter(connection, db)` with optional `db` param, routes `connection_method="ingest"` to IngestAdapter
 - ✅ `"ingest"` added to `ConnectionMethod` enum
 
-#### Step 2 — Auto-Sync ✅ (manual sync, periodic task deferred)
-- ✅ `sync_utils.py` — shared upsert helpers (upsert_products, upsert_orders, upsert_order_items) + `sync_connection_data()` orchestration + ghost row pruning (`_prune_stale_rows`)
+#### Step 2 — Auto-Sync ✅
+- ✅ `sync_utils.py` — shared upsert helpers + `sync_connection_data()` orchestration + ghost row pruning + sync metadata (`last_synced_at`, `last_sync_status`, `next_sync_at`)
 - ✅ `POST /data/sync/{connection_id}` — triggers full sync via platform adapter → ingested tables
-- ❌ Periodic sync task — cron or FastAPI background task (deferred to future)
-- ❌ Sync settings per connection: interval (hourly/daily/weekly), enabled/disabled
+- ✅ Periodic sync scheduler — `sync_scheduler.py`: asyncio background loop in FastAPI lifespan, checks every 5 min, `FOR UPDATE SKIP LOCKED`, skips ingest connections
+- ✅ Sync settings per connection — 5 fields on `EcommerceConnection` (`auto_sync_enabled`, `sync_interval`, `last_synced_at`, `next_sync_at`, `last_sync_status`), `SyncInterval` enum, PATCH computes `next_sync_at`
+- ✅ FastAPI lifespan — scheduler start/stop in `main.py`
+- ✅ Frontend Data Sync card — Switch toggle, interval Select, status info, Sync Now button
 
 #### Step 3 — Granular Sync Filters (future)
 - ❌ Filter by category, price range, date range, product tags
@@ -203,9 +207,8 @@
 - ✅ Components page "Copy Snippet" — `generateEmbedCode()` outputs `<div>` + `<script>` snippet using API key, only non-default data attributes included
 - ✅ For custom sites, Squarespace, Wix, etc. — any site that can paste a `<script>` tag
 
-### 10. Magento Adobe Commerce Extension
-- ❌ Magento 2 extension for Adobe Commerce Marketplace (harder — strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity)
-- ❌ Lower priority — smaller market
+### 10. Magento Adobe Commerce Extension 🚫 Abandoned
+- 🚫 Magento 2 extension for Adobe Commerce Marketplace — too much work for too little market. Will not be implemented.
 
 ### 10. Nice to Have
 - ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page with plan display + Shopify upgrade redirect; Standalone: Stripe via accounts module)
@@ -227,15 +230,15 @@
 7b. ✅ **Storefront widget delivery (Stage 3)** — DONE. App Proxy subrouter (4 endpoints, HMAC hex verification per Shopify docs — decoded values, no separator join, duplicate keys with comma), `[app_proxy]` in `shopify.app.toml`, Theme App Extension (Liquid block + iframe auto-resize JS), deployed via `shopify app deploy`, Components page updated with storefront instructions. Verified working in Theme Editor with product images.
 7c. ✅ **Components product dropdown + guards** — DONE. Product dropdown (fetches from `GET /products`, ungated), Liquid guard for non-product pages, app proxy guard for missing product_id.
 7d. ✅ **Managed Pricing billing** — DONE. Billing page shows current plan + "Manage Plan on Shopify" button (opens Shopify-hosted pricing page). Subscribe/cancel code kept for manual pricing revert. Managed Pricing configured in Partner Dashboard.
-8. **App Store submission** — listing, description, screenshots, demo video, submit for review (2-4 weeks).
+8. **App Store submission** — ⏳ automated embedded app checks running (every 2 hours). Listing, description, screenshots, demo video still needed. Submit for review (2-4 weeks).
 
 ### 🟢 Low Priority — Future Expansions
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
 10. ✅ **Public Widget API** — DONE. `WidgetAPIKey` model (Fernet-encrypted), HMAC-signed URL auth, 4 public widget endpoints, key management UI (3rd tab), dedicated rate limiting. 66 routes total.
 11. ✅ **WooCommerce WordPress Plugin (R1)** — DONE. `[nudgio]` shortcode + WP Admin settings page + iframe rendering + HMAC signing + Test Connection. Verified on `wp.nudgio.tech`.
-12. ✅ **Data Ingestion + Local Storage (V3)** — DONE. 3 ingested tables + migration + IngestAdapter + factory routing + shared upsert helpers + `sync_connection_data()` with ghost row pruning. Manual sync via `POST /data/sync/{connection_id}`. Periodic task deferred.
+12. ✅ **Data Ingestion + Local Storage (V3)** — DONE. 3 ingested tables + migration + IngestAdapter + factory routing + shared upsert helpers + `sync_connection_data()` with ghost row pruning + periodic sync scheduler (asyncio loop, `SKIP LOCKED`, lifespan) + per-connection sync settings (5 fields, SyncInterval enum, PATCH logic) + frontend Data Sync card (toggle, interval, status, Sync Now).
 13. ✅ **Universal JS Widget Snippet** — DONE. `widget.js` loader (IIFE, XHR, iframe, MutationObserver) + `widget_sign_subrouter.py` (HMAC signing, CORS) + Components page "Copy Snippet" (`generateEmbedCode()`).
-14. **Magento Adobe Commerce Extension** — harder (strict DI, layout XML, Block classes, `.phtml` templates, closer to Shopify complexity). Smallest market, lowest priority.
+14. 🚫 **Magento Adobe Commerce Extension** — ABANDONED. Too much work for too little market.
 15. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
 
 ---
@@ -248,7 +251,7 @@
 - Item 10 (Public Widget API) is prerequisite for items 11-13 — all delivery methods use it
 - Item 11 (WooCommerce) is independent PHP, server-to-server — no JS snippet dependency
 - Item 12 (Universal JS) is for sites without a dedicated plugin (Squarespace, Wix, custom)
-- Item 13 (Magento) is harder — Magento 2 module architecture is strict and complex, similar effort to Shopify
+- Item 13 (Magento) is abandoned — too much work for too little market
 - Backend recommendation engine is complete (adapters, scoring, widget generation, analytics tracking)
 - Accounts module is shared and complete (auth, organizations, subscriptions, Stripe)
 - Landing page is complete and deployed at www.nudgio.tech (Vercel)

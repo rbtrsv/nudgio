@@ -4,7 +4,7 @@ Nudgio Models — Ecommerce
 Platform connections, recommendation settings, API usage tracking, recommendation analytics.
 """
 
-from sqlalchemy import Integer, String, Boolean, DateTime, Float, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import Integer, String, Boolean, DateTime, Float, ForeignKey, Text, UniqueConstraint, text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -75,8 +75,8 @@ class EcommerceConnection(BaseMixin, Base):
 
     # Auto-Sync schedule — periodic data pull from platform adapters
     # Why: without these, sync is manual-only and data goes stale
-    auto_sync_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
-    sync_interval: Mapped[str] = mapped_column(String(50), default="daily")  # "hourly", "every_6_hours", "daily", "weekly"
+    auto_sync_enabled: Mapped[bool] = mapped_column(Boolean, default=False, server_default=text("false"))
+    sync_interval: Mapped[str] = mapped_column(String(50), default="daily", server_default="daily")  # "hourly", "every_6_hours", "daily", "weekly"
     last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     next_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_sync_status: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "success", "error"

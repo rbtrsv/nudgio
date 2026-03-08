@@ -1,6 +1,6 @@
 <?php
 /**
- * Nudgio Recommendations — Uninstall
+ * Nudgio Technologies — Uninstall
  *
  * Cleanup on plugin deletion (not deactivation).
  * Removes all nudgio_* options from wp_options.

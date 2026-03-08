@@ -2,7 +2,7 @@
 /**
  * Nudgio Settings — WP Admin Settings Page
  *
- * Registers the settings page under Settings → Nudgio Recommendations.
+ * Registers the settings page under Settings → Nudgio Technologies.
  * Uses WordPress Settings API (register_setting, add_settings_section, add_settings_field).
  *
  * API secret is encrypted via openssl_encrypt() with a key derived from AUTH_KEY
@@ -43,14 +43,14 @@ class Nudgio_Settings {
     // ==========================================
 
     /**
-     * Add settings page under Settings → Nudgio Recommendations.
+     * Add settings page under Settings → Nudgio Technologies.
      */
     public function add_settings_page() {
         add_options_page(
-            __( 'Nudgio Recommendations', 'nudgio-recommendations' ),
-            __( 'Nudgio Recommendations', 'nudgio-recommendations' ),
+            __( 'Nudgio Technologies', 'nudgio' ),
+            __( 'Nudgio Technologies', 'nudgio' ),
             'manage_options',
-            'nudgio-recommendations',
+            'nudgio',
             array( $this, 'render_settings_page' )
         );
     }
@@ -67,9 +67,9 @@ class Nudgio_Settings {
         // --- API Credentials Section ---
         add_settings_section(
             'nudgio_credentials_section',
-            __( 'API Credentials', 'nudgio-recommendations' ),
+            __( 'API Credentials', 'nudgio' ),
             array( $this, 'credentials_section_callback' ),
-            'nudgio-recommendations'
+            'nudgio'
         );
 
         register_setting( 'nudgio_settings', 'nudgio_key_id', array(
@@ -79,9 +79,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_key_id',
-            __( 'Key ID', 'nudgio-recommendations' ),
+            __( 'Key ID', 'nudgio' ),
             array( $this, 'render_key_id_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_credentials_section'
         );
 
@@ -92,9 +92,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_api_secret',
-            __( 'API Secret', 'nudgio-recommendations' ),
+            __( 'API Secret', 'nudgio' ),
             array( $this, 'render_api_secret_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_credentials_section'
         );
 
@@ -105,18 +105,18 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_server_url',
-            __( 'Server URL', 'nudgio-recommendations' ),
+            __( 'Server URL', 'nudgio' ),
             array( $this, 'render_server_url_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_credentials_section'
         );
 
         // --- Default Widget Settings Section ---
         add_settings_section(
             'nudgio_defaults_section',
-            __( 'Default Widget Settings', 'nudgio-recommendations' ),
+            __( 'Default Widget Settings', 'nudgio' ),
             array( $this, 'defaults_section_callback' ),
-            'nudgio-recommendations'
+            'nudgio'
         );
 
         register_setting( 'nudgio_settings', 'nudgio_default_type', array(
@@ -126,9 +126,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_type',
-            __( 'Widget Type', 'nudgio-recommendations' ),
+            __( 'Widget Type', 'nudgio' ),
             array( $this, 'render_default_type_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section'
         );
 
@@ -139,9 +139,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_count',
-            __( 'Number of Products', 'nudgio-recommendations' ),
+            __( 'Number of Products', 'nudgio' ),
             array( $this, 'render_default_count_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section'
         );
 
@@ -152,9 +152,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_style',
-            __( 'Display Style', 'nudgio-recommendations' ),
+            __( 'Display Style', 'nudgio' ),
             array( $this, 'render_default_style_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section'
         );
 
@@ -165,9 +165,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_columns',
-            __( 'Columns', 'nudgio-recommendations' ),
+            __( 'Columns', 'nudgio' ),
             array( $this, 'render_default_columns_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section'
         );
 
@@ -178,9 +178,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_size',
-            __( 'Size', 'nudgio-recommendations' ),
+            __( 'Size', 'nudgio' ),
             array( $this, 'render_default_size_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section'
         );
 
@@ -191,9 +191,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_primary_color',
-            __( 'Primary Color', 'nudgio-recommendations' ),
+            __( 'Primary Color', 'nudgio' ),
             array( $this, 'render_color_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section',
             array( 'option' => 'nudgio_default_primary_color', 'default' => '#3B82F6' )
         );
@@ -205,9 +205,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_text_color',
-            __( 'Text Color', 'nudgio-recommendations' ),
+            __( 'Text Color', 'nudgio' ),
             array( $this, 'render_color_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section',
             array( 'option' => 'nudgio_default_text_color', 'default' => '#1F2937' )
         );
@@ -219,9 +219,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_bg_color',
-            __( 'Background Color', 'nudgio-recommendations' ),
+            __( 'Background Color', 'nudgio' ),
             array( $this, 'render_color_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section',
             array( 'option' => 'nudgio_default_bg_color', 'default' => '#FFFFFF' )
         );
@@ -233,9 +233,9 @@ class Nudgio_Settings {
         ) );
         add_settings_field(
             'nudgio_default_border_radius',
-            __( 'Border Radius', 'nudgio-recommendations' ),
+            __( 'Border Radius', 'nudgio' ),
             array( $this, 'render_border_radius_field' ),
-            'nudgio-recommendations',
+            'nudgio',
             'nudgio_defaults_section'
         );
     }
@@ -247,14 +247,14 @@ class Nudgio_Settings {
     public function credentials_section_callback() {
         echo '<p>' . esc_html__(
             'Enter the Key ID and API Secret from your Nudgio dashboard (Connection → API Keys tab).',
-            'nudgio-recommendations'
+            'nudgio'
         ) . '</p>';
     }
 
     public function defaults_section_callback() {
         echo '<p>' . esc_html__(
             'Default values used when shortcode attributes are not specified. Override per-shortcode with [nudgio type="..." count="..." style="..."].',
-            'nudgio-recommendations'
+            'nudgio'
         ) . '</p>';
     }
 
@@ -265,7 +265,7 @@ class Nudgio_Settings {
     public function render_key_id_field() {
         $value = get_option( 'nudgio_key_id', 0 );
         echo '<input type="number" name="nudgio_key_id" value="' . esc_attr( $value ) . '" class="regular-text" min="1" />';
-        echo '<p class="description">' . esc_html__( 'The numeric Key ID from your Nudgio API key (shown as "ID" in the dashboard).', 'nudgio-recommendations' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'The numeric Key ID from your Nudgio API key (shown as "ID" in the dashboard).', 'nudgio' ) . '</p>';
     }
 
     public function render_api_secret_field() {
@@ -273,22 +273,22 @@ class Nudgio_Settings {
         $stored = get_option( 'nudgio_api_secret', '' );
         $placeholder = $stored ? '••••••••••••••••' : '';
         echo '<input type="password" name="nudgio_api_secret" value="" class="regular-text" placeholder="' . esc_attr( $placeholder ) . '" autocomplete="off" />';
-        echo '<p class="description">' . esc_html__( 'The nk_... secret from key creation. Leave empty to keep current value. Encrypted before storage.', 'nudgio-recommendations' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'The nk_... secret from key creation. Leave empty to keep current value. Encrypted before storage.', 'nudgio' ) . '</p>';
     }
 
     public function render_server_url_field() {
         $value = get_option( 'nudgio_server_url', 'https://server.nudgio.tech' );
         echo '<input type="url" name="nudgio_server_url" value="' . esc_attr( $value ) . '" class="regular-text" />';
-        echo '<p class="description">' . esc_html__( 'Nudgio API server URL. Default: https://server.nudgio.tech', 'nudgio-recommendations' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Nudgio API server URL. Default: https://server.nudgio.tech', 'nudgio' ) . '</p>';
     }
 
     public function render_default_type_field() {
         $value = get_option( 'nudgio_default_type', 'bestsellers' );
         $types = array(
-            'bestsellers' => __( 'Bestsellers', 'nudgio-recommendations' ),
-            'cross-sell'  => __( 'Cross-sell', 'nudgio-recommendations' ),
-            'upsell'      => __( 'Upsell', 'nudgio-recommendations' ),
-            'similar'     => __( 'Similar Products', 'nudgio-recommendations' ),
+            'bestsellers' => __( 'Bestsellers', 'nudgio' ),
+            'cross-sell'  => __( 'Cross-sell', 'nudgio' ),
+            'upsell'      => __( 'Upsell', 'nudgio' ),
+            'similar'     => __( 'Similar Products', 'nudgio' ),
         );
         echo '<select name="nudgio_default_type">';
         foreach ( $types as $k => $label ) {
@@ -305,8 +305,8 @@ class Nudgio_Settings {
     public function render_default_style_field() {
         $value = get_option( 'nudgio_default_style', 'card' );
         $styles = array(
-            'card'     => __( 'Card Grid', 'nudgio-recommendations' ),
-            'carousel' => __( 'Carousel', 'nudgio-recommendations' ),
+            'card'     => __( 'Card Grid', 'nudgio' ),
+            'carousel' => __( 'Carousel', 'nudgio' ),
         );
         echo '<select name="nudgio_default_style">';
         foreach ( $styles as $k => $label ) {
@@ -318,22 +318,22 @@ class Nudgio_Settings {
     public function render_default_columns_field() {
         $value = get_option( 'nudgio_default_columns', 4 );
         echo '<input type="number" name="nudgio_default_columns" value="' . esc_attr( $value ) . '" class="small-text" min="2" max="6" />';
-        echo '<p class="description">' . esc_html__( 'Max columns at full width (2–6). Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio-recommendations' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Max columns at full width (2–6). Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio' ) . '</p>';
     }
 
     public function render_default_size_field() {
         $value = get_option( 'nudgio_default_size', 'default' );
         $sizes = array(
-            'compact'  => __( 'Compact', 'nudgio-recommendations' ),
-            'default'  => __( 'Default', 'nudgio-recommendations' ),
-            'spacious' => __( 'Spacious', 'nudgio-recommendations' ),
+            'compact'  => __( 'Compact', 'nudgio' ),
+            'default'  => __( 'Default', 'nudgio' ),
+            'spacious' => __( 'Spacious', 'nudgio' ),
         );
         echo '<select name="nudgio_default_size">';
         foreach ( $sizes as $k => $label ) {
             echo '<option value="' . esc_attr( $k ) . '"' . selected( $value, $k, false ) . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select>';
-        echo '<p class="description">' . esc_html__( 'Controls text, padding, and gap proportionally.', 'nudgio-recommendations' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'Controls text, padding, and gap proportionally.', 'nudgio' ) . '</p>';
     }
 
     /**
@@ -351,7 +351,7 @@ class Nudgio_Settings {
     public function render_border_radius_field() {
         $value = get_option( 'nudgio_default_border_radius', '8px' );
         echo '<input type="text" name="nudgio_default_border_radius" value="' . esc_attr( $value ) . '" class="small-text" />';
-        echo '<p class="description">' . esc_html__( 'CSS border-radius value (e.g., 8px, 0.5rem, 50%).', 'nudgio-recommendations' ) . '</p>';
+        echo '<p class="description">' . esc_html__( 'CSS border-radius value (e.g., 8px, 0.5rem, 50%).', 'nudgio' ) . '</p>';
     }
 
     // ==========================================
@@ -464,7 +464,7 @@ class Nudgio_Settings {
 
         // Check user permissions
         if ( ! current_user_can( 'manage_options' ) ) {
-            wp_send_json_error( __( 'Permission denied.', 'nudgio-recommendations' ) );
+            wp_send_json_error( __( 'Permission denied.', 'nudgio' ) );
         }
 
         // Get stored credentials
@@ -473,13 +473,13 @@ class Nudgio_Settings {
         $server_url = esc_url_raw( get_option( 'nudgio_server_url', 'https://server.nudgio.tech' ) );
 
         if ( ! $key_id || empty( $encrypted ) ) {
-            wp_send_json_error( __( 'Key ID and API Secret are required.', 'nudgio-recommendations' ) );
+            wp_send_json_error( __( 'Key ID and API Secret are required.', 'nudgio' ) );
         }
 
         // Decrypt the stored secret
         $secret = self::decrypt_secret( $encrypted );
         if ( false === $secret ) {
-            wp_send_json_error( __( 'Failed to decrypt API secret. Try re-entering it.', 'nudgio-recommendations' ) );
+            wp_send_json_error( __( 'Failed to decrypt API secret. Try re-entering it.', 'nudgio' ) );
         }
 
         // Build signed URL for a simple bestsellers test
@@ -513,7 +513,7 @@ class Nudgio_Settings {
             wp_send_json_error(
                 sprintf(
                     /* translators: %s: error message */
-                    __( 'Connection failed: %s', 'nudgio-recommendations' ),
+                    __( 'Connection failed: %s', 'nudgio' ),
                     $response->get_error_message()
                 )
             );
@@ -523,12 +523,12 @@ class Nudgio_Settings {
         $body        = wp_remote_retrieve_body( $response );
 
         if ( 200 === $status_code && ! empty( $body ) ) {
-            wp_send_json_success( __( 'Connection successful! Nudgio API is reachable and responding.', 'nudgio-recommendations' ) );
+            wp_send_json_success( __( 'Connection successful! Nudgio API is reachable and responding.', 'nudgio' ) );
         } else {
             wp_send_json_error(
                 sprintf(
                     /* translators: %d: HTTP status code, %s: response body excerpt */
-                    __( 'Server responded with status %1$d: %2$s', 'nudgio-recommendations' ),
+                    __( 'Server responded with status %1$d: %2$s', 'nudgio' ),
                     $status_code,
                     wp_trim_words( wp_strip_all_tags( $body ), 20, '...' )
                 )

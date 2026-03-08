@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Nudgio Recommendations
+ * Plugin Name: Nudgio Technologies
  * Plugin URI: https://www.nudgio.tech
  * Description: Display AI-powered product recommendations on your WooCommerce store using Nudgio's recommendation engine. Supports bestsellers, cross-sell, upsell, and similar products via simple shortcodes.
  * Version: 1.0.0
@@ -10,7 +10,7 @@
  * Author URI: https://www.nudgio.tech
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: nudgio-recommendations
+ * Text Domain: nudgio
  * Domain Path: /languages
  * WC requires at least: 7.0
  * WC tested up to: 9.0
@@ -107,11 +107,11 @@ add_action( 'plugins_loaded', 'nudgio_init_admin' );
 
 /**
  * Add settings link to the plugins list page.
- * Provides quick access from Plugins → Nudgio Recommendations → Settings.
+ * Provides quick access from Plugins → Nudgio Technologies → Settings.
  */
 function nudgio_settings_link( $links ) {
-    $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=nudgio-recommendations' ) ) . '">'
-        . esc_html__( 'Settings', 'nudgio-recommendations' ) . '</a>';
+    $settings_link = '<a href="' . esc_url( admin_url( 'options-general.php?page=nudgio' ) ) . '">'
+        . esc_html__( 'Settings', 'nudgio' ) . '</a>';
     array_unshift( $links, $settings_link );
     return $links;
 }

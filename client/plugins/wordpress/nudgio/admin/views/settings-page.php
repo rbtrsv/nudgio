@@ -20,26 +20,26 @@ if ( ! defined( 'ABSPATH' ) ) {
         settings_fields( 'nudgio_settings' );
 
         // Output all settings sections and their fields
-        do_settings_sections( 'nudgio-recommendations' );
+        do_settings_sections( 'nudgio' );
 
         // Submit button
-        submit_button( __( 'Save Settings', 'nudgio-recommendations' ) );
+        submit_button( __( 'Save Settings', 'nudgio' ) );
         ?>
     </form>
 
     <hr />
 
     <!-- Test Connection -->
-    <h2><?php esc_html_e( 'Test Connection', 'nudgio-recommendations' ); ?></h2>
+    <h2><?php esc_html_e( 'Test Connection', 'nudgio' ); ?></h2>
     <p class="description">
         <?php esc_html_e(
             'Verify that the Key ID and API Secret are valid by making a test request to the Nudgio API.',
-            'nudgio-recommendations'
+            'nudgio'
         ); ?>
     </p>
     <p>
         <button type="button" id="nudgio-test-connection" class="button button-secondary">
-            <?php esc_html_e( 'Test Connection', 'nudgio-recommendations' ); ?>
+            <?php esc_html_e( 'Test Connection', 'nudgio' ); ?>
         </button>
         <span id="nudgio-test-result" style="margin-left: 10px;"></span>
     </p>
@@ -47,47 +47,47 @@ if ( ! defined( 'ABSPATH' ) ) {
     <hr />
 
     <!-- Shortcode Usage -->
-    <h2><?php esc_html_e( 'Shortcode Usage', 'nudgio-recommendations' ); ?></h2>
+    <h2><?php esc_html_e( 'Shortcode Usage', 'nudgio' ); ?></h2>
     <p class="description">
         <?php esc_html_e(
             'Add the [nudgio] shortcode to any page or post. Attributes override default settings above.',
-            'nudgio-recommendations'
+            'nudgio'
         ); ?>
     </p>
     <table class="widefat fixed" style="max-width: 700px;">
         <thead>
             <tr>
-                <th><?php esc_html_e( 'Example', 'nudgio-recommendations' ); ?></th>
-                <th><?php esc_html_e( 'Description', 'nudgio-recommendations' ); ?></th>
+                <th><?php esc_html_e( 'Example', 'nudgio' ); ?></th>
+                <th><?php esc_html_e( 'Description', 'nudgio' ); ?></th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td><code>[nudgio]</code></td>
-                <td><?php esc_html_e( 'Uses all default settings.', 'nudgio-recommendations' ); ?></td>
+                <td><?php esc_html_e( 'Uses all default settings.', 'nudgio' ); ?></td>
             </tr>
             <tr>
                 <td><code>[nudgio type="bestsellers" count="6"]</code></td>
-                <td><?php esc_html_e( 'Show 6 bestsellers.', 'nudgio-recommendations' ); ?></td>
+                <td><?php esc_html_e( 'Show 6 bestsellers.', 'nudgio' ); ?></td>
             </tr>
             <tr>
                 <td><code>[nudgio type="cross-sell"]</code></td>
-                <td><?php esc_html_e( 'Cross-sell on product pages (auto-detects product ID).', 'nudgio-recommendations' ); ?></td>
+                <td><?php esc_html_e( 'Cross-sell on product pages (auto-detects product ID).', 'nudgio' ); ?></td>
             </tr>
             <tr>
                 <td><code>[nudgio type="upsell" style="carousel"]</code></td>
-                <td><?php esc_html_e( 'Upsell carousel on product pages.', 'nudgio-recommendations' ); ?></td>
+                <td><?php esc_html_e( 'Upsell carousel on product pages.', 'nudgio' ); ?></td>
             </tr>
             <tr>
                 <td><code>[nudgio type="similar" product_id="123"]</code></td>
-                <td><?php esc_html_e( 'Similar products for a specific product ID.', 'nudgio-recommendations' ); ?></td>
+                <td><?php esc_html_e( 'Similar products for a specific product ID.', 'nudgio' ); ?></td>
             </tr>
         </tbody>
     </table>
     <p class="description" style="margin-top: 8px;">
         <?php esc_html_e(
             'Available attributes: type, count, style, columns, size, device, product_id, primary_color, text_color, bg_color, border_radius, lookback_days, method, min_price_increase_percent.',
-            'nudgio-recommendations'
+            'nudgio'
         ); ?>
     </p>
 </div>
@@ -101,7 +101,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
     btn.addEventListener('click', function() {
         btn.disabled = true;
-        btn.textContent = '<?php echo esc_js( __( 'Testing...', 'nudgio-recommendations' ) ); ?>';
+        btn.textContent = '<?php echo esc_js( __( 'Testing...', 'nudgio' ) ); ?>';
         result.textContent = '';
         result.style.color = '';
 
@@ -125,12 +125,12 @@ if ( ! defined( 'ABSPATH' ) ) {
             }
         })
         .catch(function(err) {
-            result.textContent = '<?php echo esc_js( __( 'Request failed.', 'nudgio-recommendations' ) ); ?>';
+            result.textContent = '<?php echo esc_js( __( 'Request failed.', 'nudgio' ) ); ?>';
             result.style.color = '#d63638';
         })
         .finally(function() {
             btn.disabled = false;
-            btn.textContent = '<?php echo esc_js( __( 'Test Connection', 'nudgio-recommendations' ) ); ?>';
+            btn.textContent = '<?php echo esc_js( __( 'Test Connection', 'nudgio' ) ); ?>';
         });
     });
 })();

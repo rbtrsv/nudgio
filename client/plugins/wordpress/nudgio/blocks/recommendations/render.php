@@ -1,6 +1,6 @@
 <?php
 /**
- * Nudgio Recommendations — Gutenberg Block Frontend Render
+ * Nudgio Technologies — Gutenberg Block Frontend Render
  *
  * Called by WordPress when displaying the block on the frontend.
  * Maps block attributes to shortcode-compatible array and delegates
@@ -41,7 +41,7 @@ $output = Nudgio_Shortcode::render_shortcode( $atts );
 $product_required_types = array( 'cross-sell', 'upsell', 'similar' );
 if ( empty( $output ) && in_array( $attributes['type'], $product_required_types, true ) ) {
     $output = '<p style="padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;color:#6b7280;font-size:14px;text-align:center;">'
-        . esc_html__( 'This widget requires a product page. Add it to a WooCommerce product page or specify a Product ID in the block settings.', 'nudgio-recommendations' )
+        . esc_html__( 'This widget requires a product page. Add it to a WooCommerce product page or specify a Product ID in the block settings.', 'nudgio' )
         . '</p>';
 }
 
