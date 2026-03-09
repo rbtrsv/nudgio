@@ -46,20 +46,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 
     <hr />
 
-    <!-- Visual Editing (Gutenberg) -->
-    <h2><?php esc_html_e( 'Visual Editing (Gutenberg)', 'nudgio-technologies' ); ?></h2>
-    <p class="description">
-        <?php esc_html_e(
-            'Prefer a visual approach? Search for the "Nudgio Technologies" block in the WordPress Editor (Gutenberg). You can configure widget type, product count, colors, and all visual settings directly in the block sidebar — no shortcodes needed.',
-            'nudgio-technologies'
-        ); ?>
-    </p>
-    <p class="description">
-        <?php esc_html_e(
-            'The Gutenberg block supports the same options as the shortcode: widget type, style, columns, colors, button text, image aspect ratio, and more.',
-            'nudgio-technologies'
-        ); ?>
-    </p>
+    <!-- Visual Editing (Gutenberg) — Recommended approach -->
+    <div class="notice notice-info inline" style="margin: 20px 0; padding: 16px 20px; border-left-width: 4px;">
+        <h2 style="margin-top: 0;"><?php esc_html_e( 'Recommended: Visual Editing (Gutenberg Block)', 'nudgio-technologies' ); ?></h2>
+        <p style="font-size: 14px; color: #1d2327;">
+            <?php esc_html_e(
+                'The easiest way to add Nudgio recommendations is with the Gutenberg block editor. No shortcodes, no code — just drag, drop, and customize visually.',
+                'nudgio-technologies'
+            ); ?>
+        </p>
+        <p style="font-size: 14px; color: #1d2327; margin-bottom: 4px;"><strong><?php esc_html_e( 'How to use:', 'nudgio-technologies' ); ?></strong></p>
+        <ol style="font-size: 14px; color: #1d2327; margin: 4px 0 12px 20px;">
+            <li><?php esc_html_e( 'Edit any page or product → click the "+" block inserter.', 'nudgio-technologies' ); ?></li>
+            <li><?php esc_html_e( 'Search for "Nudgio Technologies" (under WooCommerce category).', 'nudgio-technologies' ); ?></li>
+            <li><?php esc_html_e( 'Select the block → configure 35 visual settings in the sidebar, organized in 8 groups: Widget Container, Title, Layout, Card, Image, Product Title, Price, and CTA Button.', 'nudgio-technologies' ); ?></li>
+            <li><?php esc_html_e( 'Publish — the widget renders automatically with your settings.', 'nudgio-technologies' ); ?></li>
+        </ol>
+        <p class="description" style="margin-bottom: 0;">
+            <?php esc_html_e(
+                'The Gutenberg block supports all the same options as the shortcode below — widget type, layout style, columns, card shadows, button variants, colors, and more. Each setting can be customized independently.',
+                'nudgio-technologies'
+            ); ?>
+        </p>
+    </div>
 
     <hr />
 
@@ -100,7 +109,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <td><?php esc_html_e( 'Similar products for a specific product ID.', 'nudgio-technologies' ); ?></td>
             </tr>
             <tr>
-                <td><code>[nudgio cta_text="Shop Now" show_price="false"]</code></td>
+                <td><code>[nudgio button_text="Shop Now" show_price="false"]</code></td>
                 <td><?php esc_html_e( 'Custom button text, hide prices.', 'nudgio-technologies' ); ?></td>
             </tr>
             <tr>
@@ -108,14 +117,14 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <td><?php esc_html_e( 'Portrait images (3:4) with custom title.', 'nudgio-technologies' ); ?></td>
             </tr>
             <tr>
-                <td><code>[nudgio image_aspect="landscape" cta_text="Add to Cart"]</code></td>
-                <td><?php esc_html_e( 'Landscape images (16:9) with custom CTA.', 'nudgio-technologies' ); ?></td>
+                <td><code>[nudgio card_shadow="lg" button_variant="outline"]</code></td>
+                <td><?php esc_html_e( 'Large card shadows with outline buttons.', 'nudgio-technologies' ); ?></td>
             </tr>
         </tbody>
     </table>
     <p class="description" style="margin-top: 8px;">
         <?php esc_html_e(
-            'Available attributes: type, count, style, columns, size, device, product_id, primary_color, text_color, bg_color, border_radius, widget_title, cta_text, show_price, image_aspect, lookback_days, method, min_price_increase_percent.',
+            'Available attributes: type, count, device, product_id, lookback_days, method, min_price_increase_percent, widget_bg_color, widget_padding, widget_title, title_color, title_size, title_alignment, widget_style, widget_columns, gap, card_bg_color, card_border_radius, card_border_width, card_border_color, card_shadow, card_padding, card_hover, image_aspect, image_fit, image_radius, product_title_color, product_title_size, product_title_weight, product_title_lines, product_title_alignment, show_price, price_color, price_size, button_text, button_bg_color, button_text_color, button_radius, button_size, button_variant, button_full_width.',
             'nudgio-technologies'
         ); ?>
     </p>

@@ -50,42 +50,109 @@
 
   // Default values — only send non-default params to minimize URL length
   var DEFAULTS = {
+    // Algorithm / data
     top: '4',
-    style: 'card',
-    columns: '4',
-    size: 'default',
-    'primary-color': '#3B82F6',
-    'text-color': '#1F2937',
-    'bg-color': '#FFFFFF',
-    'border-radius': '8px',
-    'cta-text': 'View',
-    'show-price': 'true',
-    'image-aspect': 'square',
     'lookback-days': '30',
     method: 'volume',
-    'min-price-increase': '10'
+    'min-price-increase': '10',
+    device: 'desktop',
+    // Group 1: Widget Container
+    'widget-bg-color': '#FFFFFF',
+    'widget-padding': 'md',
+    // Group 2: Widget Title
+    'title-color': '#111827',
+    'title-size': 'lg',
+    'title-alignment': 'left',
+    // Group 3: Layout
+    'widget-style': 'grid',
+    'widget-columns': '4',
+    gap: 'md',
+    // Group 4: Product Card
+    'card-bg-color': '#FFFFFF',
+    'card-border-radius': '8px',
+    'card-border-width': '0',
+    'card-border-color': '#E5E7EB',
+    'card-shadow': 'md',
+    'card-padding': 'md',
+    'card-hover': 'lift',
+    // Group 5: Product Image
+    'image-aspect': 'square',
+    'image-fit': 'cover',
+    'image-radius': '8px',
+    // Group 6: Product Title in Card
+    'product-title-color': '#1F2937',
+    'product-title-size': 'sm',
+    'product-title-weight': 'semibold',
+    'product-title-lines': '2',
+    'product-title-alignment': 'left',
+    // Group 7: Price
+    'show-price': 'true',
+    'price-color': '#111827',
+    'price-size': 'md',
+    // Group 8: CTA Button
+    'button-text': 'View',
+    'button-bg-color': '#3B82F6',
+    'button-text-color': '#FFFFFF',
+    'button-radius': '6px',
+    'button-size': 'md',
+    'button-variant': 'solid',
+    'button-full-width': 'false'
   };
 
   // Map data-attribute names (kebab-case) to query param names (snake_case)
+  // URL param name = DB column name (no mapping table needed on the backend).
   var ATTR_MAP = {
     'key-id': 'key_id',
     'type': 'type',
     'product-id': 'product_id',
+    // Algorithm / data
     'top': 'top',
-    'style': 'style',
-    'columns': 'columns',
-    'size': 'size',
-    'primary-color': 'primary_color',
-    'text-color': 'text_color',
-    'bg-color': 'bg_color',
-    'border-radius': 'border_radius',
-    'widget-title': 'widget_title',
-    'cta-text': 'cta_text',
-    'show-price': 'show_price',
-    'image-aspect': 'image_aspect',
     'lookback-days': 'lookback_days',
     'method': 'method',
-    'min-price-increase': 'min_price_increase'
+    'min-price-increase': 'min_price_increase',
+    'device': 'device',
+    // Group 1: Widget Container
+    'widget-bg-color': 'widget_bg_color',
+    'widget-padding': 'widget_padding',
+    // Group 2: Widget Title
+    'widget-title': 'widget_title',
+    'title-color': 'title_color',
+    'title-size': 'title_size',
+    'title-alignment': 'title_alignment',
+    // Group 3: Layout
+    'widget-style': 'widget_style',
+    'widget-columns': 'widget_columns',
+    'gap': 'gap',
+    // Group 4: Product Card
+    'card-bg-color': 'card_bg_color',
+    'card-border-radius': 'card_border_radius',
+    'card-border-width': 'card_border_width',
+    'card-border-color': 'card_border_color',
+    'card-shadow': 'card_shadow',
+    'card-padding': 'card_padding',
+    'card-hover': 'card_hover',
+    // Group 5: Product Image
+    'image-aspect': 'image_aspect',
+    'image-fit': 'image_fit',
+    'image-radius': 'image_radius',
+    // Group 6: Product Title in Card
+    'product-title-color': 'product_title_color',
+    'product-title-size': 'product_title_size',
+    'product-title-weight': 'product_title_weight',
+    'product-title-lines': 'product_title_lines',
+    'product-title-alignment': 'product_title_alignment',
+    // Group 7: Price
+    'show-price': 'show_price',
+    'price-color': 'price_color',
+    'price-size': 'price_size',
+    // Group 8: CTA Button
+    'button-text': 'button_text',
+    'button-bg-color': 'button_bg_color',
+    'button-text-color': 'button_text_color',
+    'button-radius': 'button_radius',
+    'button-size': 'button_size',
+    'button-variant': 'button_variant',
+    'button-full-width': 'button_full_width'
   };
 
   /**

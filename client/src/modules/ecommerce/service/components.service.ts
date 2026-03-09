@@ -5,30 +5,21 @@ import { COMPONENT_ENDPOINTS } from '../utils/api.endpoints';
 import { getAuthHeaders } from '@/modules/accounts/utils/fetch.client';
 
 /**
- * Build query string from widget params
+ * Build query string from widget params.
+ * URL param name = DB column name for all visual fields.
+ * Only exception: min_price_increase → min_price_increase_percent (backend param name).
+ *
  * @param params Widget parameters
  * @returns URL query string
  */
 const buildWidgetQuery = (params: WidgetParams): string => {
   const searchParams = new URLSearchParams();
-  searchParams.set('connection_id', String(params.connection_id));
-  if (params.product_id) searchParams.set('product_id', params.product_id);
-  if (params.top !== undefined) searchParams.set('top', String(params.top));
-  if (params.lookback_days !== undefined) searchParams.set('lookback_days', String(params.lookback_days));
-  if (params.method) searchParams.set('method', params.method);
-  if (params.min_price_increase !== undefined) searchParams.set('min_price_increase_percent', String(params.min_price_increase));
-  if (params.style) searchParams.set('style', params.style);
-  if (params.device) searchParams.set('device', params.device);
-  if (params.columns !== undefined) searchParams.set('columns', String(params.columns));
-  if (params.size) searchParams.set('size', params.size);
-  if (params.primary_color) searchParams.set('primary_color', params.primary_color);
-  if (params.text_color) searchParams.set('text_color', params.text_color);
-  if (params.bg_color) searchParams.set('bg_color', params.bg_color);
-  if (params.border_radius) searchParams.set('border_radius', params.border_radius);
-  if (params.widget_title) searchParams.set('widget_title', params.widget_title);
-  if (params.cta_text) searchParams.set('cta_text', params.cta_text);
-  if (params.show_price !== undefined) searchParams.set('show_price', String(params.show_price));
-  if (params.image_aspect) searchParams.set('image_aspect', params.image_aspect);
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    // Backend uses min_price_increase_percent as param name
+    const paramName = key === 'min_price_increase' ? 'min_price_increase_percent' : key;
+    searchParams.set(paramName, String(value));
+  }
   return searchParams.toString();
 };
 

@@ -52,24 +52,56 @@ class Nudgio_Shortcode {
         // Step 1: Merge attributes with defaults from wp_options
         $atts = shortcode_atts(
             array(
+                // Algorithm / data
                 'type'                       => get_option( 'nudgio_default_type', 'bestsellers' ),
                 'count'                      => get_option( 'nudgio_default_count', 4 ),
-                'style'                      => get_option( 'nudgio_default_style', 'card' ),
                 'device'                     => get_option( 'nudgio_default_device', 'desktop' ),
-                'columns'                    => get_option( 'nudgio_default_columns', 4 ),
-                'size'                       => get_option( 'nudgio_default_size', 'default' ),
                 'product_id'                 => '',
-                'primary_color'              => get_option( 'nudgio_default_primary_color', '#3B82F6' ),
-                'text_color'                 => get_option( 'nudgio_default_text_color', '#1F2937' ),
-                'bg_color'                   => get_option( 'nudgio_default_bg_color', '#FFFFFF' ),
-                'border_radius'              => get_option( 'nudgio_default_border_radius', '8px' ),
-                'widget_title'               => get_option( 'nudgio_default_widget_title', '' ),
-                'cta_text'                   => get_option( 'nudgio_default_cta_text', 'View' ),
-                'show_price'                 => get_option( 'nudgio_default_show_price', true ) ? 'true' : 'false',
-                'image_aspect'               => get_option( 'nudgio_default_image_aspect', 'square' ),
                 'lookback_days'              => '30',
                 'method'                     => 'volume',
                 'min_price_increase_percent' => '10',
+                // Group 1: Widget Container
+                'widget_bg_color'            => get_option( 'nudgio_default_widget_bg_color', '#FFFFFF' ),
+                'widget_padding'             => get_option( 'nudgio_default_widget_padding', 'md' ),
+                // Group 2: Widget Title
+                'widget_title'               => get_option( 'nudgio_default_widget_title', '' ),
+                'title_color'                => get_option( 'nudgio_default_title_color', '#111827' ),
+                'title_size'                 => get_option( 'nudgio_default_title_size', 'lg' ),
+                'title_alignment'            => get_option( 'nudgio_default_title_alignment', 'left' ),
+                // Group 3: Layout
+                'widget_style'               => get_option( 'nudgio_default_widget_style', 'grid' ),
+                'widget_columns'             => get_option( 'nudgio_default_widget_columns', 4 ),
+                'gap'                        => get_option( 'nudgio_default_gap', 'md' ),
+                // Group 4: Product Card
+                'card_bg_color'              => get_option( 'nudgio_default_card_bg_color', '#FFFFFF' ),
+                'card_border_radius'         => get_option( 'nudgio_default_card_border_radius', '8px' ),
+                'card_border_width'          => get_option( 'nudgio_default_card_border_width', '0' ),
+                'card_border_color'          => get_option( 'nudgio_default_card_border_color', '#E5E7EB' ),
+                'card_shadow'                => get_option( 'nudgio_default_card_shadow', 'md' ),
+                'card_padding'               => get_option( 'nudgio_default_card_padding', 'md' ),
+                'card_hover'                 => get_option( 'nudgio_default_card_hover', 'lift' ),
+                // Group 5: Product Image
+                'image_aspect'               => get_option( 'nudgio_default_image_aspect', 'square' ),
+                'image_fit'                  => get_option( 'nudgio_default_image_fit', 'cover' ),
+                'image_radius'               => get_option( 'nudgio_default_image_radius', '8px' ),
+                // Group 6: Product Title in Card
+                'product_title_color'        => get_option( 'nudgio_default_product_title_color', '#1F2937' ),
+                'product_title_size'         => get_option( 'nudgio_default_product_title_size', 'sm' ),
+                'product_title_weight'       => get_option( 'nudgio_default_product_title_weight', 'semibold' ),
+                'product_title_lines'        => get_option( 'nudgio_default_product_title_lines', 2 ),
+                'product_title_alignment'    => get_option( 'nudgio_default_product_title_alignment', 'left' ),
+                // Group 7: Price
+                'show_price'                 => get_option( 'nudgio_default_show_price', true ) ? 'true' : 'false',
+                'price_color'                => get_option( 'nudgio_default_price_color', '#111827' ),
+                'price_size'                 => get_option( 'nudgio_default_price_size', 'md' ),
+                // Group 8: CTA Button
+                'button_text'                => get_option( 'nudgio_default_button_text', 'View' ),
+                'button_bg_color'            => get_option( 'nudgio_default_button_bg_color', '#3B82F6' ),
+                'button_text_color'          => get_option( 'nudgio_default_button_text_color', '#FFFFFF' ),
+                'button_radius'              => get_option( 'nudgio_default_button_radius', '6px' ),
+                'button_size'                => get_option( 'nudgio_default_button_size', 'md' ),
+                'button_variant'             => get_option( 'nudgio_default_button_variant', 'solid' ),
+                'button_full_width'          => get_option( 'nudgio_default_button_full_width', false ) ? 'true' : 'false',
             ),
             $atts,
             'nudgio'
@@ -114,22 +146,55 @@ class Nudgio_Shortcode {
         }
 
         // Step 5: Build params array with ALL widget params + auth params
+        // URL param name = DB column name (no mapping needed)
         $params = array(
-            'key_id'        => $key_id,
-            'ts'            => time(),
-            'nonce'         => bin2hex( random_bytes( 8 ) ),
-            'top'           => absint( $atts['count'] ),
-            'style'         => sanitize_text_field( $atts['style'] ),
-            'device'        => sanitize_text_field( $atts['device'] ),
-            'columns'       => absint( $atts['columns'] ),
-            'size'          => sanitize_text_field( $atts['size'] ),
-            'primary_color' => sanitize_hex_color( $atts['primary_color'] ),
-            'text_color'    => sanitize_hex_color( $atts['text_color'] ),
-            'bg_color'      => sanitize_hex_color( $atts['bg_color'] ),
-            'border_radius' => sanitize_text_field( $atts['border_radius'] ),
-            'cta_text'      => sanitize_text_field( $atts['cta_text'] ),
-            'show_price'    => sanitize_text_field( $atts['show_price'] ),
-            'image_aspect'  => sanitize_text_field( $atts['image_aspect'] ),
+            'key_id'                  => $key_id,
+            'ts'                      => time(),
+            'nonce'                   => bin2hex( random_bytes( 8 ) ),
+            // Algorithm / data
+            'top'                     => absint( $atts['count'] ),
+            'device'                  => sanitize_text_field( $atts['device'] ),
+            // Group 1: Widget Container
+            'widget_bg_color'         => sanitize_hex_color( $atts['widget_bg_color'] ),
+            'widget_padding'          => sanitize_text_field( $atts['widget_padding'] ),
+            // Group 2: Widget Title
+            'title_color'             => sanitize_hex_color( $atts['title_color'] ),
+            'title_size'              => sanitize_text_field( $atts['title_size'] ),
+            'title_alignment'         => sanitize_text_field( $atts['title_alignment'] ),
+            // Group 3: Layout
+            'widget_style'            => sanitize_text_field( $atts['widget_style'] ),
+            'widget_columns'          => absint( $atts['widget_columns'] ),
+            'gap'                     => sanitize_text_field( $atts['gap'] ),
+            // Group 4: Product Card
+            'card_bg_color'           => sanitize_hex_color( $atts['card_bg_color'] ),
+            'card_border_radius'      => sanitize_text_field( $atts['card_border_radius'] ),
+            'card_border_width'       => sanitize_text_field( $atts['card_border_width'] ),
+            'card_border_color'       => sanitize_hex_color( $atts['card_border_color'] ),
+            'card_shadow'             => sanitize_text_field( $atts['card_shadow'] ),
+            'card_padding'            => sanitize_text_field( $atts['card_padding'] ),
+            'card_hover'              => sanitize_text_field( $atts['card_hover'] ),
+            // Group 5: Product Image
+            'image_aspect'            => sanitize_text_field( $atts['image_aspect'] ),
+            'image_fit'               => sanitize_text_field( $atts['image_fit'] ),
+            'image_radius'            => sanitize_text_field( $atts['image_radius'] ),
+            // Group 6: Product Title in Card
+            'product_title_color'     => sanitize_hex_color( $atts['product_title_color'] ),
+            'product_title_size'      => sanitize_text_field( $atts['product_title_size'] ),
+            'product_title_weight'    => sanitize_text_field( $atts['product_title_weight'] ),
+            'product_title_lines'     => absint( $atts['product_title_lines'] ),
+            'product_title_alignment' => sanitize_text_field( $atts['product_title_alignment'] ),
+            // Group 7: Price
+            'show_price'              => sanitize_text_field( $atts['show_price'] ),
+            'price_color'             => sanitize_hex_color( $atts['price_color'] ),
+            'price_size'              => sanitize_text_field( $atts['price_size'] ),
+            // Group 8: CTA Button
+            'button_text'             => sanitize_text_field( $atts['button_text'] ),
+            'button_bg_color'         => sanitize_hex_color( $atts['button_bg_color'] ),
+            'button_text_color'       => sanitize_hex_color( $atts['button_text_color'] ),
+            'button_radius'           => sanitize_text_field( $atts['button_radius'] ),
+            'button_size'             => sanitize_text_field( $atts['button_size'] ),
+            'button_variant'          => sanitize_text_field( $atts['button_variant'] ),
+            'button_full_width'       => sanitize_text_field( $atts['button_full_width'] ),
         );
 
         // Only include widget_title if non-empty (empty = server auto-defaults)

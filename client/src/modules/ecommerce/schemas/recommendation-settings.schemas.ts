@@ -43,17 +43,48 @@ export const RecommendationSettingsSchema = z.object({
   shop_base_url: z.string().nullable(),
   product_url_template: z.string().nullable(),
   // Brand identity defaults — visual settings for widget rendering
+  // Group 1: Widget Container
+  widget_bg_color: z.string().nullable(),
+  widget_padding: z.string().nullable(),
+  // Group 2: Widget Title
+  widget_title: z.string().nullable(),
+  title_color: z.string().nullable(),
+  title_size: z.string().nullable(),
+  title_alignment: z.string().nullable(),
+  // Group 3: Layout
   widget_style: z.string().nullable(),
   widget_columns: z.number().nullable(),
-  widget_size: z.string().nullable(),
-  primary_color: z.string().nullable(),
-  text_color: z.string().nullable(),
-  bg_color: z.string().nullable(),
-  border_radius: z.string().nullable(),
-  cta_text: z.string().nullable(),
-  show_price: z.boolean().nullable(),
+  gap: z.string().nullable(),
+  // Group 4: Product Card
+  card_bg_color: z.string().nullable(),
+  card_border_radius: z.string().nullable(),
+  card_border_width: z.string().nullable(),
+  card_border_color: z.string().nullable(),
+  card_shadow: z.string().nullable(),
+  card_padding: z.string().nullable(),
+  card_hover: z.string().nullable(),
+  // Group 5: Product Image
   image_aspect: z.string().nullable(),
-  widget_title: z.string().nullable(),
+  image_fit: z.string().nullable(),
+  image_radius: z.string().nullable(),
+  // Group 6: Product Title in Card
+  product_title_color: z.string().nullable(),
+  product_title_size: z.string().nullable(),
+  product_title_weight: z.string().nullable(),
+  product_title_lines: z.number().nullable(),
+  product_title_alignment: z.string().nullable(),
+  // Group 7: Price
+  show_price: z.boolean().nullable(),
+  price_color: z.string().nullable(),
+  price_size: z.string().nullable(),
+  // Group 8: CTA Button
+  button_text: z.string().nullable(),
+  button_bg_color: z.string().nullable(),
+  button_text_color: z.string().nullable(),
+  button_radius: z.string().nullable(),
+  button_size: z.string().nullable(),
+  button_variant: z.string().nullable(),
+  button_full_width: z.boolean().nullable(),
   created_at: z.string(),
   updated_at: z.string().nullable(),
 });
@@ -78,17 +109,48 @@ export const CreateOrUpdateSettingsSchema = z.object({
   shop_base_url: z.string().nullable().optional(),
   product_url_template: z.string().nullable().optional(),
   // Brand identity defaults — visual settings for widget rendering
+  // Group 1: Widget Container
+  widget_bg_color: z.string().nullable().optional(),
+  widget_padding: z.string().nullable().optional(),
+  // Group 2: Widget Title
+  widget_title: z.string().nullable().optional(),
+  title_color: z.string().nullable().optional(),
+  title_size: z.string().nullable().optional(),
+  title_alignment: z.string().nullable().optional(),
+  // Group 3: Layout
   widget_style: z.string().nullable().optional(),
   widget_columns: z.number().min(2).max(6).nullable().optional(),
-  widget_size: z.string().nullable().optional(),
-  primary_color: z.string().nullable().optional(),
-  text_color: z.string().nullable().optional(),
-  bg_color: z.string().nullable().optional(),
-  border_radius: z.string().nullable().optional(),
-  cta_text: z.string().nullable().optional(),
-  show_price: z.boolean().nullable().optional(),
+  gap: z.string().nullable().optional(),
+  // Group 4: Product Card
+  card_bg_color: z.string().nullable().optional(),
+  card_border_radius: z.string().nullable().optional(),
+  card_border_width: z.string().nullable().optional(),
+  card_border_color: z.string().nullable().optional(),
+  card_shadow: z.string().nullable().optional(),
+  card_padding: z.string().nullable().optional(),
+  card_hover: z.string().nullable().optional(),
+  // Group 5: Product Image
   image_aspect: z.string().nullable().optional(),
-  widget_title: z.string().nullable().optional(),
+  image_fit: z.string().nullable().optional(),
+  image_radius: z.string().nullable().optional(),
+  // Group 6: Product Title in Card
+  product_title_color: z.string().nullable().optional(),
+  product_title_size: z.string().nullable().optional(),
+  product_title_weight: z.string().nullable().optional(),
+  product_title_lines: z.number().min(1).max(3).nullable().optional(),
+  product_title_alignment: z.string().nullable().optional(),
+  // Group 7: Price
+  show_price: z.boolean().nullable().optional(),
+  price_color: z.string().nullable().optional(),
+  price_size: z.string().nullable().optional(),
+  // Group 8: CTA Button
+  button_text: z.string().nullable().optional(),
+  button_bg_color: z.string().nullable().optional(),
+  button_text_color: z.string().nullable().optional(),
+  button_radius: z.string().nullable().optional(),
+  button_size: z.string().nullable().optional(),
+  button_variant: z.string().nullable().optional(),
+  button_full_width: z.boolean().nullable().optional(),
 });
 
 // ==========================================

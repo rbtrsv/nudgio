@@ -530,18 +530,48 @@ async def update_settings(
                 min_price_increase_percent=payload.min_price_increase_percent,
                 shop_base_url=payload.shop_base_url,
                 product_url_template=payload.product_url_template,
-                # Brand identity defaults
+                # Group 1: Widget Container
+                widget_bg_color=payload.widget_bg_color,
+                widget_padding=payload.widget_padding,
+                # Group 2: Widget Title
+                widget_title=payload.widget_title,
+                title_color=payload.title_color,
+                title_size=payload.title_size,
+                title_alignment=payload.title_alignment,
+                # Group 3: Layout
                 widget_style=payload.widget_style,
                 widget_columns=payload.widget_columns,
-                widget_size=payload.widget_size,
-                primary_color=payload.primary_color,
-                text_color=payload.text_color,
-                bg_color=payload.bg_color,
-                border_radius=payload.border_radius,
-                cta_text=payload.cta_text,
-                show_price=payload.show_price,
+                gap=payload.gap,
+                # Group 4: Product Card
+                card_bg_color=payload.card_bg_color,
+                card_border_radius=payload.card_border_radius,
+                card_border_width=payload.card_border_width,
+                card_border_color=payload.card_border_color,
+                card_shadow=payload.card_shadow,
+                card_padding=payload.card_padding,
+                card_hover=payload.card_hover,
+                # Group 5: Product Image
                 image_aspect=payload.image_aspect,
-                widget_title=payload.widget_title,
+                image_fit=payload.image_fit,
+                image_radius=payload.image_radius,
+                # Group 6: Product Title in Card
+                product_title_color=payload.product_title_color,
+                product_title_size=payload.product_title_size,
+                product_title_weight=payload.product_title_weight,
+                product_title_lines=payload.product_title_lines,
+                product_title_alignment=payload.product_title_alignment,
+                # Group 7: Price
+                show_price=payload.show_price,
+                price_color=payload.price_color,
+                price_size=payload.price_size,
+                # Group 8: CTA Button
+                button_text=payload.button_text,
+                button_bg_color=payload.button_bg_color,
+                button_text_color=payload.button_text_color,
+                button_radius=payload.button_radius,
+                button_size=payload.button_size,
+                button_variant=payload.button_variant,
+                button_full_width=payload.button_full_width,
             )
             db.add(new_settings)
             await db.commit()
@@ -861,18 +891,49 @@ async def get_bestsellers_component(
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
     method: str = Query("volume", description="Bestseller calculation method: volume, value, or balanced"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max grid columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("1", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("sm", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image object-fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button stretches to full card width"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -903,10 +964,31 @@ async def get_bestsellers_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            rec_settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            rec_settings,
+            # Group 1: Widget Container
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            # Group 2: Widget Title
+            widget_title=widget_title, title_color=title_color, title_size=title_size,
+            title_alignment=title_alignment,
+            # Group 3: Layout
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            # Group 4: Product Card
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius,
+            card_border_width=card_border_width, card_border_color=card_border_color,
+            card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            # Group 5: Product Image
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            # Group 6: Product Title in Card
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            # Group 7: Price
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            # Group 8: CTA Button
+            button_text=button_text, button_bg_color=button_bg_color,
+            button_text_color=button_text_color, button_radius=button_radius,
+            button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, db)
@@ -931,19 +1013,8 @@ async def get_bestsellers_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs,
-            style=vis["style"],
-            device=device,
-            columns=vis["columns"],
-            size=vis["size"],
-            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
-            border_radius=vis["border_radius"],
-            rec_type="bestseller",
-            shop_urls=shop_urls,
-            widget_title=vis["widget_title"],
-            cta_text=vis["cta_text"],
-            show_price=vis["show_price"],
-            image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="bestseller", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -961,18 +1032,49 @@ async def get_cross_sell_component(
     product_id: str = Query(..., description="Product ID for cross-sell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max grid columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("1", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("sm", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image object-fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button stretches to full card width"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -999,10 +1101,31 @@ async def get_cross_sell_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            rec_settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            rec_settings,
+            # Group 1: Widget Container
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            # Group 2: Widget Title
+            widget_title=widget_title, title_color=title_color, title_size=title_size,
+            title_alignment=title_alignment,
+            # Group 3: Layout
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            # Group 4: Product Card
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius,
+            card_border_width=card_border_width, card_border_color=card_border_color,
+            card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            # Group 5: Product Image
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            # Group 6: Product Title in Card
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            # Group 7: Price
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            # Group 8: CTA Button
+            button_text=button_text, button_bg_color=button_bg_color,
+            button_text_color=button_text_color, button_radius=button_radius,
+            button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, db)
@@ -1023,12 +1146,8 @@ async def get_cross_sell_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, style=vis["style"], device=device,
-            columns=vis["columns"], size=vis["size"],
-            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
-            border_radius=vis["border_radius"], rec_type="cross-sell", shop_urls=shop_urls,
-            widget_title=vis["widget_title"], cta_text=vis["cta_text"],
-            show_price=vis["show_price"], image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="cross-sell", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -1046,18 +1165,49 @@ async def get_upsell_component(
     product_id: str = Query(..., description="Product ID for upsell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
     min_price_increase_percent: int = Query(10, description="Minimum price increase percentage for upsell candidates"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max grid columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("1", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("sm", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image object-fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button stretches to full card width"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -1084,10 +1234,31 @@ async def get_upsell_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            rec_settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            rec_settings,
+            # Group 1: Widget Container
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            # Group 2: Widget Title
+            widget_title=widget_title, title_color=title_color, title_size=title_size,
+            title_alignment=title_alignment,
+            # Group 3: Layout
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            # Group 4: Product Card
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius,
+            card_border_width=card_border_width, card_border_color=card_border_color,
+            card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            # Group 5: Product Image
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            # Group 6: Product Title in Card
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            # Group 7: Price
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            # Group 8: CTA Button
+            button_text=button_text, button_bg_color=button_bg_color,
+            button_text_color=button_text_color, button_radius=button_radius,
+            button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, db)
@@ -1108,12 +1279,8 @@ async def get_upsell_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, style=vis["style"], device=device,
-            columns=vis["columns"], size=vis["size"],
-            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
-            border_radius=vis["border_radius"], rec_type="upsell", shop_urls=shop_urls,
-            widget_title=vis["widget_title"], cta_text=vis["cta_text"],
-            show_price=vis["show_price"], image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="upsell", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -1130,18 +1297,49 @@ async def get_upsell_component(
 async def get_similar_component(
     product_id: str = Query(..., description="Product ID for similar product recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max grid columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("1", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("sm", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image object-fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button stretches to full card width"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -1168,10 +1366,31 @@ async def get_similar_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            rec_settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            rec_settings,
+            # Group 1: Widget Container
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            # Group 2: Widget Title
+            widget_title=widget_title, title_color=title_color, title_size=title_size,
+            title_alignment=title_alignment,
+            # Group 3: Layout
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            # Group 4: Product Card
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius,
+            card_border_width=card_border_width, card_border_color=card_border_color,
+            card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            # Group 5: Product Image
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            # Group 6: Product Title in Card
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            # Group 7: Price
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            # Group 8: CTA Button
+            button_text=button_text, button_bg_color=button_bg_color,
+            button_text_color=button_text_color, button_radius=button_radius,
+            button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, db)
@@ -1192,12 +1411,8 @@ async def get_similar_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, style=vis["style"], device=device,
-            columns=vis["columns"], size=vis["size"],
-            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
-            border_radius=vis["border_radius"], rec_type="similar", shop_urls=shop_urls,
-            widget_title=vis["widget_title"], cta_text=vis["cta_text"],
-            show_price=vis["show_price"], image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="similar", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)

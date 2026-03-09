@@ -251,6 +251,7 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - ✅ `connections/page.tsx` — OAuth/auth success redirects, method badge
 - ✅ `settings/page.tsx` — correct field names
 - ✅ `recommendations/page.tsx` — `result.count`
+- ✅ `recommendations/page.tsx` — product dropdown (replaced raw text Input with Select, fetches from `GET /data/products/{connection_id}`, same pattern as standalone Components page)
 - ✅ `data-provider.tsx` — removed auto-fetch (was causing 404s)
 - ✅ `recommendation-settings-provider.tsx` — removed auto-fetch (was causing 404s)
 - ✅ `ConnectionProvider` `initialFetch={true}` (connections load on all pages)
@@ -425,7 +426,13 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - ✅ Both settings create blocks (`recommendation_settings_subrouter` + `shopify_embedded_subrouter`) include 11 new fields
 - ⚠️ **Migration not included** — user creates migration manually
 
-### 12. Nice to Have
+### 12. Widget Configuration Overhaul (35 Settings, 8 Groups)
+- ❌ Replace 11 limited visual settings with 35 individually configurable settings across 8 groups
+- DROP 6 columns (`widget_size`, `primary_color`, `text_color`, `bg_color`, `border_radius`, `cta_text`), ADD 29 new, KEEP 5
+- 14 files: models, schemas, components_subrouter (SIZE_MAP → 13 CSS value maps), 4 subrouters, Liquid template, frontend types/services/UI
+- See plan file for full details: `.claude/plans/zesty-stirring-gem.md`
+
+### 13. Nice to Have
 - ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page with plan display + Shopify upgrade redirect; Standalone: Stripe via accounts module)
 
 ---

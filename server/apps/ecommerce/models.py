@@ -120,17 +120,57 @@ class RecommendationSettings(BaseMixin, Base):
 
     # Brand identity defaults — visual settings for widget rendering
     # None = use hardcoded default in widget endpoints. Fallback chain: URL param → DB → hardcoded.
-    widget_style: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "card", "carousel"
-    widget_columns: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 2-6
-    widget_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "compact", "default", "spacious"
-    primary_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#3B82F6"
-    text_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#1F2937"
-    bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
-    border_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "8px"
-    cta_text: Mapped[str | None] = mapped_column(String(100), nullable=True)  # "View", "Shop Now"
-    show_price: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False
-    image_aspect: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "square", "portrait", "landscape"
+    # 35 settings across 8 groups — each independently configurable.
+
+    # Group 1: Widget Container
+    widget_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
+    widget_padding: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "none", "sm", "md", "lg"
+
+    # Group 2: Widget Title
     widget_title: Mapped[str | None] = mapped_column(String(200), nullable=True)  # "Our Picks", "" (empty = auto)
+    title_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#111827"
+    title_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg", "xl"
+    title_alignment: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "left", "center"
+
+    # Group 3: Layout
+    widget_style: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "grid", "carousel"
+    widget_columns: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 2-6
+    gap: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+
+    # Group 4: Product Card
+    card_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
+    card_border_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "8px"
+    card_border_width: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "0", "1", "2"
+    card_border_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#E5E7EB"
+    card_shadow: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "none", "sm", "md", "lg"
+    card_padding: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+    card_hover: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "none", "lift", "shadow", "glow"
+
+    # Group 5: Product Image
+    image_aspect: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "square", "portrait", "landscape"
+    image_fit: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "cover", "contain"
+    image_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "8px"
+
+    # Group 6: Product Title in Card
+    product_title_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#1F2937"
+    product_title_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "xs", "sm", "md", "lg"
+    product_title_weight: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "normal", "medium", "semibold", "bold"
+    product_title_lines: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-3
+    product_title_alignment: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "left", "center"
+
+    # Group 7: Price
+    show_price: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False
+    price_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#111827"
+    price_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+
+    # Group 8: CTA Button
+    button_text: Mapped[str | None] = mapped_column(String(100), nullable=True)  # "View", "Shop Now"
+    button_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#3B82F6"
+    button_text_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
+    button_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "6px"
+    button_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+    button_variant: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "solid", "outline", "ghost"
+    button_full_width: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False
 
     # Relationships
     connection: Mapped["EcommerceConnection"] = relationship(back_populates="settings")

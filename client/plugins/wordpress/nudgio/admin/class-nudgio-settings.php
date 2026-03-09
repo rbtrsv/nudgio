@@ -112,6 +112,9 @@ class Nudgio_Settings {
         );
 
         // --- Default Widget Settings Section ---
+        // Widget type and count are standalone fields; all 35 visual settings
+        // are registered as generic text/color/select/boolean options and rendered
+        // via reusable helper methods (render_color_field, render_select_field, etc.).
         add_settings_section(
             'nudgio_defaults_section',
             __( 'Default Widget Settings', 'nudgio-technologies' ),
@@ -145,151 +148,55 @@ class Nudgio_Settings {
             'nudgio_defaults_section'
         );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_style', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => 'card',
-        ) );
-        add_settings_field(
-            'nudgio_default_style',
-            __( 'Display Style', 'nudgio-technologies' ),
-            array( $this, 'render_default_style_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
+        // --- Group 1: Widget Container ---
+        $this->register_color_setting( 'widget_bg_color', __( 'Widget Background', 'nudgio-technologies' ), '#FFFFFF' );
+        $this->register_select_setting( 'widget_padding', __( 'Widget Padding', 'nudgio-technologies' ), 'md', array( 'none' => 'None', 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_columns', array(
-            'type'              => 'integer',
-            'sanitize_callback' => 'absint',
-            'default'           => 4,
-        ) );
-        add_settings_field(
-            'nudgio_default_columns',
-            __( 'Columns', 'nudgio-technologies' ),
-            array( $this, 'render_default_columns_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
+        // --- Group 2: Widget Title ---
+        $this->register_text_setting( 'widget_title', __( 'Widget Title', 'nudgio-technologies' ), '', __( 'Leave empty for auto-default based on widget type.', 'nudgio-technologies' ) );
+        $this->register_color_setting( 'title_color', __( 'Title Color', 'nudgio-technologies' ), '#111827' );
+        $this->register_select_setting( 'title_size', __( 'Title Size', 'nudgio-technologies' ), 'lg', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large', 'xl' => 'Extra Large' ) );
+        $this->register_select_setting( 'title_alignment', __( 'Title Alignment', 'nudgio-technologies' ), 'left', array( 'left' => 'Left', 'center' => 'Center' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_size', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => 'default',
-        ) );
-        add_settings_field(
-            'nudgio_default_size',
-            __( 'Size', 'nudgio-technologies' ),
-            array( $this, 'render_default_size_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
+        // --- Group 3: Layout ---
+        $this->register_select_setting( 'widget_style', __( 'Layout Style', 'nudgio-technologies' ), 'grid', array( 'grid' => 'Card Grid', 'carousel' => 'Carousel' ) );
+        $this->register_number_setting( 'widget_columns', __( 'Columns (2-6)', 'nudgio-technologies' ), 4, 2, 6, __( 'Max columns at full width. Responsive: 1→2→N.', 'nudgio-technologies' ) );
+        $this->register_select_setting( 'gap', __( 'Gap', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_primary_color', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_hex_color',
-            'default'           => '#3B82F6',
-        ) );
-        add_settings_field(
-            'nudgio_default_primary_color',
-            __( 'Primary Color', 'nudgio-technologies' ),
-            array( $this, 'render_color_field' ),
-            'nudgio',
-            'nudgio_defaults_section',
-            array( 'option' => 'nudgio_default_primary_color', 'default' => '#3B82F6' )
-        );
+        // --- Group 4: Product Card ---
+        $this->register_color_setting( 'card_bg_color', __( 'Card Background', 'nudgio-technologies' ), '#FFFFFF' );
+        $this->register_text_setting( 'card_border_radius', __( 'Card Border Radius', 'nudgio-technologies' ), '8px', __( 'CSS value (e.g. 8px, 0.5rem).', 'nudgio-technologies' ) );
+        $this->register_select_setting( 'card_border_width', __( 'Card Border Width', 'nudgio-technologies' ), '0', array( '0' => 'None', '1' => '1px', '2' => '2px' ) );
+        $this->register_color_setting( 'card_border_color', __( 'Card Border Color', 'nudgio-technologies' ), '#E5E7EB' );
+        $this->register_select_setting( 'card_shadow', __( 'Card Shadow', 'nudgio-technologies' ), 'md', array( 'none' => 'None', 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_select_setting( 'card_padding', __( 'Card Padding', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_select_setting( 'card_hover', __( 'Card Hover', 'nudgio-technologies' ), 'lift', array( 'none' => 'None', 'lift' => 'Lift', 'shadow' => 'Shadow', 'glow' => 'Glow' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_text_color', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_hex_color',
-            'default'           => '#1F2937',
-        ) );
-        add_settings_field(
-            'nudgio_default_text_color',
-            __( 'Text Color', 'nudgio-technologies' ),
-            array( $this, 'render_color_field' ),
-            'nudgio',
-            'nudgio_defaults_section',
-            array( 'option' => 'nudgio_default_text_color', 'default' => '#1F2937' )
-        );
+        // --- Group 5: Product Image ---
+        $this->register_select_setting( 'image_aspect', __( 'Image Aspect Ratio', 'nudgio-technologies' ), 'square', array( 'square' => 'Square (1:1)', 'portrait' => 'Portrait (3:4)', 'landscape' => 'Landscape (16:9)' ) );
+        $this->register_select_setting( 'image_fit', __( 'Image Fit', 'nudgio-technologies' ), 'cover', array( 'cover' => 'Cover', 'contain' => 'Contain' ) );
+        $this->register_text_setting( 'image_radius', __( 'Image Border Radius', 'nudgio-technologies' ), '8px', __( 'CSS value (e.g. 8px, 0).', 'nudgio-technologies' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_bg_color', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_hex_color',
-            'default'           => '#FFFFFF',
-        ) );
-        add_settings_field(
-            'nudgio_default_bg_color',
-            __( 'Background Color', 'nudgio-technologies' ),
-            array( $this, 'render_color_field' ),
-            'nudgio',
-            'nudgio_defaults_section',
-            array( 'option' => 'nudgio_default_bg_color', 'default' => '#FFFFFF' )
-        );
+        // --- Group 6: Product Title in Card ---
+        $this->register_color_setting( 'product_title_color', __( 'Product Title Color', 'nudgio-technologies' ), '#1F2937' );
+        $this->register_select_setting( 'product_title_size', __( 'Product Title Size', 'nudgio-technologies' ), 'sm', array( 'xs' => 'Extra Small', 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_select_setting( 'product_title_weight', __( 'Product Title Weight', 'nudgio-technologies' ), 'semibold', array( 'normal' => 'Normal', 'medium' => 'Medium', 'semibold' => 'Semibold', 'bold' => 'Bold' ) );
+        $this->register_number_setting( 'product_title_lines', __( 'Product Title Max Lines', 'nudgio-technologies' ), 2, 1, 3 );
+        $this->register_select_setting( 'product_title_alignment', __( 'Product Title Alignment', 'nudgio-technologies' ), 'left', array( 'left' => 'Left', 'center' => 'Center' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_border_radius', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => '8px',
-        ) );
-        add_settings_field(
-            'nudgio_default_border_radius',
-            __( 'Border Radius', 'nudgio-technologies' ),
-            array( $this, 'render_border_radius_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
+        // --- Group 7: Price ---
+        $this->register_boolean_setting( 'show_price', __( 'Show Price', 'nudgio-technologies' ), true, __( 'Display product price on widget cards.', 'nudgio-technologies' ) );
+        $this->register_color_setting( 'price_color', __( 'Price Color', 'nudgio-technologies' ), '#111827' );
+        $this->register_select_setting( 'price_size', __( 'Price Size', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
 
-        register_setting( 'nudgio_settings', 'nudgio_default_widget_title', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => '',
-        ) );
-        add_settings_field(
-            'nudgio_default_widget_title',
-            __( 'Widget Title', 'nudgio-technologies' ),
-            array( $this, 'render_widget_title_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
-
-        register_setting( 'nudgio_settings', 'nudgio_default_cta_text', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => 'View',
-        ) );
-        add_settings_field(
-            'nudgio_default_cta_text',
-            __( 'Button Text', 'nudgio-technologies' ),
-            array( $this, 'render_cta_text_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
-
-        register_setting( 'nudgio_settings', 'nudgio_default_show_price', array(
-            'type'              => 'boolean',
-            'sanitize_callback' => 'rest_sanitize_boolean',
-            'default'           => true,
-        ) );
-        add_settings_field(
-            'nudgio_default_show_price',
-            __( 'Show Price', 'nudgio-technologies' ),
-            array( $this, 'render_show_price_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
-
-        register_setting( 'nudgio_settings', 'nudgio_default_image_aspect', array(
-            'type'              => 'string',
-            'sanitize_callback' => 'sanitize_text_field',
-            'default'           => 'square',
-        ) );
-        add_settings_field(
-            'nudgio_default_image_aspect',
-            __( 'Image Aspect Ratio', 'nudgio-technologies' ),
-            array( $this, 'render_image_aspect_field' ),
-            'nudgio',
-            'nudgio_defaults_section'
-        );
+        // --- Group 8: CTA Button ---
+        $this->register_text_setting( 'button_text', __( 'Button Text', 'nudgio-technologies' ), 'View', __( 'Call-to-action text (e.g. View, Shop Now, Add to Cart).', 'nudgio-technologies' ) );
+        $this->register_color_setting( 'button_bg_color', __( 'Button Color', 'nudgio-technologies' ), '#3B82F6' );
+        $this->register_color_setting( 'button_text_color', __( 'Button Text Color', 'nudgio-technologies' ), '#FFFFFF' );
+        $this->register_text_setting( 'button_radius', __( 'Button Border Radius', 'nudgio-technologies' ), '6px', __( 'CSS value (e.g. 6px, 0).', 'nudgio-technologies' ) );
+        $this->register_select_setting( 'button_size', __( 'Button Size', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_select_setting( 'button_variant', __( 'Button Variant', 'nudgio-technologies' ), 'solid', array( 'solid' => 'Solid', 'outline' => 'Outline', 'ghost' => 'Ghost' ) );
+        $this->register_boolean_setting( 'button_full_width', __( 'Button Full Width', 'nudgio-technologies' ), false, __( 'Stretch button to full card width.', 'nudgio-technologies' ) );
     }
 
     // ==========================================
@@ -305,7 +212,7 @@ class Nudgio_Settings {
 
     public function defaults_section_callback() {
         echo '<p>' . esc_html__(
-            'Default values used when shortcode attributes are not specified. Override per-shortcode with [nudgio type="..." count="..." style="..."].',
+            'Default values used when shortcode attributes are not specified. Override per-shortcode with [nudgio type="..." count="..." widget_style="..."].',
             'nudgio-technologies'
         ) . '</p>';
     }
@@ -354,43 +261,87 @@ class Nudgio_Settings {
         echo '<input type="number" name="nudgio_default_count" value="' . esc_attr( $value ) . '" class="small-text" min="1" max="20" />';
     }
 
-    public function render_default_style_field() {
-        $value = get_option( 'nudgio_default_style', 'card' );
-        $styles = array(
-            'card'     => __( 'Card Grid', 'nudgio-technologies' ),
-            'carousel' => __( 'Carousel', 'nudgio-technologies' ),
-        );
-        echo '<select name="nudgio_default_style">';
-        foreach ( $styles as $k => $label ) {
-            echo '<option value="' . esc_attr( $k ) . '"' . selected( $value, $k, false ) . '>' . esc_html( $label ) . '</option>';
-        }
-        echo '</select>';
-    }
+    // ==========================================
+    // Reusable Setting Registration Helpers
+    // ==========================================
 
-    public function render_default_columns_field() {
-        $value = get_option( 'nudgio_default_columns', 4 );
-        echo '<input type="number" name="nudgio_default_columns" value="' . esc_attr( $value ) . '" class="small-text" min="2" max="6" />';
-        echo '<p class="description">' . esc_html__( 'Max columns at full width (2–6). Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio-technologies' ) . '</p>';
-    }
-
-    public function render_default_size_field() {
-        $value = get_option( 'nudgio_default_size', 'default' );
-        $sizes = array(
-            'compact'  => __( 'Compact', 'nudgio-technologies' ),
-            'default'  => __( 'Default', 'nudgio-technologies' ),
-            'spacious' => __( 'Spacious', 'nudgio-technologies' ),
-        );
-        echo '<select name="nudgio_default_size">';
-        foreach ( $sizes as $k => $label ) {
-            echo '<option value="' . esc_attr( $k ) . '"' . selected( $value, $k, false ) . '>' . esc_html( $label ) . '</option>';
-        }
-        echo '</select>';
-        echo '<p class="description">' . esc_html__( 'Controls text, padding, and gap proportionally.', 'nudgio-technologies' ) . '</p>';
+    /**
+     * Register a color picker setting.
+     * Option name: nudgio_default_{$name}
+     */
+    private function register_color_setting( $name, $label, $default ) {
+        $option = 'nudgio_default_' . $name;
+        register_setting( 'nudgio_settings', $option, array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => $default,
+        ) );
+        add_settings_field( $option, $label, array( $this, 'render_color_field' ), 'nudgio', 'nudgio_defaults_section', array( 'option' => $option, 'default' => $default ) );
     }
 
     /**
+     * Register a select dropdown setting.
+     * Option name: nudgio_default_{$name}
+     */
+    private function register_select_setting( $name, $label, $default, $options ) {
+        $option = 'nudgio_default_' . $name;
+        register_setting( 'nudgio_settings', $option, array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => $default,
+        ) );
+        add_settings_field( $option, $label, array( $this, 'render_select_field' ), 'nudgio', 'nudgio_defaults_section', array( 'option' => $option, 'default' => $default, 'options' => $options ) );
+    }
+
+    /**
+     * Register a text input setting.
+     * Option name: nudgio_default_{$name}
+     */
+    private function register_text_setting( $name, $label, $default, $description = '' ) {
+        $option = 'nudgio_default_' . $name;
+        register_setting( 'nudgio_settings', $option, array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => $default,
+        ) );
+        add_settings_field( $option, $label, array( $this, 'render_text_field' ), 'nudgio', 'nudgio_defaults_section', array( 'option' => $option, 'default' => $default, 'description' => $description ) );
+    }
+
+    /**
+     * Register a number input setting.
+     * Option name: nudgio_default_{$name}
+     */
+    private function register_number_setting( $name, $label, $default, $min = 1, $max = 100, $description = '' ) {
+        $option = 'nudgio_default_' . $name;
+        register_setting( 'nudgio_settings', $option, array(
+            'type'              => 'integer',
+            'sanitize_callback' => 'absint',
+            'default'           => $default,
+        ) );
+        add_settings_field( $option, $label, array( $this, 'render_number_field' ), 'nudgio', 'nudgio_defaults_section', array( 'option' => $option, 'default' => $default, 'min' => $min, 'max' => $max, 'description' => $description ) );
+    }
+
+    /**
+     * Register a boolean (checkbox) setting.
+     * Option name: nudgio_default_{$name}
+     */
+    private function register_boolean_setting( $name, $label, $default, $description = '' ) {
+        $option = 'nudgio_default_' . $name;
+        register_setting( 'nudgio_settings', $option, array(
+            'type'              => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default'           => $default,
+        ) );
+        add_settings_field( $option, $label, array( $this, 'render_boolean_field' ), 'nudgio', 'nudgio_defaults_section', array( 'option' => $option, 'default' => $default, 'description' => $description ) );
+    }
+
+    // ==========================================
+    // Reusable Field Renderers
+    // ==========================================
+
+    /**
      * Render a color picker field.
-     * Reusable for primary_color, text_color, bg_color.
+     * Reusable for all hex color settings.
      */
     public function render_color_field( $args ) {
         $option  = $args['option'];
@@ -400,42 +351,65 @@ class Nudgio_Settings {
         echo '<code style="margin-left:8px;">' . esc_html( $value ) . '</code>';
     }
 
-    public function render_border_radius_field() {
-        $value = get_option( 'nudgio_default_border_radius', '8px' );
-        echo '<input type="text" name="nudgio_default_border_radius" value="' . esc_attr( $value ) . '" class="small-text" />';
-        echo '<p class="description">' . esc_html__( 'CSS border-radius value (e.g., 8px, 0.5rem, 50%).', 'nudgio-technologies' ) . '</p>';
-    }
-
-    public function render_widget_title_field() {
-        $value = get_option( 'nudgio_default_widget_title', '' );
-        echo '<input type="text" name="nudgio_default_widget_title" value="' . esc_attr( $value ) . '" class="regular-text" />';
-        echo '<p class="description">' . esc_html__( 'Leave empty for auto-default based on widget type (e.g., "Popular now", "Frequently bought together").', 'nudgio-technologies' ) . '</p>';
-    }
-
-    public function render_cta_text_field() {
-        $value = get_option( 'nudgio_default_cta_text', 'View' );
-        echo '<input type="text" name="nudgio_default_cta_text" value="' . esc_attr( $value ) . '" class="small-text" />';
-        echo '<p class="description">' . esc_html__( 'Call-to-action button text (e.g., "View", "Shop Now", "Add to Cart").', 'nudgio-technologies' ) . '</p>';
-    }
-
-    public function render_show_price_field() {
-        $value = get_option( 'nudgio_default_show_price', true );
-        echo '<label><input type="checkbox" name="nudgio_default_show_price" value="1"' . checked( $value, true, false ) . ' /> ';
-        echo esc_html__( 'Display product price on widget cards.', 'nudgio-technologies' ) . '</label>';
-    }
-
-    public function render_image_aspect_field() {
-        $value = get_option( 'nudgio_default_image_aspect', 'square' );
-        $aspects = array(
-            'square'    => __( 'Square (1:1)', 'nudgio-technologies' ),
-            'portrait'  => __( 'Portrait (3:4)', 'nudgio-technologies' ),
-            'landscape' => __( 'Landscape (16:9)', 'nudgio-technologies' ),
-        );
-        echo '<select name="nudgio_default_image_aspect">';
-        foreach ( $aspects as $k => $label ) {
+    /**
+     * Render a select dropdown field.
+     * Reusable for all enum-style settings.
+     */
+    public function render_select_field( $args ) {
+        $option  = $args['option'];
+        $default = $args['default'];
+        $options = $args['options'];
+        $value   = get_option( $option, $default );
+        echo '<select name="' . esc_attr( $option ) . '">';
+        foreach ( $options as $k => $label ) {
             echo '<option value="' . esc_attr( $k ) . '"' . selected( $value, $k, false ) . '>' . esc_html( $label ) . '</option>';
         }
         echo '</select>';
+    }
+
+    /**
+     * Render a text input field.
+     * Reusable for CSS values, titles, button text.
+     */
+    public function render_text_field( $args ) {
+        $option      = $args['option'];
+        $default     = $args['default'];
+        $description = isset( $args['description'] ) ? $args['description'] : '';
+        $value       = get_option( $option, $default );
+        echo '<input type="text" name="' . esc_attr( $option ) . '" value="' . esc_attr( $value ) . '" class="regular-text" />';
+        if ( $description ) {
+            echo '<p class="description">' . esc_html( $description ) . '</p>';
+        }
+    }
+
+    /**
+     * Render a number input field.
+     * Reusable for columns, max lines, etc.
+     */
+    public function render_number_field( $args ) {
+        $option      = $args['option'];
+        $default     = $args['default'];
+        $min         = isset( $args['min'] ) ? $args['min'] : 1;
+        $max         = isset( $args['max'] ) ? $args['max'] : 100;
+        $description = isset( $args['description'] ) ? $args['description'] : '';
+        $value       = get_option( $option, $default );
+        echo '<input type="number" name="' . esc_attr( $option ) . '" value="' . esc_attr( $value ) . '" class="small-text" min="' . esc_attr( $min ) . '" max="' . esc_attr( $max ) . '" />';
+        if ( $description ) {
+            echo '<p class="description">' . esc_html( $description ) . '</p>';
+        }
+    }
+
+    /**
+     * Render a boolean (checkbox) field.
+     * Reusable for show_price, button_full_width.
+     */
+    public function render_boolean_field( $args ) {
+        $option      = $args['option'];
+        $default     = $args['default'];
+        $description = isset( $args['description'] ) ? $args['description'] : '';
+        $value       = get_option( $option, $default );
+        echo '<label><input type="checkbox" name="' . esc_attr( $option ) . '" value="1"' . checked( $value, true, false ) . ' /> ';
+        echo esc_html( $description ) . '</label>';
     }
 
     // ==========================================
@@ -568,11 +542,12 @@ class Nudgio_Settings {
 
         // Build signed URL for a simple bestsellers test
         $params = array(
-            'key_id' => $key_id,
-            'ts'     => time(),
-            'nonce'  => bin2hex( random_bytes( 8 ) ),
-            'top'    => 2,
-            'style'  => 'card',
+            'key_id'       => $key_id,
+            'ts'           => time(),
+            'nonce'        => bin2hex( random_bytes( 8 ) ),
+            'top'          => 2,
+            'device'       => 'desktop',
+            'widget_style' => 'grid',
         );
 
         // Sort alphabetically for canonical query string

@@ -122,17 +122,48 @@ export interface EmbeddedSettingsDetail {
   shop_base_url: string | null;
   product_url_template: string | null;
   // Brand identity defaults — visual settings for widget rendering
+  // Group 1: Widget Container
+  widget_bg_color: string | null;
+  widget_padding: string | null;
+  // Group 2: Widget Title
+  widget_title: string | null;
+  title_color: string | null;
+  title_size: string | null;
+  title_alignment: string | null;
+  // Group 3: Layout
   widget_style: string | null;
   widget_columns: number | null;
-  widget_size: string | null;
-  primary_color: string | null;
-  text_color: string | null;
-  bg_color: string | null;
-  border_radius: string | null;
-  cta_text: string | null;
-  show_price: boolean | null;
+  gap: string | null;
+  // Group 4: Product Card
+  card_bg_color: string | null;
+  card_border_radius: string | null;
+  card_border_width: string | null;
+  card_border_color: string | null;
+  card_shadow: string | null;
+  card_padding: string | null;
+  card_hover: string | null;
+  // Group 5: Product Image
   image_aspect: string | null;
-  widget_title: string | null;
+  image_fit: string | null;
+  image_radius: string | null;
+  // Group 6: Product Title in Card
+  product_title_color: string | null;
+  product_title_size: string | null;
+  product_title_weight: string | null;
+  product_title_lines: number | null;
+  product_title_alignment: string | null;
+  // Group 7: Price
+  show_price: boolean | null;
+  price_color: string | null;
+  price_size: string | null;
+  // Group 8: CTA Button
+  button_text: string | null;
+  button_bg_color: string | null;
+  button_text_color: string | null;
+  button_radius: string | null;
+  button_size: string | null;
+  button_variant: string | null;
+  button_full_width: boolean | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -153,17 +184,48 @@ export interface EmbeddedSettingsPayload {
   max_recommendations: number;
   min_price_increase_percent: number;
   // Brand identity defaults — visual settings for widget rendering (all optional)
+  // Group 1: Widget Container
+  widget_bg_color?: string | null;
+  widget_padding?: string | null;
+  // Group 2: Widget Title
+  widget_title?: string | null;
+  title_color?: string | null;
+  title_size?: string | null;
+  title_alignment?: string | null;
+  // Group 3: Layout
   widget_style?: string | null;
   widget_columns?: number | null;
-  widget_size?: string | null;
-  primary_color?: string | null;
-  text_color?: string | null;
-  bg_color?: string | null;
-  border_radius?: string | null;
-  cta_text?: string | null;
-  show_price?: boolean | null;
+  gap?: string | null;
+  // Group 4: Product Card
+  card_bg_color?: string | null;
+  card_border_radius?: string | null;
+  card_border_width?: string | null;
+  card_border_color?: string | null;
+  card_shadow?: string | null;
+  card_padding?: string | null;
+  card_hover?: string | null;
+  // Group 5: Product Image
   image_aspect?: string | null;
-  widget_title?: string | null;
+  image_fit?: string | null;
+  image_radius?: string | null;
+  // Group 6: Product Title in Card
+  product_title_color?: string | null;
+  product_title_size?: string | null;
+  product_title_weight?: string | null;
+  product_title_lines?: number | null;
+  product_title_alignment?: string | null;
+  // Group 7: Price
+  show_price?: boolean | null;
+  price_color?: string | null;
+  price_size?: string | null;
+  // Group 8: CTA Button
+  button_text?: string | null;
+  button_bg_color?: string | null;
+  button_text_color?: string | null;
+  button_radius?: string | null;
+  button_size?: string | null;
+  button_variant?: string | null;
+  button_full_width?: boolean | null;
 }
 
 /** Simple message response */
@@ -249,18 +311,49 @@ export interface EmbeddedComponentParams {
   lookback_days?: number;
   method?: string;
   min_price_increase_percent?: number;
-  style?: 'card' | 'carousel';
   device?: 'desktop' | 'mobile';
-  columns?: number;
-  size?: 'compact' | 'default' | 'spacious';
-  primary_color?: string;
-  text_color?: string;
-  bg_color?: string;
-  border_radius?: string;
+  // Group 1: Widget Container
+  widget_bg_color?: string;
+  widget_padding?: string;
+  // Group 2: Widget Title
   widget_title?: string;
-  cta_text?: string;
-  show_price?: boolean;
+  title_color?: string;
+  title_size?: string;
+  title_alignment?: string;
+  // Group 3: Layout
+  widget_style?: 'grid' | 'carousel';
+  widget_columns?: number;
+  gap?: string;
+  // Group 4: Product Card
+  card_bg_color?: string;
+  card_border_radius?: string;
+  card_border_width?: string;
+  card_border_color?: string;
+  card_shadow?: string;
+  card_padding?: string;
+  card_hover?: string;
+  // Group 5: Product Image
   image_aspect?: 'square' | 'portrait' | 'landscape';
+  image_fit?: string;
+  image_radius?: string;
+  // Group 6: Product Title in Card
+  product_title_color?: string;
+  product_title_size?: string;
+  product_title_weight?: string;
+  product_title_lines?: number;
+  product_title_alignment?: string;
+  // Group 7: Price
+  show_price?: boolean;
+  price_color?: string;
+  price_size?: string;
+  // Group 8: CTA Button
+  button_text?: string;
+  button_bg_color?: string;
+  button_text_color?: string;
+  button_radius?: string;
+  button_size?: string;
+  button_variant?: string;
+  button_full_width?: boolean;
 }
 
 // ==========================================
@@ -554,25 +647,13 @@ export const getComponentHtml = async (
   type: 'bestsellers' | 'cross-sell' | 'upsell' | 'similar',
   params: EmbeddedComponentParams,
 ): Promise<string> => {
-  // Build query string from params
+  // Build query string from params — iterate all keys, skip undefined
   const searchParams = new URLSearchParams();
-  if (params.product_id) searchParams.set('product_id', params.product_id);
-  if (params.top !== undefined) searchParams.set('top', String(params.top));
-  if (params.lookback_days !== undefined) searchParams.set('lookback_days', String(params.lookback_days));
-  if (params.method) searchParams.set('method', params.method);
-  if (params.min_price_increase_percent !== undefined) searchParams.set('min_price_increase_percent', String(params.min_price_increase_percent));
-  if (params.style) searchParams.set('style', params.style);
-  if (params.device) searchParams.set('device', params.device);
-  if (params.columns !== undefined) searchParams.set('columns', String(params.columns));
-  if (params.size) searchParams.set('size', params.size);
-  if (params.primary_color) searchParams.set('primary_color', params.primary_color);
-  if (params.text_color) searchParams.set('text_color', params.text_color);
-  if (params.bg_color) searchParams.set('bg_color', params.bg_color);
-  if (params.border_radius) searchParams.set('border_radius', params.border_radius);
-  if (params.widget_title) searchParams.set('widget_title', params.widget_title);
-  if (params.cta_text) searchParams.set('cta_text', params.cta_text);
-  if (params.show_price !== undefined) searchParams.set('show_price', String(params.show_price));
-  if (params.image_aspect) searchParams.set('image_aspect', params.image_aspect);
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null) {
+      searchParams.set(key, String(value));
+    }
+  }
 
   // Map type to endpoint
   const endpointMap: Record<string, string> = {

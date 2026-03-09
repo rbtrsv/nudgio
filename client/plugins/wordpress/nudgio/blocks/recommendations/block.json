@@ -2,11 +2,11 @@
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
     "name": "nudgio/recommendations",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "title": "Nudgio Technologies",
     "category": "woocommerce",
     "icon": "products",
-    "description": "Display AI-powered product recommendations from Nudgio. Supports bestsellers, cross-sell, upsell, and similar products.",
+    "description": "Display AI-powered product recommendations from Nudgio. Supports bestsellers, cross-sell, upsell, and similar products with 35 visual settings in 8 groups.",
     "keywords": [ "nudgio", "recommendations", "products", "woocommerce", "upsell", "cross-sell" ],
     "textdomain": "nudgio",
     "editorScript": "file:./index.js",
@@ -26,56 +26,9 @@
             "type": "number",
             "default": 4
         },
-        "style": {
-            "type": "string",
-            "default": "card",
-            "enum": [ "card", "carousel" ]
-        },
-        "columns": {
-            "type": "number",
-            "default": 4
-        },
-        "size": {
-            "type": "string",
-            "default": "default",
-            "enum": [ "compact", "default", "spacious" ]
-        },
         "product_id": {
             "type": "string",
             "default": ""
-        },
-        "primary_color": {
-            "type": "string",
-            "default": "#3B82F6"
-        },
-        "text_color": {
-            "type": "string",
-            "default": "#1F2937"
-        },
-        "bg_color": {
-            "type": "string",
-            "default": "#FFFFFF"
-        },
-        "border_radius": {
-            "type": "string",
-            "default": "8px"
-        },
-        "widget_title": {
-            "type": "string",
-            "default": ""
-        },
-        "cta_text": {
-            "type": "string",
-            "default": "View"
-        },
-        "show_price": {
-            "type": "boolean",
-            "default": true
-        },
-        "image_aspect": {
-            "type": "string",
-            "default": "square",
-            "enum": [ "square", "portrait", "landscape" ]
         },
         "lookback_days": {
             "type": "number",
@@ -89,6 +42,159 @@
         "min_price_increase_percent": {
             "type": "number",
             "default": 10
+        },
+        "widget_bg_color": {
+            "type": "string",
+            "default": "#FFFFFF"
+        },
+        "widget_padding": {
+            "type": "string",
+            "default": "md",
+            "enum": [ "none", "sm", "md", "lg" ]
+        },
+        "widget_title": {
+            "type": "string",
+            "default": ""
+        },
+        "title_color": {
+            "type": "string",
+            "default": "#111827"
+        },
+        "title_size": {
+            "type": "string",
+            "default": "lg",
+            "enum": [ "sm", "md", "lg", "xl" ]
+        },
+        "title_alignment": {
+            "type": "string",
+            "default": "left",
+            "enum": [ "left", "center" ]
+        },
+        "widget_style": {
+            "type": "string",
+            "default": "grid",
+            "enum": [ "grid", "carousel" ]
+        },
+        "widget_columns": {
+            "type": "number",
+            "default": 4
+        },
+        "gap": {
+            "type": "string",
+            "default": "md",
+            "enum": [ "sm", "md", "lg" ]
+        },
+        "card_bg_color": {
+            "type": "string",
+            "default": "#FFFFFF"
+        },
+        "card_border_radius": {
+            "type": "string",
+            "default": "8px"
+        },
+        "card_border_width": {
+            "type": "string",
+            "default": "0",
+            "enum": [ "0", "1", "2" ]
+        },
+        "card_border_color": {
+            "type": "string",
+            "default": "#E5E7EB"
+        },
+        "card_shadow": {
+            "type": "string",
+            "default": "md",
+            "enum": [ "none", "sm", "md", "lg" ]
+        },
+        "card_padding": {
+            "type": "string",
+            "default": "md",
+            "enum": [ "sm", "md", "lg" ]
+        },
+        "card_hover": {
+            "type": "string",
+            "default": "lift",
+            "enum": [ "none", "lift", "shadow", "glow" ]
+        },
+        "image_aspect": {
+            "type": "string",
+            "default": "square",
+            "enum": [ "square", "portrait", "landscape" ]
+        },
+        "image_fit": {
+            "type": "string",
+            "default": "cover",
+            "enum": [ "cover", "contain" ]
+        },
+        "image_radius": {
+            "type": "string",
+            "default": "8px"
+        },
+        "product_title_color": {
+            "type": "string",
+            "default": "#1F2937"
+        },
+        "product_title_size": {
+            "type": "string",
+            "default": "sm",
+            "enum": [ "xs", "sm", "md", "lg" ]
+        },
+        "product_title_weight": {
+            "type": "string",
+            "default": "semibold",
+            "enum": [ "normal", "medium", "semibold", "bold" ]
+        },
+        "product_title_lines": {
+            "type": "number",
+            "default": 2
+        },
+        "product_title_alignment": {
+            "type": "string",
+            "default": "left",
+            "enum": [ "left", "center" ]
+        },
+        "show_price": {
+            "type": "boolean",
+            "default": true
+        },
+        "price_color": {
+            "type": "string",
+            "default": "#111827"
+        },
+        "price_size": {
+            "type": "string",
+            "default": "md",
+            "enum": [ "sm", "md", "lg" ]
+        },
+        "button_text": {
+            "type": "string",
+            "default": "View"
+        },
+        "button_bg_color": {
+            "type": "string",
+            "default": "#3B82F6"
+        },
+        "button_text_color": {
+            "type": "string",
+            "default": "#FFFFFF"
+        },
+        "button_radius": {
+            "type": "string",
+            "default": "6px"
+        },
+        "button_size": {
+            "type": "string",
+            "default": "md",
+            "enum": [ "sm", "md", "lg" ]
+        },
+        "button_variant": {
+            "type": "string",
+            "default": "solid",
+            "enum": [ "solid", "outline", "ghost" ]
+        },
+        "button_full_width": {
+            "type": "boolean",
+            "default": false
         }
     }
 }

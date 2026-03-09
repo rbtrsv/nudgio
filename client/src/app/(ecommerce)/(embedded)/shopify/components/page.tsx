@@ -52,17 +52,48 @@ export default function ShopifyComponentsPage() {
   const [lookbackDays, setLookbackDays] = useState(30);
   const [method, setMethod] = useState<'volume' | 'value' | 'balanced'>('volume');
   const [minPriceIncrease, setMinPriceIncrease] = useState(10);
-  const [style, setStyle] = useState<'card' | 'carousel'>('card');
-  const [columns, setColumns] = useState(4);
-  const [size, setSize] = useState<'compact' | 'default' | 'spacious'>('default');
-  const [primaryColor, setPrimaryColor] = useState('#3B82F6');
-  const [textColor, setTextColor] = useState('#1F2937');
-  const [bgColor, setBgColor] = useState('#FFFFFF');
-  const [borderRadius, setBorderRadius] = useState('8px');
+  // Group 1: Widget Container
+  const [widgetBgColor, setWidgetBgColor] = useState('#FFFFFF');
+  const [widgetPadding, setWidgetPadding] = useState('md');
+  // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
-  const [ctaText, setCtaText] = useState('View');
-  const [showPrice, setShowPrice] = useState(true);
+  const [titleColor, setTitleColor] = useState('#111827');
+  const [titleSize, setTitleSize] = useState('lg');
+  const [titleAlignment, setTitleAlignment] = useState('left');
+  // Group 3: Layout
+  const [widgetStyle, setWidgetStyle] = useState<'grid' | 'carousel'>('grid');
+  const [widgetColumns, setWidgetColumns] = useState(4);
+  const [gap, setGap] = useState('md');
+  // Group 4: Product Card
+  const [cardBgColor, setCardBgColor] = useState('#FFFFFF');
+  const [cardBorderRadius, setCardBorderRadius] = useState('8px');
+  const [cardBorderWidth, setCardBorderWidth] = useState('1');
+  const [cardBorderColor, setCardBorderColor] = useState('#E5E7EB');
+  const [cardShadow, setCardShadow] = useState('sm');
+  const [cardPadding, setCardPadding] = useState('md');
+  const [cardHover, setCardHover] = useState('lift');
+  // Group 5: Product Image
   const [imageAspect, setImageAspect] = useState<'square' | 'portrait' | 'landscape'>('square');
+  const [imageFit, setImageFit] = useState('cover');
+  const [imageRadius, setImageRadius] = useState('8px');
+  // Group 6: Product Title in Card
+  const [productTitleColor, setProductTitleColor] = useState('#1F2937');
+  const [productTitleSize, setProductTitleSize] = useState('sm');
+  const [productTitleWeight, setProductTitleWeight] = useState('medium');
+  const [productTitleLines, setProductTitleLines] = useState(2);
+  const [productTitleAlignment, setProductTitleAlignment] = useState('left');
+  // Group 7: Price
+  const [showPrice, setShowPrice] = useState(true);
+  const [priceColor, setPriceColor] = useState('#111827');
+  const [priceSize, setPriceSize] = useState('md');
+  // Group 8: CTA Button
+  const [buttonText, setButtonText] = useState('View');
+  const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
+  const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
+  const [buttonRadius, setButtonRadius] = useState('6px');
+  const [buttonSize, setButtonSize] = useState('md');
+  const [buttonVariant, setButtonVariant] = useState('solid');
+  const [buttonFullWidth, setButtonFullWidth] = useState(false);
 
   // Product dropdown state
   const [products, setProducts] = useState<EmbeddedProduct[]>([]);
@@ -136,17 +167,48 @@ export default function ShopifyComponentsPage() {
         lookback_days: lookbackDays,
         method: needsMethod ? method : undefined,
         min_price_increase_percent: needsMinPriceIncrease ? minPriceIncrease : undefined,
-        style,
-        columns,
-        size,
-        primary_color: primaryColor,
-        text_color: textColor,
-        bg_color: bgColor,
-        border_radius: borderRadius,
+        // Group 1: Widget Container
+        widget_bg_color: widgetBgColor,
+        widget_padding: widgetPadding,
+        // Group 2: Widget Title
         widget_title: widgetTitle || undefined,
-        cta_text: ctaText,
-        show_price: showPrice,
+        title_color: titleColor,
+        title_size: titleSize,
+        title_alignment: titleAlignment,
+        // Group 3: Layout
+        widget_style: widgetStyle,
+        widget_columns: widgetColumns,
+        gap,
+        // Group 4: Product Card
+        card_bg_color: cardBgColor,
+        card_border_radius: cardBorderRadius,
+        card_border_width: cardBorderWidth,
+        card_border_color: cardBorderColor,
+        card_shadow: cardShadow,
+        card_padding: cardPadding,
+        card_hover: cardHover,
+        // Group 5: Product Image
         image_aspect: imageAspect,
+        image_fit: imageFit,
+        image_radius: imageRadius,
+        // Group 6: Product Title in Card
+        product_title_color: productTitleColor,
+        product_title_size: productTitleSize,
+        product_title_weight: productTitleWeight,
+        product_title_lines: productTitleLines,
+        product_title_alignment: productTitleAlignment,
+        // Group 7: Price
+        show_price: showPrice,
+        price_color: priceColor,
+        price_size: priceSize,
+        // Group 8: CTA Button
+        button_text: buttonText,
+        button_bg_color: buttonBgColor,
+        button_text_color: buttonTextColor,
+        button_radius: buttonRadius,
+        button_size: buttonSize,
+        button_variant: buttonVariant,
+        button_full_width: buttonFullWidth,
       });
 
       setHtml(result);
@@ -175,17 +237,48 @@ export default function ShopifyComponentsPage() {
         crosssell_lookback_days: lookbackDays,
         max_recommendations: top,
         min_price_increase_percent: minPriceIncrease,
-        widget_style: style,
-        widget_columns: columns,
-        widget_size: size,
-        primary_color: primaryColor,
-        text_color: textColor,
-        bg_color: bgColor,
-        border_radius: borderRadius,
-        cta_text: ctaText,
-        show_price: showPrice,
-        image_aspect: imageAspect,
+        // Group 1: Widget Container
+        widget_bg_color: widgetBgColor,
+        widget_padding: widgetPadding,
+        // Group 2: Widget Title
         widget_title: widgetTitle || null,
+        title_color: titleColor,
+        title_size: titleSize,
+        title_alignment: titleAlignment,
+        // Group 3: Layout
+        widget_style: widgetStyle,
+        widget_columns: widgetColumns,
+        gap,
+        // Group 4: Product Card
+        card_bg_color: cardBgColor,
+        card_border_radius: cardBorderRadius,
+        card_border_width: cardBorderWidth,
+        card_border_color: cardBorderColor,
+        card_shadow: cardShadow,
+        card_padding: cardPadding,
+        card_hover: cardHover,
+        // Group 5: Product Image
+        image_aspect: imageAspect,
+        image_fit: imageFit,
+        image_radius: imageRadius,
+        // Group 6: Product Title in Card
+        product_title_color: productTitleColor,
+        product_title_size: productTitleSize,
+        product_title_weight: productTitleWeight,
+        product_title_lines: productTitleLines,
+        product_title_alignment: productTitleAlignment,
+        // Group 7: Price
+        show_price: showPrice,
+        price_color: priceColor,
+        price_size: priceSize,
+        // Group 8: CTA Button
+        button_text: buttonText,
+        button_bg_color: buttonBgColor,
+        button_text_color: buttonTextColor,
+        button_radius: buttonRadius,
+        button_size: buttonSize,
+        button_variant: buttonVariant,
+        button_full_width: buttonFullWidth,
       });
       setSaveMessage('Brand defaults saved');
       setTimeout(() => setSaveMessage(null), 3000);
@@ -328,106 +421,182 @@ export default function ShopifyComponentsPage() {
               />
             )}
 
-            {/* Style */}
-            <s-select
-              label="Style"
-              value={style}
-              onChange={(e) => setStyle(e.currentTarget.value as 'card' | 'carousel')}
-            >
-              <s-option value="card">Card Grid</s-option>
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Group 1: Widget Container */}
+      <s-section heading="Widget Container">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-text-field label="Background Color" value={widgetBgColor} onChange={(e) => setWidgetBgColor(e.currentTarget.value)} details="Hex color (e.g. #FFFFFF)" />
+            <s-select label="Padding" value={widgetPadding} onChange={(e) => setWidgetPadding(e.currentTarget.value)}>
+              <s-option value="none">None</s-option>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+            </s-select>
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Group 2: Widget Title */}
+      <s-section heading="Widget Title">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-text-field label="Title Text" value={widgetTitle} onChange={(e) => setWidgetTitle(e.currentTarget.value)} details="Leave empty for auto-default based on widget type." />
+            <s-text-field label="Title Color" value={titleColor} onChange={(e) => setTitleColor(e.currentTarget.value)} details="Hex color (e.g. #111827)" />
+            <s-select label="Title Size" value={titleSize} onChange={(e) => setTitleSize(e.currentTarget.value)}>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+              <s-option value="xl">Extra Large</s-option>
+            </s-select>
+            <s-select label="Title Alignment" value={titleAlignment} onChange={(e) => setTitleAlignment(e.currentTarget.value)}>
+              <s-option value="left">Left</s-option>
+              <s-option value="center">Center</s-option>
+            </s-select>
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Group 3: Layout */}
+      <s-section heading="Layout">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-select label="Layout Style" value={widgetStyle} onChange={(e) => setWidgetStyle(e.currentTarget.value as 'grid' | 'carousel')}>
+              <s-option value="grid">Grid Cards</s-option>
               <s-option value="carousel">Carousel</s-option>
             </s-select>
-
-            {/* Columns */}
-            <s-number-field
-              label="Columns"
-              min={2}
-              max={6}
-              step={1}
-              value={String(columns)}
-              onChange={(e) => {
-                const val = parseInt(e.currentTarget.value, 10);
-                if (!isNaN(val)) setColumns(val);
-              }}
-              details="Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop."
-            />
-
-            {/* Size */}
-            <s-select
-              label="Size"
-              value={size}
-              onChange={(e) => setSize(e.currentTarget.value as 'compact' | 'default' | 'spacious')}
-              details="Controls text, padding, and gap proportionally."
-            >
-              <s-option value="compact">Compact</s-option>
-              <s-option value="default">Default</s-option>
-              <s-option value="spacious">Spacious</s-option>
+            <s-number-field label="Columns" min={2} max={6} step={1} value={String(widgetColumns)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setWidgetColumns(val); }} details="Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop." />
+            <s-select label="Card Gap" value={gap} onChange={(e) => setGap(e.currentTarget.value)}>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
             </s-select>
+          </s-stack>
+        </s-box>
+      </s-section>
 
-            {/* Colors */}
-            <s-text-field
-              label="Primary Color"
-              value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.currentTarget.value)}
-              details="Hex color code (e.g. #3B82F6)"
-            />
+      {/* Group 4: Product Card */}
+      <s-section heading="Product Card">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-text-field label="Card Background" value={cardBgColor} onChange={(e) => setCardBgColor(e.currentTarget.value)} details="Hex color (e.g. #FFFFFF)" />
+            <s-text-field label="Card Border Radius" value={cardBorderRadius} onChange={(e) => setCardBorderRadius(e.currentTarget.value)} details="CSS value (e.g. 8px)" />
+            <s-select label="Card Border Width" value={cardBorderWidth} onChange={(e) => setCardBorderWidth(e.currentTarget.value)}>
+              <s-option value="0">None</s-option>
+              <s-option value="1">1px</s-option>
+              <s-option value="2">2px</s-option>
+            </s-select>
+            <s-text-field label="Card Border Color" value={cardBorderColor} onChange={(e) => setCardBorderColor(e.currentTarget.value)} details="Hex color (e.g. #E5E7EB)" />
+            <s-select label="Card Shadow" value={cardShadow} onChange={(e) => setCardShadow(e.currentTarget.value)}>
+              <s-option value="none">None</s-option>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+            </s-select>
+            <s-select label="Card Padding" value={cardPadding} onChange={(e) => setCardPadding(e.currentTarget.value)}>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+            </s-select>
+            <s-select label="Card Hover Effect" value={cardHover} onChange={(e) => setCardHover(e.currentTarget.value)}>
+              <s-option value="none">None</s-option>
+              <s-option value="lift">Lift</s-option>
+              <s-option value="shadow">Shadow</s-option>
+              <s-option value="glow">Glow</s-option>
+            </s-select>
+          </s-stack>
+        </s-box>
+      </s-section>
 
-            <s-text-field
-              label="Text Color"
-              value={textColor}
-              onChange={(e) => setTextColor(e.currentTarget.value)}
-              details="Hex color code (e.g. #1F2937)"
-            />
-
-            <s-text-field
-              label="Background Color"
-              value={bgColor}
-              onChange={(e) => setBgColor(e.currentTarget.value)}
-              details="Hex color code (e.g. #FFFFFF)"
-            />
-
-            <s-text-field
-              label="Border Radius"
-              value={borderRadius}
-              onChange={(e) => setBorderRadius(e.currentTarget.value)}
-              details="CSS value (e.g. 8px)"
-            />
-
-            {/* Widget Title */}
-            <s-text-field
-              label="Widget Title"
-              value={widgetTitle}
-              onChange={(e) => setWidgetTitle(e.currentTarget.value)}
-              details="Leave empty for auto-default based on widget type."
-            />
-
-            {/* CTA Text */}
-            <s-text-field
-              label="Button Text"
-              value={ctaText}
-              onChange={(e) => setCtaText(e.currentTarget.value)}
-              details="Call-to-action button text (e.g. View, Shop Now, Add to Cart)."
-            />
-
-            {/* Show Price */}
-            <s-checkbox
-              label="Show Price"
-              checked={showPrice || undefined}
-              onChange={(e) => setShowPrice(e.currentTarget.checked)}
-            />
-
-            {/* Image Aspect Ratio */}
-            <s-select
-              label="Image Aspect Ratio"
-              value={imageAspect}
-              onChange={(e) => setImageAspect(e.currentTarget.value as 'square' | 'portrait' | 'landscape')}
-            >
+      {/* Group 5: Product Image */}
+      <s-section heading="Product Image">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-select label="Aspect Ratio" value={imageAspect} onChange={(e) => setImageAspect(e.currentTarget.value as 'square' | 'portrait' | 'landscape')}>
               <s-option value="square">Square (1:1)</s-option>
               <s-option value="portrait">Portrait (3:4)</s-option>
               <s-option value="landscape">Landscape (16:9)</s-option>
             </s-select>
+            <s-select label="Image Fit" value={imageFit} onChange={(e) => setImageFit(e.currentTarget.value)}>
+              <s-option value="cover">Cover (crop)</s-option>
+              <s-option value="contain">Contain (fit)</s-option>
+            </s-select>
+            <s-text-field label="Image Border Radius" value={imageRadius} onChange={(e) => setImageRadius(e.currentTarget.value)} details="CSS value (e.g. 8px, 0)" />
+          </s-stack>
+        </s-box>
+      </s-section>
 
-            {/* Generate Button */}
+      {/* Group 6: Product Title */}
+      <s-section heading="Product Title">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-text-field label="Title Color" value={productTitleColor} onChange={(e) => setProductTitleColor(e.currentTarget.value)} details="Hex color (e.g. #1F2937)" />
+            <s-select label="Title Size" value={productTitleSize} onChange={(e) => setProductTitleSize(e.currentTarget.value)}>
+              <s-option value="xs">Extra Small</s-option>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+            </s-select>
+            <s-select label="Title Weight" value={productTitleWeight} onChange={(e) => setProductTitleWeight(e.currentTarget.value)}>
+              <s-option value="normal">Normal</s-option>
+              <s-option value="medium">Medium</s-option>
+              <s-option value="semibold">Semibold</s-option>
+              <s-option value="bold">Bold</s-option>
+            </s-select>
+            <s-number-field label="Max Lines" min={1} max={3} step={1} value={String(productTitleLines)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setProductTitleLines(val); }} details="Product title truncation after N lines." />
+            <s-select label="Title Alignment" value={productTitleAlignment} onChange={(e) => setProductTitleAlignment(e.currentTarget.value)}>
+              <s-option value="left">Left</s-option>
+              <s-option value="center">Center</s-option>
+            </s-select>
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Group 7: Price */}
+      <s-section heading="Price">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-checkbox label="Show Price" checked={showPrice || undefined} onChange={(e) => setShowPrice(e.currentTarget.checked)} />
+            <s-text-field label="Price Color" value={priceColor} onChange={(e) => setPriceColor(e.currentTarget.value)} details="Hex color (e.g. #111827)" />
+            <s-select label="Price Size" value={priceSize} onChange={(e) => setPriceSize(e.currentTarget.value)}>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+            </s-select>
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Group 8: CTA Button */}
+      <s-section heading="CTA Button">
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
+            <s-text-field label="Button Text" value={buttonText} onChange={(e) => setButtonText(e.currentTarget.value)} details="e.g. View, Shop Now, Add to Cart" />
+            <s-text-field label="Button Color" value={buttonBgColor} onChange={(e) => setButtonBgColor(e.currentTarget.value)} details="Hex color (e.g. #3B82F6)" />
+            <s-text-field label="Button Text Color" value={buttonTextColor} onChange={(e) => setButtonTextColor(e.currentTarget.value)} details="Hex color (e.g. #FFFFFF)" />
+            <s-text-field label="Button Border Radius" value={buttonRadius} onChange={(e) => setButtonRadius(e.currentTarget.value)} details="CSS value (e.g. 6px, 9999px for pill)" />
+            <s-select label="Button Size" value={buttonSize} onChange={(e) => setButtonSize(e.currentTarget.value)}>
+              <s-option value="sm">Small</s-option>
+              <s-option value="md">Medium</s-option>
+              <s-option value="lg">Large</s-option>
+            </s-select>
+            <s-select label="Button Style" value={buttonVariant} onChange={(e) => setButtonVariant(e.currentTarget.value)}>
+              <s-option value="solid">Solid (filled)</s-option>
+              <s-option value="outline">Outline (border)</s-option>
+              <s-option value="ghost">Ghost (transparent)</s-option>
+            </s-select>
+            <s-checkbox label="Full Width Button" checked={buttonFullWidth || undefined} onChange={(e) => setButtonFullWidth(e.currentTarget.checked)} />
+          </s-stack>
+        </s-box>
+      </s-section>
+
+      {/* Actions */}
+      <s-section>
+        <s-box padding="base">
+          <s-stack direction="block" gap="base">
             <s-button
               variant="primary"
               onClick={handleGenerate}
@@ -436,7 +605,6 @@ export default function ShopifyComponentsPage() {
               {isLoading ? 'Generating...' : 'Generate Preview'}
             </s-button>
 
-            {/* Save current visual config as brand defaults in DB */}
             <s-button
               onClick={handleSaveBrandDefaults}
               disabled={isSaving || undefined}
@@ -449,7 +617,6 @@ export default function ShopifyComponentsPage() {
                 <s-paragraph>{saveMessage}</s-paragraph>
               </s-banner>
             )}
-
           </s-stack>
         </s-box>
       </s-section>

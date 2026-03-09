@@ -4,11 +4,11 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Display AI-powered product recommendations on your WooCommerce store — bestsellers, cross-sell, upsell, and similar products.
+Display AI-powered product recommendations on your WooCommerce store — bestsellers, cross-sell, upsell, and similar products with 35 visual settings in 8 groups.
 
 == Description ==
 
@@ -21,9 +21,10 @@ Nudgio Technologies connects your WooCommerce store to the Nudgio recommendation
 * Upsell recommendations (higher-priced alternatives)
 * Similar product recommendations
 * Simple `[nudgio]` shortcode with customizable attributes
+* Gutenberg block with 35 visual settings in 8 organized groups — no shortcodes needed
 * Auto-detects WooCommerce product ID on product pages
 * HMAC-signed URLs — your API secret never appears in page source
-* Configurable widget appearance (colors, style, layout)
+* Full visual customization: widget container, title, layout, card, image, product title, price, and CTA button
 * Iframe-based rendering — no CSS conflicts with your theme
 * Auto-resizing iframes — content height adjusts automatically
 
@@ -41,7 +42,7 @@ Nudgio Technologies connects your WooCommerce store to the Nudgio recommendation
 3. Go to Settings → Nudgio Technologies
 4. Enter your Key ID and API Secret from the Nudgio dashboard
 5. Click "Test Connection" to verify
-6. Add `[nudgio]` shortcodes to your pages or posts
+6. Add recommendations using the Gutenberg block (recommended) or `[nudgio]` shortcodes
 
 == Frequently Asked Questions ==
 
@@ -52,29 +53,76 @@ Nudgio Technologies connects your WooCommerce store to the Nudgio recommendation
 3. Go to the connection's "API Keys" tab
 4. Click "Generate Key" — save the secret immediately (shown once)
 
+= How do I use the Gutenberg block? =
+
+1. Edit any page or product → click the "+" block inserter
+2. Search for "Nudgio Technologies" (under WooCommerce category)
+3. Select the block → configure 35 visual settings in the sidebar, organized in 8 groups
+4. Publish — the widget renders automatically with your settings
+
 = Is my API secret secure? =
 
 Yes. The API secret is encrypted before storage in WordPress. It never appears in your page source — only the Key ID, timestamp, nonce, and HMAC signature are included in widget URLs.
 
 = What shortcode attributes are available? =
 
+**Algorithm / Data:**
 * `type` — bestsellers, cross-sell, upsell, similar (default: bestsellers)
 * `count` — number of products to show (default: 4)
-* `style` — card, carousel (default: card)
-* `columns` — max columns at full width, 2-6 (default: 4)
-* `size` — compact, default, spacious (default: default)
 * `product_id` — specific product ID (auto-detected on product pages)
-* `primary_color` — hex color for buttons/accents
-* `text_color` — hex color for text
-* `bg_color` — hex color for background
-* `border_radius` — CSS border-radius value (default: 8px)
-* `widget_title` — custom widget heading (leave empty for auto-default)
-* `cta_text` — button text, e.g. View, Shop Now (default: View)
-* `show_price` — show product price: true/false (default: true)
-* `image_aspect` — square, portrait, landscape (default: square)
 * `lookback_days` — order data lookback period (default: 30)
 * `method` — bestseller method: volume, value, balanced (default: volume)
 * `min_price_increase_percent` — upsell price threshold (default: 10)
+
+**Widget Container:**
+* `widget_bg_color` — hex color for widget background (default: #FFFFFF)
+* `widget_padding` — none, sm, md, lg (default: md)
+
+**Widget Title:**
+* `widget_title` — custom widget heading (leave empty for auto-default)
+* `title_color` — hex color for title (default: #111827)
+* `title_size` — sm, md, lg, xl (default: lg)
+* `title_alignment` — left, center (default: left)
+
+**Layout:**
+* `widget_style` — grid, carousel (default: grid)
+* `widget_columns` — max columns at full width, 2-6 (default: 4)
+* `gap` — sm, md, lg (default: md)
+
+**Product Card:**
+* `card_bg_color` — hex color for card background (default: #FFFFFF)
+* `card_border_radius` — CSS border-radius value (default: 8px)
+* `card_border_width` — 0, 1, 2 (default: 0)
+* `card_border_color` — hex color for card border (default: #E5E7EB)
+* `card_shadow` — none, sm, md, lg (default: md)
+* `card_padding` — sm, md, lg (default: md)
+* `card_hover` — none, lift, shadow, glow (default: lift)
+
+**Product Image:**
+* `image_aspect` — square, portrait, landscape (default: square)
+* `image_fit` — cover, contain (default: cover)
+* `image_radius` — CSS border-radius value (default: 8px)
+
+**Product Title:**
+* `product_title_color` — hex color for product title (default: #1F2937)
+* `product_title_size` — xs, sm, md, lg (default: sm)
+* `product_title_weight` — normal, medium, semibold, bold (default: semibold)
+* `product_title_lines` — max lines before truncation, 1-3 (default: 2)
+* `product_title_alignment` — left, center (default: left)
+
+**Price:**
+* `show_price` — show product price: true/false (default: true)
+* `price_color` — hex color for price (default: #111827)
+* `price_size` — sm, md, lg (default: md)
+
+**CTA Button:**
+* `button_text` — button text, e.g. View, Shop Now (default: View)
+* `button_bg_color` — hex color for button background (default: #3B82F6)
+* `button_text_color` — hex color for button text (default: #FFFFFF)
+* `button_radius` — CSS border-radius value (default: 6px)
+* `button_size` — sm, md, lg (default: md)
+* `button_variant` — solid, outline, ghost (default: solid)
+* `button_full_width` — stretch button to full width: true/false (default: false)
 
 = Do cross-sell/upsell/similar work on non-product pages? =
 
@@ -82,12 +130,26 @@ These types require a product context. On non-product pages, the shortcode outpu
 
 == Changelog ==
 
+= 1.2.0 =
+* Replaced 11-setting visual system with 35 individually configurable settings in 8 groups
+* Widget Container: independent background color and padding control
+* Widget Title: separate color, size, and alignment settings
+* Layout: renamed style→widget_style, columns→widget_columns, added gap control
+* Product Card: 7 new settings — background, border radius/width/color, shadow, padding, hover effect
+* Product Image: added image fit (cover/contain) and image border radius
+* Product Title: 5 new settings — color, size, weight, max lines, alignment
+* Price: separate color and size controls
+* CTA Button: 7 new settings — text, background color, text color, border radius, size, variant (solid/outline/ghost), full width
+* Gutenberg block rewritten with 10 editor panels and 35 sidebar controls
+* Admin settings page reorganized with reusable field helpers (color, select, text, number, boolean)
+* Prominent Gutenberg block instructions added to settings page
+* Uninstall cleanup updated for all new option names + legacy cleanup
+
 = 1.1.0 =
-* Added Gutenberg block with full visual editor controls (Widget Title, Button Text, Show Price, Image Aspect Ratio)
-* Added responsive columns setting (2-6, responsive cascade: 1 col mobile, 2 col tablet, N col desktop)
-* Added size setting (compact, default, spacious) for density control
+* Added Gutenberg block with visual editor controls
+* Added responsive columns setting (2-6)
+* Added size setting (compact, default, spacious)
 * Added widget_title, cta_text, show_price, image_aspect shortcode attributes
-* Fixed render.php block-to-shortcode mapping for all visual fields
 * Updated shortcode to pass all visual parameters through HMAC-signed URLs
 
 = 1.0.0 =
@@ -100,6 +162,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Major visual overhaul: 35 settings in 8 groups replace the old 11-setting system. Gutenberg block fully rewritten. All new shortcode attributes. See changelog for details.
 
 = 1.1.0 =
 Gutenberg block with full visual controls. New shortcode attributes: columns, size, widget_title, cta_text, show_price, image_aspect.

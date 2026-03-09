@@ -3,7 +3,7 @@
  *
  * Vanilla JS using wp.element.createElement() — no build process, no JSX.
  * Registers the nudgio/recommendations block with:
- *   - InspectorControls sidebar (4 panels: Widget Settings, Type-Specific, Colors, Appearance)
+ *   - InspectorControls sidebar (10 panels: Algorithm, 8 visual groups, Type-Specific)
  *   - Placeholder preview in the main editor area
  *
  * All WordPress packages accessed via globals (wp.blocks, wp.blockEditor, wp.components, wp.element, wp.i18n).
@@ -24,6 +24,7 @@
     var SelectControl  = wp.components.SelectControl;
     var RangeControl   = wp.components.RangeControl;
     var TextControl    = wp.components.TextControl;
+    var ToggleControl  = wp.components.ToggleControl;
     var Placeholder    = wp.components.Placeholder;
 
     // ==========================================
@@ -45,7 +46,7 @@
     }
 
     // ==========================================
-    // Style Label Maps
+    // Label Maps
     // ==========================================
 
     var typeLabels = {
@@ -56,14 +57,8 @@
     };
 
     var styleLabels = {
-        card:     'Card Grid',
+        grid:     'Grid',
         carousel: 'Carousel',
-    };
-
-    var sizeLabels = {
-        compact:  'Compact',
-        'default': 'Default',
-        spacious: 'Spacious',
     };
 
     // ==========================================
@@ -109,7 +104,7 @@
             var vis           = typeVisibility[ type ] || typeVisibility.bestsellers;
 
             // ------------------------------------------
-            // Panel 1: Widget Settings
+            // Panel 1: Widget Settings (type + count + product_id)
             // ------------------------------------------
             var widgetSettingsPanel = el( PanelBody, { title: __( 'Widget Settings', 'nudgio' ), initialOpen: true },
 
@@ -133,40 +128,6 @@
                     onChange: function ( val ) { setAttributes( { count: val } ); },
                     min: 1,
                     max: 20,
-                } ),
-
-                // Style dropdown
-                el( SelectControl, {
-                    label: __( 'Display Style', 'nudgio' ),
-                    value: attributes.style,
-                    options: [
-                        { label: 'Card Grid', value: 'card' },
-                        { label: 'Carousel',  value: 'carousel' },
-                    ],
-                    onChange: function ( val ) { setAttributes( { style: val } ); },
-                } ),
-
-                // Columns slider (2–6, max columns at full width)
-                el( RangeControl, {
-                    label: __( 'Columns', 'nudgio' ),
-                    help: __( 'Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop.', 'nudgio' ),
-                    value: attributes.columns,
-                    onChange: function ( val ) { setAttributes( { columns: val } ); },
-                    min: 2,
-                    max: 6,
-                } ),
-
-                // Size dropdown (compact / default / spacious)
-                el( SelectControl, {
-                    label: __( 'Size', 'nudgio' ),
-                    help: __( 'Controls text, padding, and gap proportionally.', 'nudgio' ),
-                    value: attributes.size,
-                    options: [
-                        { label: 'Compact',  value: 'compact' },
-                        { label: 'Default',  value: 'default' },
-                        { label: 'Spacious', value: 'spacious' },
-                    ],
-                    onChange: function ( val ) { setAttributes( { size: val } ); },
                 } ),
 
                 // Product ID — shown only for cross-sell, upsell, similar
@@ -240,71 +201,145 @@
             }
 
             // ------------------------------------------
-            // Panel 3: Color Settings
+            // Panel 3: Widget Container (Group 1)
             // ------------------------------------------
-            var colorPanel = el( PanelColorSettings, {
-                title: __( 'Color Settings', 'nudgio' ),
+            var containerPanel = el( PanelColorSettings, {
+                title: __( 'Widget Container', 'nudgio' ),
                 initialOpen: false,
                 colorSettings: [
                     {
-                        value: attributes.primary_color,
-                        onChange: function ( val ) { setAttributes( { primary_color: val || '#3B82F6' } ); },
-                        label: __( 'Primary Color', 'nudgio' ),
-                    },
-                    {
-                        value: attributes.text_color,
-                        onChange: function ( val ) { setAttributes( { text_color: val || '#1F2937' } ); },
-                        label: __( 'Text Color', 'nudgio' ),
-                    },
-                    {
-                        value: attributes.bg_color,
-                        onChange: function ( val ) { setAttributes( { bg_color: val || '#FFFFFF' } ); },
+                        value: attributes.widget_bg_color,
+                        onChange: function ( val ) { setAttributes( { widget_bg_color: val || '#FFFFFF' } ); },
                         label: __( 'Background Color', 'nudgio' ),
                     },
                 ],
             } );
 
             // ------------------------------------------
-            // Panel 4: Appearance
+            // Panel 4: Widget Title (Group 2)
             // ------------------------------------------
-            var ToggleControl = wp.components.ToggleControl;
-
-            var appearancePanel = el( PanelBody, { title: __( 'Appearance', 'nudgio' ), initialOpen: false },
-
-                // Border Radius
+            var titlePanel = el( PanelBody, { title: __( 'Widget Title', 'nudgio' ), initialOpen: false },
                 el( TextControl, {
-                    label: __( 'Border Radius', 'nudgio' ),
-                    help: __( 'CSS value, e.g. 8px, 0.5rem, 0', 'nudgio' ),
-                    value: attributes.border_radius,
-                    onChange: function ( val ) { setAttributes( { border_radius: val } ); },
-                } ),
-
-                // Widget Title
-                el( TextControl, {
-                    label: __( 'Widget Title', 'nudgio' ),
+                    label: __( 'Title Text', 'nudgio' ),
                     help: __( 'Leave empty for auto-default based on widget type.', 'nudgio' ),
                     value: attributes.widget_title,
                     onChange: function ( val ) { setAttributes( { widget_title: val } ); },
                 } ),
-
-                // CTA Text
-                el( TextControl, {
-                    label: __( 'Button Text', 'nudgio' ),
-                    help: __( 'Call-to-action text (e.g. View, Shop Now, Add to Cart).', 'nudgio' ),
-                    value: attributes.cta_text,
-                    onChange: function ( val ) { setAttributes( { cta_text: val } ); },
-                } ),
-
-                // Show Price toggle
-                el( ToggleControl, {
-                    label: __( 'Show Price', 'nudgio' ),
-                    checked: attributes.show_price,
-                    onChange: function ( val ) { setAttributes( { show_price: val } ); },
-                } ),
-
-                // Image Aspect Ratio
                 el( SelectControl, {
-                    label: __( 'Image Aspect Ratio', 'nudgio' ),
+                    label: __( 'Title Size', 'nudgio' ),
+                    value: attributes.title_size,
+                    options: [
+                        { label: 'Small',       value: 'sm' },
+                        { label: 'Medium',      value: 'md' },
+                        { label: 'Large',       value: 'lg' },
+                        { label: 'Extra Large', value: 'xl' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { title_size: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Title Alignment', 'nudgio' ),
+                    value: attributes.title_alignment,
+                    options: [
+                        { label: 'Left',   value: 'left' },
+                        { label: 'Center', value: 'center' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { title_alignment: val } ); },
+                } )
+            );
+
+            // ------------------------------------------
+            // Panel 5: Layout (Group 3)
+            // ------------------------------------------
+            var layoutPanel = el( PanelBody, { title: __( 'Layout', 'nudgio' ), initialOpen: false },
+                el( SelectControl, {
+                    label: __( 'Layout Style', 'nudgio' ),
+                    value: attributes.widget_style,
+                    options: [
+                        { label: 'Card Grid', value: 'grid' },
+                        { label: 'Carousel',  value: 'carousel' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { widget_style: val } ); },
+                } ),
+                el( RangeControl, {
+                    label: __( 'Columns', 'nudgio' ),
+                    help: __( 'Max columns at full width. Responsive: 1→2→N.', 'nudgio' ),
+                    value: attributes.widget_columns,
+                    onChange: function ( val ) { setAttributes( { widget_columns: val } ); },
+                    min: 2,
+                    max: 6,
+                } ),
+                el( SelectControl, {
+                    label: __( 'Gap', 'nudgio' ),
+                    value: attributes.gap,
+                    options: [
+                        { label: 'Small',  value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large',  value: 'lg' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { gap: val } ); },
+                } )
+            );
+
+            // ------------------------------------------
+            // Panel 6: Product Card (Group 4)
+            // ------------------------------------------
+            var cardPanel = el( PanelBody, { title: __( 'Product Card', 'nudgio' ), initialOpen: false },
+                el( TextControl, {
+                    label: __( 'Border Radius', 'nudgio' ),
+                    help: __( 'CSS value (e.g. 8px, 0.5rem).', 'nudgio' ),
+                    value: attributes.card_border_radius,
+                    onChange: function ( val ) { setAttributes( { card_border_radius: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Border Width', 'nudgio' ),
+                    value: attributes.card_border_width,
+                    options: [
+                        { label: 'None', value: '0' },
+                        { label: '1px',  value: '1' },
+                        { label: '2px',  value: '2' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { card_border_width: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Shadow', 'nudgio' ),
+                    value: attributes.card_shadow,
+                    options: [
+                        { label: 'None',   value: 'none' },
+                        { label: 'Small',  value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large',  value: 'lg' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { card_shadow: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Padding', 'nudgio' ),
+                    value: attributes.card_padding,
+                    options: [
+                        { label: 'Small',  value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large',  value: 'lg' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { card_padding: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Hover Effect', 'nudgio' ),
+                    value: attributes.card_hover,
+                    options: [
+                        { label: 'None',   value: 'none' },
+                        { label: 'Lift',   value: 'lift' },
+                        { label: 'Shadow', value: 'shadow' },
+                        { label: 'Glow',   value: 'glow' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { card_hover: val } ); },
+                } )
+            );
+
+            // ------------------------------------------
+            // Panel 7: Product Image (Group 5)
+            // ------------------------------------------
+            var imagePanel = el( PanelBody, { title: __( 'Product Image', 'nudgio' ), initialOpen: false },
+                el( SelectControl, {
+                    label: __( 'Aspect Ratio', 'nudgio' ),
                     value: attributes.image_aspect,
                     options: [
                         { label: 'Square (1:1)',      value: 'square' },
@@ -312,8 +347,147 @@
                         { label: 'Landscape (16:9)',  value: 'landscape' },
                     ],
                     onChange: function ( val ) { setAttributes( { image_aspect: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Image Fit', 'nudgio' ),
+                    value: attributes.image_fit,
+                    options: [
+                        { label: 'Cover',   value: 'cover' },
+                        { label: 'Contain', value: 'contain' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { image_fit: val } ); },
+                } ),
+                el( TextControl, {
+                    label: __( 'Border Radius', 'nudgio' ),
+                    value: attributes.image_radius,
+                    onChange: function ( val ) { setAttributes( { image_radius: val } ); },
                 } )
             );
+
+            // ------------------------------------------
+            // Panel 8: Product Title (Group 6)
+            // ------------------------------------------
+            var productTitlePanel = el( PanelBody, { title: __( 'Product Title', 'nudgio' ), initialOpen: false },
+                el( SelectControl, {
+                    label: __( 'Size', 'nudgio' ),
+                    value: attributes.product_title_size,
+                    options: [
+                        { label: 'Extra Small', value: 'xs' },
+                        { label: 'Small',       value: 'sm' },
+                        { label: 'Medium',      value: 'md' },
+                        { label: 'Large',       value: 'lg' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { product_title_size: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Weight', 'nudgio' ),
+                    value: attributes.product_title_weight,
+                    options: [
+                        { label: 'Normal',   value: 'normal' },
+                        { label: 'Medium',   value: 'medium' },
+                        { label: 'Semibold', value: 'semibold' },
+                        { label: 'Bold',     value: 'bold' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { product_title_weight: val } ); },
+                } ),
+                el( RangeControl, {
+                    label: __( 'Max Lines', 'nudgio' ),
+                    value: attributes.product_title_lines,
+                    onChange: function ( val ) { setAttributes( { product_title_lines: val } ); },
+                    min: 1,
+                    max: 3,
+                } ),
+                el( SelectControl, {
+                    label: __( 'Alignment', 'nudgio' ),
+                    value: attributes.product_title_alignment,
+                    options: [
+                        { label: 'Left',   value: 'left' },
+                        { label: 'Center', value: 'center' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { product_title_alignment: val } ); },
+                } )
+            );
+
+            // ------------------------------------------
+            // Panel 9: Price (Group 7)
+            // ------------------------------------------
+            var pricePanel = el( PanelBody, { title: __( 'Price', 'nudgio' ), initialOpen: false },
+                el( ToggleControl, {
+                    label: __( 'Show Price', 'nudgio' ),
+                    checked: attributes.show_price,
+                    onChange: function ( val ) { setAttributes( { show_price: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Price Size', 'nudgio' ),
+                    value: attributes.price_size,
+                    options: [
+                        { label: 'Small',  value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large',  value: 'lg' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { price_size: val } ); },
+                } )
+            );
+
+            // ------------------------------------------
+            // Panel 10: CTA Button (Group 8)
+            // ------------------------------------------
+            var buttonPanel = el( PanelBody, { title: __( 'CTA Button', 'nudgio' ), initialOpen: false },
+                el( TextControl, {
+                    label: __( 'Button Text', 'nudgio' ),
+                    help: __( 'Call-to-action text (e.g. View, Shop Now, Add to Cart).', 'nudgio' ),
+                    value: attributes.button_text,
+                    onChange: function ( val ) { setAttributes( { button_text: val } ); },
+                } ),
+                el( TextControl, {
+                    label: __( 'Border Radius', 'nudgio' ),
+                    value: attributes.button_radius,
+                    onChange: function ( val ) { setAttributes( { button_radius: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Size', 'nudgio' ),
+                    value: attributes.button_size,
+                    options: [
+                        { label: 'Small',  value: 'sm' },
+                        { label: 'Medium', value: 'md' },
+                        { label: 'Large',  value: 'lg' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { button_size: val } ); },
+                } ),
+                el( SelectControl, {
+                    label: __( 'Variant', 'nudgio' ),
+                    value: attributes.button_variant,
+                    options: [
+                        { label: 'Solid',   value: 'solid' },
+                        { label: 'Outline', value: 'outline' },
+                        { label: 'Ghost',   value: 'ghost' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { button_variant: val } ); },
+                } ),
+                el( ToggleControl, {
+                    label: __( 'Full Width', 'nudgio' ),
+                    checked: attributes.button_full_width,
+                    onChange: function ( val ) { setAttributes( { button_full_width: val } ); },
+                } )
+            );
+
+            // ------------------------------------------
+            // Color Panels — grouped PanelColorSettings for all hex colors
+            // ------------------------------------------
+            var colorPanel = el( PanelColorSettings, {
+                title: __( 'Colors', 'nudgio' ),
+                initialOpen: false,
+                colorSettings: [
+                    { value: attributes.widget_bg_color,      onChange: function ( val ) { setAttributes( { widget_bg_color: val || '#FFFFFF' } ); },      label: __( 'Widget Background', 'nudgio' ) },
+                    { value: attributes.title_color,          onChange: function ( val ) { setAttributes( { title_color: val || '#111827' } ); },          label: __( 'Title', 'nudgio' ) },
+                    { value: attributes.card_bg_color,        onChange: function ( val ) { setAttributes( { card_bg_color: val || '#FFFFFF' } ); },        label: __( 'Card Background', 'nudgio' ) },
+                    { value: attributes.card_border_color,    onChange: function ( val ) { setAttributes( { card_border_color: val || '#E5E7EB' } ); },    label: __( 'Card Border', 'nudgio' ) },
+                    { value: attributes.product_title_color,  onChange: function ( val ) { setAttributes( { product_title_color: val || '#1F2937' } ); },  label: __( 'Product Title', 'nudgio' ) },
+                    { value: attributes.price_color,          onChange: function ( val ) { setAttributes( { price_color: val || '#111827' } ); },          label: __( 'Price', 'nudgio' ) },
+                    { value: attributes.button_bg_color,      onChange: function ( val ) { setAttributes( { button_bg_color: val || '#3B82F6' } ); },      label: __( 'Button', 'nudgio' ) },
+                    { value: attributes.button_text_color,    onChange: function ( val ) { setAttributes( { button_text_color: val || '#FFFFFF' } ); },    label: __( 'Button Text', 'nudgio' ) },
+                ],
+            } );
 
             // ------------------------------------------
             // Sidebar — InspectorControls
@@ -321,8 +495,13 @@
             var sidebar = el( InspectorControls, {},
                 widgetSettingsPanel,
                 typeSpecificPanel,
-                colorPanel,
-                appearancePanel
+                layoutPanel,
+                cardPanel,
+                imagePanel,
+                productTitlePanel,
+                pricePanel,
+                buttonPanel,
+                colorPanel
             );
 
             // ------------------------------------------
@@ -330,17 +509,16 @@
             // ------------------------------------------
             var summaryLine = ( typeLabels[ type ] || type )
                 + ' \u00B7 ' + attributes.count + ' products'
-                + ' \u00B7 ' + ( styleLabels[ attributes.style ] || attributes.style )
-                + ' \u00B7 ' + attributes.columns + ' cols'
-                + ' \u00B7 ' + ( sizeLabels[ attributes.size ] || attributes.size );
+                + ' \u00B7 ' + ( styleLabels[ attributes.widget_style ] || attributes.widget_style )
+                + ' \u00B7 ' + attributes.widget_columns + ' cols';
 
             var swatches = el( 'div', { style: { display: 'flex', alignItems: 'flex-start', marginTop: '8px' } },
-                el( ColorSwatch, { color: attributes.primary_color, label: 'Primary' } ),
-                el( ColorSwatch, { color: attributes.text_color,    label: 'Text' } ),
-                el( ColorSwatch, { color: attributes.bg_color,      label: 'Background' } ),
+                el( ColorSwatch, { color: attributes.widget_bg_color,  label: 'Widget' } ),
+                el( ColorSwatch, { color: attributes.card_bg_color,    label: 'Card' } ),
+                el( ColorSwatch, { color: attributes.button_bg_color,  label: 'Button' } ),
                 el( 'span', {
                     style: { fontSize: '11px', color: '#757575', marginLeft: '8px', alignSelf: 'center' },
-                }, 'radius: ' + attributes.border_radius )
+                }, attributes.button_variant + ' \u00B7 ' + attributes.card_shadow + ' shadow' )
             );
 
             var placeholder = el( Placeholder, {

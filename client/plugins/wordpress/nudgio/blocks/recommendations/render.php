@@ -18,24 +18,57 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Map block attributes to shortcode-compatible array
+// URL param name = DB column name = block attribute name (no mapping table needed)
 $nudgio_atts = array(
+    // Algorithm / data
     'type'                       => $attributes['type'],
     'count'                      => $attributes['count'],
-    'style'                      => $attributes['style'],
-    'columns'                    => $attributes['columns'],
-    'size'                       => $attributes['size'],
     'product_id'                 => $attributes['product_id'],
-    'primary_color'              => $attributes['primary_color'],
-    'text_color'                 => $attributes['text_color'],
-    'bg_color'                   => $attributes['bg_color'],
-    'border_radius'              => $attributes['border_radius'],
-    'widget_title'               => $attributes['widget_title'],
-    'cta_text'                   => $attributes['cta_text'],
-    'show_price'                 => $attributes['show_price'],
-    'image_aspect'               => $attributes['image_aspect'],
     'lookback_days'              => $attributes['lookback_days'],
     'method'                     => $attributes['method'],
     'min_price_increase_percent' => $attributes['min_price_increase_percent'],
+    // Group 1: Widget Container
+    'widget_bg_color'            => $attributes['widget_bg_color'],
+    'widget_padding'             => $attributes['widget_padding'],
+    // Group 2: Widget Title
+    'widget_title'               => $attributes['widget_title'],
+    'title_color'                => $attributes['title_color'],
+    'title_size'                 => $attributes['title_size'],
+    'title_alignment'            => $attributes['title_alignment'],
+    // Group 3: Layout
+    'widget_style'               => $attributes['widget_style'],
+    'widget_columns'             => $attributes['widget_columns'],
+    'gap'                        => $attributes['gap'],
+    // Group 4: Product Card
+    'card_bg_color'              => $attributes['card_bg_color'],
+    'card_border_radius'         => $attributes['card_border_radius'],
+    'card_border_width'          => $attributes['card_border_width'],
+    'card_border_color'          => $attributes['card_border_color'],
+    'card_shadow'                => $attributes['card_shadow'],
+    'card_padding'               => $attributes['card_padding'],
+    'card_hover'                 => $attributes['card_hover'],
+    // Group 5: Product Image
+    'image_aspect'               => $attributes['image_aspect'],
+    'image_fit'                  => $attributes['image_fit'],
+    'image_radius'               => $attributes['image_radius'],
+    // Group 6: Product Title in Card
+    'product_title_color'        => $attributes['product_title_color'],
+    'product_title_size'         => $attributes['product_title_size'],
+    'product_title_weight'       => $attributes['product_title_weight'],
+    'product_title_lines'        => $attributes['product_title_lines'],
+    'product_title_alignment'    => $attributes['product_title_alignment'],
+    // Group 7: Price
+    'show_price'                 => $attributes['show_price'],
+    'price_color'                => $attributes['price_color'],
+    'price_size'                 => $attributes['price_size'],
+    // Group 8: CTA Button
+    'button_text'                => $attributes['button_text'],
+    'button_bg_color'            => $attributes['button_bg_color'],
+    'button_text_color'          => $attributes['button_text_color'],
+    'button_radius'              => $attributes['button_radius'],
+    'button_size'                => $attributes['button_size'],
+    'button_variant'             => $attributes['button_variant'],
+    'button_full_width'          => $attributes['button_full_width'],
 );
 
 // Render using the existing shortcode pipeline

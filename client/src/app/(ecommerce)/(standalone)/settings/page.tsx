@@ -33,18 +33,49 @@ export default function SettingsPage() {
   const [shopBaseUrl, setShopBaseUrl] = useState('');
   const [productUrlTemplate, setProductUrlTemplate] = useState('');
 
-  // Local form state — brand identity visual fields
-  const [widgetStyle, setWidgetStyle] = useState<'card' | 'carousel'>('card');
-  const [widgetColumns, setWidgetColumns] = useState(4);
-  const [widgetSize, setWidgetSize] = useState<'compact' | 'default' | 'spacious'>('default');
-  const [primaryColor, setPrimaryColor] = useState('#3B82F6');
-  const [textColor, setTextColor] = useState('#1F2937');
-  const [bgColor, setBgColor] = useState('#FFFFFF');
-  const [borderRadius, setBorderRadius] = useState('8px');
-  const [ctaText, setCtaText] = useState('View');
-  const [showPrice, setShowPrice] = useState(true);
-  const [imageAspect, setImageAspect] = useState<'square' | 'portrait' | 'landscape'>('square');
+  // Local form state — brand identity visual fields (35 settings in 8 groups)
+  // Group 1: Widget Container
+  const [widgetBgColor, setWidgetBgColor] = useState('#FFFFFF');
+  const [widgetPadding, setWidgetPadding] = useState('md');
+  // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
+  const [titleColor, setTitleColor] = useState('#111827');
+  const [titleSize, setTitleSize] = useState('lg');
+  const [titleAlignment, setTitleAlignment] = useState('left');
+  // Group 3: Layout
+  const [widgetStyle, setWidgetStyle] = useState('grid');
+  const [widgetColumns, setWidgetColumns] = useState(4);
+  const [gap, setGap] = useState('md');
+  // Group 4: Product Card
+  const [cardBgColor, setCardBgColor] = useState('#FFFFFF');
+  const [cardBorderRadius, setCardBorderRadius] = useState('8px');
+  const [cardBorderWidth, setCardBorderWidth] = useState('0');
+  const [cardBorderColor, setCardBorderColor] = useState('#E5E7EB');
+  const [cardShadow, setCardShadow] = useState('md');
+  const [cardPadding, setCardPadding] = useState('md');
+  const [cardHover, setCardHover] = useState('lift');
+  // Group 5: Product Image
+  const [imageAspect, setImageAspect] = useState('square');
+  const [imageFit, setImageFit] = useState('cover');
+  const [imageRadius, setImageRadius] = useState('8px');
+  // Group 6: Product Title in Card
+  const [productTitleColor, setProductTitleColor] = useState('#1F2937');
+  const [productTitleSize, setProductTitleSize] = useState('sm');
+  const [productTitleWeight, setProductTitleWeight] = useState('semibold');
+  const [productTitleLines, setProductTitleLines] = useState(2);
+  const [productTitleAlignment, setProductTitleAlignment] = useState('left');
+  // Group 7: Price
+  const [showPrice, setShowPrice] = useState(true);
+  const [priceColor, setPriceColor] = useState('#111827');
+  const [priceSize, setPriceSize] = useState('md');
+  // Group 8: CTA Button
+  const [buttonText, setButtonText] = useState('View');
+  const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
+  const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
+  const [buttonRadius, setButtonRadius] = useState('6px');
+  const [buttonSize, setButtonSize] = useState('md');
+  const [buttonVariant, setButtonVariant] = useState('solid');
+  const [buttonFullWidth, setButtonFullWidth] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -62,17 +93,48 @@ export default function SettingsPage() {
       setShopBaseUrl(currentSettings.shop_base_url || '');
       setProductUrlTemplate(currentSettings.product_url_template || '');
       // Brand identity visual fields — use DB value if saved, else keep hardcoded default
-      if (currentSettings.widget_style) setWidgetStyle(currentSettings.widget_style as 'card' | 'carousel');
-      if (currentSettings.widget_columns != null) setWidgetColumns(currentSettings.widget_columns);
-      if (currentSettings.widget_size) setWidgetSize(currentSettings.widget_size as 'compact' | 'default' | 'spacious');
-      if (currentSettings.primary_color) setPrimaryColor(currentSettings.primary_color);
-      if (currentSettings.text_color) setTextColor(currentSettings.text_color);
-      if (currentSettings.bg_color) setBgColor(currentSettings.bg_color);
-      if (currentSettings.border_radius) setBorderRadius(currentSettings.border_radius);
-      if (currentSettings.cta_text) setCtaText(currentSettings.cta_text);
-      if (currentSettings.show_price != null) setShowPrice(currentSettings.show_price);
-      if (currentSettings.image_aspect) setImageAspect(currentSettings.image_aspect as 'square' | 'portrait' | 'landscape');
+      // Group 1: Widget Container
+      if (currentSettings.widget_bg_color) setWidgetBgColor(currentSettings.widget_bg_color);
+      if (currentSettings.widget_padding) setWidgetPadding(currentSettings.widget_padding);
+      // Group 2: Widget Title
       if (currentSettings.widget_title != null) setWidgetTitle(currentSettings.widget_title);
+      if (currentSettings.title_color) setTitleColor(currentSettings.title_color);
+      if (currentSettings.title_size) setTitleSize(currentSettings.title_size);
+      if (currentSettings.title_alignment) setTitleAlignment(currentSettings.title_alignment);
+      // Group 3: Layout
+      if (currentSettings.widget_style) setWidgetStyle(currentSettings.widget_style);
+      if (currentSettings.widget_columns != null) setWidgetColumns(currentSettings.widget_columns);
+      if (currentSettings.gap) setGap(currentSettings.gap);
+      // Group 4: Product Card
+      if (currentSettings.card_bg_color) setCardBgColor(currentSettings.card_bg_color);
+      if (currentSettings.card_border_radius) setCardBorderRadius(currentSettings.card_border_radius);
+      if (currentSettings.card_border_width) setCardBorderWidth(currentSettings.card_border_width);
+      if (currentSettings.card_border_color) setCardBorderColor(currentSettings.card_border_color);
+      if (currentSettings.card_shadow) setCardShadow(currentSettings.card_shadow);
+      if (currentSettings.card_padding) setCardPadding(currentSettings.card_padding);
+      if (currentSettings.card_hover) setCardHover(currentSettings.card_hover);
+      // Group 5: Product Image
+      if (currentSettings.image_aspect) setImageAspect(currentSettings.image_aspect);
+      if (currentSettings.image_fit) setImageFit(currentSettings.image_fit);
+      if (currentSettings.image_radius) setImageRadius(currentSettings.image_radius);
+      // Group 6: Product Title in Card
+      if (currentSettings.product_title_color) setProductTitleColor(currentSettings.product_title_color);
+      if (currentSettings.product_title_size) setProductTitleSize(currentSettings.product_title_size);
+      if (currentSettings.product_title_weight) setProductTitleWeight(currentSettings.product_title_weight);
+      if (currentSettings.product_title_lines != null) setProductTitleLines(currentSettings.product_title_lines);
+      if (currentSettings.product_title_alignment) setProductTitleAlignment(currentSettings.product_title_alignment);
+      // Group 7: Price
+      if (currentSettings.show_price != null) setShowPrice(currentSettings.show_price);
+      if (currentSettings.price_color) setPriceColor(currentSettings.price_color);
+      if (currentSettings.price_size) setPriceSize(currentSettings.price_size);
+      // Group 8: CTA Button
+      if (currentSettings.button_text) setButtonText(currentSettings.button_text);
+      if (currentSettings.button_bg_color) setButtonBgColor(currentSettings.button_bg_color);
+      if (currentSettings.button_text_color) setButtonTextColor(currentSettings.button_text_color);
+      if (currentSettings.button_radius) setButtonRadius(currentSettings.button_radius);
+      if (currentSettings.button_size) setButtonSize(currentSettings.button_size);
+      if (currentSettings.button_variant) setButtonVariant(currentSettings.button_variant);
+      if (currentSettings.button_full_width != null) setButtonFullWidth(currentSettings.button_full_width);
     }
   }, [currentSettings]);
 
@@ -100,18 +162,49 @@ export default function SettingsPage() {
         min_price_increase_percent: minPriceIncreasePercent,
         shop_base_url: shopBaseUrl || null,
         product_url_template: productUrlTemplate || null,
-        // Brand identity visual fields
+        // Brand identity visual fields (35 settings in 8 groups)
+        // Group 1: Widget Container
+        widget_bg_color: widgetBgColor,
+        widget_padding: widgetPadding,
+        // Group 2: Widget Title
+        widget_title: widgetTitle || null,
+        title_color: titleColor,
+        title_size: titleSize,
+        title_alignment: titleAlignment,
+        // Group 3: Layout
         widget_style: widgetStyle,
         widget_columns: widgetColumns,
-        widget_size: widgetSize,
-        primary_color: primaryColor,
-        text_color: textColor,
-        bg_color: bgColor,
-        border_radius: borderRadius,
-        cta_text: ctaText,
-        show_price: showPrice,
+        gap: gap,
+        // Group 4: Product Card
+        card_bg_color: cardBgColor,
+        card_border_radius: cardBorderRadius,
+        card_border_width: cardBorderWidth,
+        card_border_color: cardBorderColor,
+        card_shadow: cardShadow,
+        card_padding: cardPadding,
+        card_hover: cardHover,
+        // Group 5: Product Image
         image_aspect: imageAspect,
-        widget_title: widgetTitle || null,
+        image_fit: imageFit,
+        image_radius: imageRadius,
+        // Group 6: Product Title in Card
+        product_title_color: productTitleColor,
+        product_title_size: productTitleSize,
+        product_title_weight: productTitleWeight,
+        product_title_lines: productTitleLines,
+        product_title_alignment: productTitleAlignment,
+        // Group 7: Price
+        show_price: showPrice,
+        price_color: priceColor,
+        price_size: priceSize,
+        // Group 8: CTA Button
+        button_text: buttonText,
+        button_bg_color: buttonBgColor,
+        button_text_color: buttonTextColor,
+        button_radius: buttonRadius,
+        button_size: buttonSize,
+        button_variant: buttonVariant,
+        button_full_width: buttonFullWidth,
       });
 
       if (success) {
@@ -298,144 +391,209 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Brand Identity */}
+          {/* Group 1: Widget Container */}
           <Card>
             <CardHeader>
-              <CardTitle>Brand Identity</CardTitle>
-              <CardDescription>Default visual settings for recommendation widgets</CardDescription>
+              <CardTitle>Widget Container</CardTitle>
+              <CardDescription>Overall widget background and padding</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="widget-bg-color">Background Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={widgetBgColor} onChange={(e) => setWidgetBgColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="widget-bg-color" value={widgetBgColor} onChange={(e) => setWidgetBgColor(e.target.value)} className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="widget-padding">Padding</Label>
+                  <Select value={widgetPadding} onValueChange={setWidgetPadding}>
+                    <SelectTrigger id="widget-padding"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                {/* Layout Style */}
+          {/* Group 2: Widget Title */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Widget Title</CardTitle>
+              <CardDescription>Main heading above the product grid</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="widget-title">Title Text</Label>
+                  <Input id="widget-title" value={widgetTitle} onChange={(e) => setWidgetTitle(e.target.value)} placeholder="Leave empty for auto-default" />
+                  <p className="text-xs text-muted-foreground">Leave empty for auto-default based on widget type.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="title-color">Title Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={titleColor} onChange={(e) => setTitleColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="title-color" value={titleColor} onChange={(e) => setTitleColor(e.target.value)} className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="title-size">Title Size</Label>
+                  <Select value={titleSize} onValueChange={setTitleSize}>
+                    <SelectTrigger id="title-size"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                      <SelectItem value="xl">Extra Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="title-alignment">Title Alignment</Label>
+                  <Select value={titleAlignment} onValueChange={setTitleAlignment}>
+                    <SelectTrigger id="title-alignment"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Group 3: Layout */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout</CardTitle>
+              <CardDescription>Grid style, columns, and spacing</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="widget-style">Layout Style</Label>
-                  <Select
-                    value={widgetStyle}
-                    onValueChange={(value) => setWidgetStyle(value as 'card' | 'carousel')}
-                  >
-                    <SelectTrigger id="widget-style">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={widgetStyle} onValueChange={setWidgetStyle}>
+                    <SelectTrigger id="widget-style"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="card">Card Grid</SelectItem>
+                      <SelectItem value="grid">Card Grid</SelectItem>
                       <SelectItem value="carousel">Carousel</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-
-                {/* Columns */}
                 <div className="space-y-2">
                   <Label htmlFor="widget-columns">Columns (2-6)</Label>
-                  <Input
-                    id="widget-columns"
-                    type="number"
-                    min={2}
-                    max={6}
-                    value={widgetColumns}
-                    onChange={(e) => setWidgetColumns(parseInt(e.target.value) || 4)}
-                  />
-                  <p className="text-xs text-muted-foreground">Max columns at full width. Responsive: 1 col mobile, 2 col tablet, N col desktop.</p>
+                  <Input id="widget-columns" type="number" min={2} max={6} value={widgetColumns} onChange={(e) => setWidgetColumns(parseInt(e.target.value) || 4)} />
+                  <p className="text-xs text-muted-foreground">Max columns at full width. Responsive: 1→2→N.</p>
                 </div>
-
-                {/* Size */}
                 <div className="space-y-2">
-                  <Label htmlFor="widget-size">Size</Label>
-                  <Select
-                    value={widgetSize}
-                    onValueChange={(value) => setWidgetSize(value as 'compact' | 'default' | 'spacious')}
-                  >
-                    <SelectTrigger id="widget-size">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Label htmlFor="gap">Gap</Label>
+                  <Select value={gap} onValueChange={setGap}>
+                    <SelectTrigger id="gap"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="compact">Compact</SelectItem>
-                      <SelectItem value="default">Default</SelectItem>
-                      <SelectItem value="spacious">Spacious</SelectItem>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Controls text, padding, and gap proportionally.</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                {/* Primary Color */}
+          {/* Group 4: Product Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Card</CardTitle>
+              <CardDescription>Card background, border, shadow, and hover</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="primary-color">Primary Color</Label>
-                  <Input
-                    id="primary-color"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    placeholder="#3B82F6"
-                  />
+                  <Label htmlFor="card-bg-color">Card Background</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={cardBgColor} onChange={(e) => setCardBgColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="card-bg-color" value={cardBgColor} onChange={(e) => setCardBgColor(e.target.value)} className="flex-1" />
+                  </div>
                 </div>
-
-                {/* Text Color */}
                 <div className="space-y-2">
-                  <Label htmlFor="text-color">Text Color</Label>
-                  <Input
-                    id="text-color"
-                    value={textColor}
-                    onChange={(e) => setTextColor(e.target.value)}
-                    placeholder="#1F2937"
-                  />
+                  <Label htmlFor="card-border-radius">Border Radius</Label>
+                  <Input id="card-border-radius" value={cardBorderRadius} onChange={(e) => setCardBorderRadius(e.target.value)} placeholder="8px" />
                 </div>
-
-                {/* Background Color */}
                 <div className="space-y-2">
-                  <Label htmlFor="bg-color">Background Color</Label>
-                  <Input
-                    id="bg-color"
-                    value={bgColor}
-                    onChange={(e) => setBgColor(e.target.value)}
-                    placeholder="#FFFFFF"
-                  />
+                  <Label htmlFor="card-border-width">Border Width</Label>
+                  <Select value={cardBorderWidth} onValueChange={setCardBorderWidth}>
+                    <SelectTrigger id="card-border-width"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">None</SelectItem>
+                      <SelectItem value="1">1px</SelectItem>
+                      <SelectItem value="2">2px</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {/* Border Radius */}
                 <div className="space-y-2">
-                  <Label htmlFor="border-radius">Border Radius</Label>
-                  <Input
-                    id="border-radius"
-                    value={borderRadius}
-                    onChange={(e) => setBorderRadius(e.target.value)}
-                    placeholder="8px"
-                  />
-                  <p className="text-xs text-muted-foreground">CSS value (e.g. 8px, 0.5rem, 0).</p>
+                  <Label htmlFor="card-border-color">Border Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={cardBorderColor} onChange={(e) => setCardBorderColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="card-border-color" value={cardBorderColor} onChange={(e) => setCardBorderColor(e.target.value)} className="flex-1" />
+                  </div>
                 </div>
-
-                {/* Widget Title */}
                 <div className="space-y-2">
-                  <Label htmlFor="widget-title">Widget Title</Label>
-                  <Input
-                    id="widget-title"
-                    value={widgetTitle}
-                    onChange={(e) => setWidgetTitle(e.target.value)}
-                    placeholder="Leave empty for auto-default"
-                  />
-                  <p className="text-xs text-muted-foreground">Leave empty for auto-default based on widget type.</p>
+                  <Label htmlFor="card-shadow">Shadow</Label>
+                  <Select value={cardShadow} onValueChange={setCardShadow}>
+                    <SelectTrigger id="card-shadow"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {/* CTA Text */}
                 <div className="space-y-2">
-                  <Label htmlFor="cta-text">Button Text</Label>
-                  <Input
-                    id="cta-text"
-                    value={ctaText}
-                    onChange={(e) => setCtaText(e.target.value)}
-                    placeholder="View"
-                  />
-                  <p className="text-xs text-muted-foreground">Call-to-action button text (e.g. View, Shop Now, Add to Cart).</p>
+                  <Label htmlFor="card-padding">Padding</Label>
+                  <Select value={cardPadding} onValueChange={setCardPadding}>
+                    <SelectTrigger id="card-padding"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                {/* Image Aspect Ratio */}
                 <div className="space-y-2">
-                  <Label htmlFor="image-aspect">Image Aspect Ratio</Label>
-                  <Select
-                    value={imageAspect}
-                    onValueChange={(value) => setImageAspect(value as 'square' | 'portrait' | 'landscape')}
-                  >
-                    <SelectTrigger id="image-aspect">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Label htmlFor="card-hover">Hover Effect</Label>
+                  <Select value={cardHover} onValueChange={setCardHover}>
+                    <SelectTrigger id="card-hover"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="lift">Lift</SelectItem>
+                      <SelectItem value="shadow">Shadow</SelectItem>
+                      <SelectItem value="glow">Glow</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Group 5: Product Image */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Image</CardTitle>
+              <CardDescription>Image aspect ratio, fit, and radius</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="image-aspect">Aspect Ratio</Label>
+                  <Select value={imageAspect} onValueChange={setImageAspect}>
+                    <SelectTrigger id="image-aspect"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="square">Square (1:1)</SelectItem>
                       <SelectItem value="portrait">Portrait (3:4)</SelectItem>
@@ -443,21 +601,178 @@ export default function SettingsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
+                <div className="space-y-2">
+                  <Label htmlFor="image-fit">Image Fit</Label>
+                  <Select value={imageFit} onValueChange={setImageFit}>
+                    <SelectTrigger id="image-fit"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cover">Cover</SelectItem>
+                      <SelectItem value="contain">Contain</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image-radius">Border Radius</Label>
+                  <Input id="image-radius" value={imageRadius} onChange={(e) => setImageRadius(e.target.value)} placeholder="8px" />
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Show Price — full width toggle below the grid */}
-              <div className="flex items-center space-x-2">
-                <input
-                  id="show-price"
-                  type="checkbox"
-                  checked={showPrice}
-                  onChange={(e) => setShowPrice(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <Label htmlFor="show-price">Show Price</Label>
+          {/* Group 6: Product Title in Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Title</CardTitle>
+              <CardDescription>Product name text styling in cards</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="product-title-color">Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={productTitleColor} onChange={(e) => setProductTitleColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="product-title-color" value={productTitleColor} onChange={(e) => setProductTitleColor(e.target.value)} className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-title-size">Size</Label>
+                  <Select value={productTitleSize} onValueChange={setProductTitleSize}>
+                    <SelectTrigger id="product-title-size"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="xs">Extra Small</SelectItem>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-title-weight">Weight</Label>
+                  <Select value={productTitleWeight} onValueChange={setProductTitleWeight}>
+                    <SelectTrigger id="product-title-weight"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="normal">Normal</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="semibold">Semibold</SelectItem>
+                      <SelectItem value="bold">Bold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-title-lines">Max Lines (1-3)</Label>
+                  <Input id="product-title-lines" type="number" min={1} max={3} value={productTitleLines} onChange={(e) => setProductTitleLines(parseInt(e.target.value) || 2)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-title-alignment">Alignment</Label>
+                  <Select value={productTitleAlignment} onValueChange={setProductTitleAlignment}>
+                    <SelectTrigger id="product-title-alignment"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="center">Center</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+            </CardContent>
+          </Card>
 
+          {/* Group 7: Price */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Price</CardTitle>
+              <CardDescription>Price visibility, color, and size</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Show Price</Label>
+                  <div className="flex items-center gap-2">
+                    <input id="show-price" type="checkbox" checked={showPrice} onChange={(e) => setShowPrice(e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                    <Label htmlFor="show-price">Display product prices</Label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price-color">Price Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={priceColor} onChange={(e) => setPriceColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="price-color" value={priceColor} onChange={(e) => setPriceColor(e.target.value)} className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price-size">Price Size</Label>
+                  <Select value={priceSize} onValueChange={setPriceSize}>
+                    <SelectTrigger id="price-size"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Group 8: CTA Button */}
+          <Card>
+            <CardHeader>
+              <CardTitle>CTA Button</CardTitle>
+              <CardDescription>Call-to-action button appearance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="button-text">Button Text</Label>
+                  <Input id="button-text" value={buttonText} onChange={(e) => setButtonText(e.target.value)} placeholder="View" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="button-bg-color">Button Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={buttonBgColor} onChange={(e) => setButtonBgColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="button-bg-color" value={buttonBgColor} onChange={(e) => setButtonBgColor(e.target.value)} className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="button-text-color">Text Color</Label>
+                  <div className="flex gap-2">
+                    <Input type="color" value={buttonTextColor} onChange={(e) => setButtonTextColor(e.target.value)} className="w-12 h-9 p-1" />
+                    <Input id="button-text-color" value={buttonTextColor} onChange={(e) => setButtonTextColor(e.target.value)} className="flex-1" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="button-radius">Border Radius</Label>
+                  <Input id="button-radius" value={buttonRadius} onChange={(e) => setButtonRadius(e.target.value)} placeholder="6px" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="button-size">Size</Label>
+                  <Select value={buttonSize} onValueChange={setButtonSize}>
+                    <SelectTrigger id="button-size"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sm">Small</SelectItem>
+                      <SelectItem value="md">Medium</SelectItem>
+                      <SelectItem value="lg">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="button-variant">Variant</Label>
+                  <Select value={buttonVariant} onValueChange={setButtonVariant}>
+                    <SelectTrigger id="button-variant"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="solid">Solid</SelectItem>
+                      <SelectItem value="outline">Outline</SelectItem>
+                      <SelectItem value="ghost">Ghost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Full Width</Label>
+                  <div className="flex items-center gap-2">
+                    <input id="button-full-width" type="checkbox" checked={buttonFullWidth} onChange={(e) => setButtonFullWidth(e.target.checked)} className="h-4 w-4 rounded border-gray-300" />
+                    <Label htmlFor="button-full-width">Stretch button to full card width</Label>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 

@@ -22,7 +22,8 @@ router = APIRouter(
 
 
 # ==========================================
-# Image Aspect Ratio Map — Tailwind classes per aspect ratio option
+# CSS Value Maps — individual Tailwind classes per setting value
+# Replaces the monolithic SIZE_MAP with per-element control.
 # ==========================================
 
 IMAGE_ASPECT_MAP = {
@@ -31,105 +32,136 @@ IMAGE_ASPECT_MAP = {
     "landscape": "aspect-video",     # 16:9
 }
 
+WIDGET_PADDING_MAP = {
+    "none": "",
+    "sm": "p-2",
+    "md": "p-4",
+    "lg": "p-6",
+}
 
-# ==========================================
-# Size Map — proportional CSS classes per size tier
-# ==========================================
+TITLE_SIZE_MAP = {
+    "sm": "text-base",
+    "md": "text-xl",
+    "lg": "text-2xl",
+    "xl": "text-3xl",
+}
 
-SIZE_MAP = {
-    "compact": {
-        "title_text": "text-xs",
-        "price_text": "text-sm",
-        "card_padding": "p-2",
-        "button_padding": "px-2 py-1",
-        "button_text": "text-xs",
-        "grid_gap": "gap-2",
-        "heading_text": "text-base",
-        "heading_margin": "mb-2",
-        "container_padding": "p-2",
-        "shadow": "shadow-sm hover:shadow-md",
-        "carousel_card_width": "w-48",
-        "carousel_gap": "space-x-2",
-    },
-    "default": {
-        "title_text": "text-sm",
-        "price_text": "text-lg",
-        "card_padding": "p-4",
-        "button_padding": "px-4 py-2",
-        "button_text": "text-sm",
-        "grid_gap": "gap-4",
-        "heading_text": "text-xl",
-        "heading_margin": "mb-4",
-        "container_padding": "p-4",
-        "shadow": "shadow-md hover:shadow-lg",
-        "carousel_card_width": "w-64",
-        "carousel_gap": "space-x-4",
-    },
-    "spacious": {
-        "title_text": "text-base",
-        "price_text": "text-xl",
-        "card_padding": "p-6",
-        "button_padding": "px-6 py-3",
-        "button_text": "text-base",
-        "grid_gap": "gap-6",
-        "heading_text": "text-2xl",
-        "heading_margin": "mb-6",
-        "container_padding": "p-6",
-        "shadow": "shadow-lg hover:shadow-xl",
-        "carousel_card_width": "w-80",
-        "carousel_gap": "space-x-6",
-    },
+GAP_MAP = {
+    "sm": "gap-2",
+    "md": "gap-4",
+    "lg": "gap-6",
+}
+
+CARD_SHADOW_MAP = {
+    "none": "",
+    "sm": "shadow-sm",
+    "md": "shadow-md",
+    "lg": "shadow-lg",
+}
+
+CARD_PADDING_MAP = {
+    "sm": "p-2",
+    "md": "p-4",
+    "lg": "p-6",
+}
+
+CARD_HOVER_MAP = {
+    "none": "",
+    "lift": "hover:-translate-y-1",
+    "shadow": "hover:shadow-xl",
+    "glow": "hover:shadow-lg hover:shadow-blue-200/50",
+}
+
+PRODUCT_TITLE_SIZE_MAP = {
+    "xs": "text-xs",
+    "sm": "text-sm",
+    "md": "text-base",
+    "lg": "text-lg",
+}
+
+PRODUCT_TITLE_WEIGHT_MAP = {
+    "normal": "font-normal",
+    "medium": "font-medium",
+    "semibold": "font-semibold",
+    "bold": "font-bold",
+}
+
+PRICE_SIZE_MAP = {
+    "sm": "text-sm",
+    "md": "text-lg",
+    "lg": "text-xl",
+}
+
+BUTTON_SIZE_MAP = {
+    "sm": {"padding": "px-2 py-1", "text": "text-xs"},
+    "md": {"padding": "px-4 py-2", "text": "text-sm"},
+    "lg": {"padding": "px-6 py-3", "text": "text-base"},
+}
+
+# Carousel card width — scales with column count (higher columns = narrower cards)
+CAROUSEL_WIDTH_MAP = {
+    2: "w-48",
+    3: "w-56",
+    4: "w-64",
+    5: "w-72",
+    6: "w-80",
 }
 
 
 # ==========================================
 # Hardcoded Visual Defaults — single source of truth
+# URL param name = DB column name (no mapping table needed).
 # ==========================================
 
 VISUAL_DEFAULTS = {
-    "style": "card",
-    "columns": 4,
-    "size": "default",
-    "primary_color": "#3B82F6",
-    "text_color": "#1F2937",
-    "bg_color": "#FFFFFF",
-    "border_radius": "8px",
-    "cta_text": "View",
-    "show_price": True,
-    "image_aspect": "square",
+    # Group 1: Widget Container
+    "widget_bg_color": "#FFFFFF",
+    "widget_padding": "md",
+    # Group 2: Widget Title
     "widget_title": "",
-}
-
-# Maps URL param names to DB column names on RecommendationSettings
-_URL_TO_DB_MAP = {
-    "style": "widget_style",
-    "columns": "widget_columns",
-    "size": "widget_size",
-    "primary_color": "primary_color",
-    "text_color": "text_color",
-    "bg_color": "bg_color",
-    "border_radius": "border_radius",
-    "cta_text": "cta_text",
-    "show_price": "show_price",
-    "image_aspect": "image_aspect",
-    "widget_title": "widget_title",
+    "title_color": "#111827",
+    "title_size": "lg",
+    "title_alignment": "left",
+    # Group 3: Layout
+    "widget_style": "grid",
+    "widget_columns": 4,
+    "gap": "md",
+    # Group 4: Product Card
+    "card_bg_color": "#FFFFFF",
+    "card_border_radius": "8px",
+    "card_border_width": "0",
+    "card_border_color": "#E5E7EB",
+    "card_shadow": "md",
+    "card_padding": "md",
+    "card_hover": "lift",
+    # Group 5: Product Image
+    "image_aspect": "square",
+    "image_fit": "cover",
+    "image_radius": "8px",
+    # Group 6: Product Title in Card
+    "product_title_color": "#1F2937",
+    "product_title_size": "sm",
+    "product_title_weight": "semibold",
+    "product_title_lines": 2,
+    "product_title_alignment": "left",
+    # Group 7: Price
+    "show_price": True,
+    "price_color": "#111827",
+    "price_size": "md",
+    # Group 8: CTA Button
+    "button_text": "View",
+    "button_bg_color": "#3B82F6",
+    "button_text_color": "#FFFFFF",
+    "button_radius": "6px",
+    "button_size": "md",
+    "button_variant": "solid",
+    "button_full_width": False,
 }
 
 
 def apply_visual_defaults(
-    settings: Optional[RecommendationSettings],
-    *,
-    style: str,
-    columns: int,
-    size: str,
-    primary_color: str,
-    text_color: str,
-    bg_color: str,
-    border_radius: str,
-    cta_text: str,
-    show_price: bool,
-    image_aspect: str,
-    widget_title: str,
+    settings,
+    **url_params,
 ) -> Dict[str, any]:
     """
     Apply the fallback chain: URL param (explicit) → DB brand defaults → hardcoded defaults.
@@ -139,33 +171,24 @@ def apply_visual_defaults(
     - URL value == hardcoded default AND DB has value → use DB value
     - URL value == hardcoded default AND DB is None → keep hardcoded default
 
-    Returns a dict with resolved values keyed by URL param names.
+    URL param name = DB column name (no mapping table needed).
+    Returns a dict with resolved values keyed by setting names.
     """
-    url_values = {
-        "style": style,
-        "columns": columns,
-        "size": size,
-        "primary_color": primary_color,
-        "text_color": text_color,
-        "bg_color": bg_color,
-        "border_radius": border_radius,
-        "cta_text": cta_text,
-        "show_price": show_price,
-        "image_aspect": image_aspect,
-        "widget_title": widget_title,
-    }
-
     resolved = {}
-    for param_name, url_val in url_values.items():
-        hardcoded = VISUAL_DEFAULTS[param_name]
-        db_col = _URL_TO_DB_MAP[param_name]
+    for param_name, url_val in url_params.items():
+        hardcoded = VISUAL_DEFAULTS.get(param_name)
+
+        # Unknown param — skip (safety guard)
+        if hardcoded is None:
+            resolved[param_name] = url_val
+            continue
 
         if url_val != hardcoded:
             # URL value differs from hardcoded → user explicitly set it → use URL value
             resolved[param_name] = url_val
-        elif settings is not None and getattr(settings, db_col, None) is not None:
+        elif settings is not None and getattr(settings, param_name, None) is not None:
             # URL value matches hardcoded AND DB has a saved value → use DB value
-            resolved[param_name] = getattr(settings, db_col)
+            resolved[param_name] = getattr(settings, param_name)
         else:
             # URL value matches hardcoded AND DB is None → keep hardcoded default
             resolved[param_name] = hardcoded
@@ -246,18 +269,49 @@ async def get_bestsellers_component(
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
     method: str = Query("volume", description="Bestseller calculation method: volume, value, or balanced"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("0", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("md", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -283,10 +337,20 @@ async def get_bestsellers_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            settings,
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            widget_title=widget_title, title_color=title_color, title_size=title_size, title_alignment=title_alignment,
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius, card_border_width=card_border_width,
+            card_border_color=card_border_color, card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            button_text=button_text, button_bg_color=button_bg_color, button_text_color=button_text_color,
+            button_radius=button_radius, button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, session)
@@ -311,23 +375,8 @@ async def get_bestsellers_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs,
-            style=vis["style"],
-            device=device,
-            columns=vis["columns"],
-            size=vis["size"],
-            colors={
-                "primary": vis["primary_color"],
-                "text": vis["text_color"],
-                "bg": vis["bg_color"],
-            },
-            border_radius=vis["border_radius"],
-            rec_type="bestseller",
-            shop_urls=shop_urls,
-            widget_title=vis["widget_title"],
-            cta_text=vis["cta_text"],
-            show_price=vis["show_price"],
-            image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="bestseller", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -344,18 +393,49 @@ async def get_cross_sell_component(
     product_id: str = Query(..., description="Product ID for cross-sell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
     lookback_days: int = Query(30, description="Number of days to look back for order data"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("0", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("md", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -381,10 +461,20 @@ async def get_cross_sell_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            settings,
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            widget_title=widget_title, title_color=title_color, title_size=title_size, title_alignment=title_alignment,
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius, card_border_width=card_border_width,
+            card_border_color=card_border_color, card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            button_text=button_text, button_bg_color=button_bg_color, button_text_color=button_text_color,
+            button_radius=button_radius, button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, session)
@@ -408,23 +498,8 @@ async def get_cross_sell_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs,
-            style=vis["style"],
-            device=device,
-            columns=vis["columns"],
-            size=vis["size"],
-            colors={
-                "primary": vis["primary_color"],
-                "text": vis["text_color"],
-                "bg": vis["bg_color"],
-            },
-            border_radius=vis["border_radius"],
-            rec_type="cross-sell",
-            shop_urls=shop_urls,
-            widget_title=vis["widget_title"],
-            cta_text=vis["cta_text"],
-            show_price=vis["show_price"],
-            image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="cross-sell", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -441,18 +516,49 @@ async def get_upsell_component(
     product_id: str = Query(..., description="Product ID for upsell recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
     min_price_increase_percent: int = Query(10, description="Minimum price increase percentage for upsell candidates"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("0", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("md", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -478,10 +584,20 @@ async def get_upsell_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            settings,
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            widget_title=widget_title, title_color=title_color, title_size=title_size, title_alignment=title_alignment,
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius, card_border_width=card_border_width,
+            card_border_color=card_border_color, card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            button_text=button_text, button_bg_color=button_bg_color, button_text_color=button_text_color,
+            button_radius=button_radius, button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, session)
@@ -505,23 +621,8 @@ async def get_upsell_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs,
-            style=vis["style"],
-            device=device,
-            columns=vis["columns"],
-            size=vis["size"],
-            colors={
-                "primary": vis["primary_color"],
-                "text": vis["text_color"],
-                "bg": vis["bg_color"],
-            },
-            border_radius=vis["border_radius"],
-            rec_type="upsell",
-            shop_urls=shop_urls,
-            widget_title=vis["widget_title"],
-            cta_text=vis["cta_text"],
-            show_price=vis["show_price"],
-            image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="upsell", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -537,18 +638,49 @@ async def get_similar_component(
     connection_id: int = Query(..., description="Connection ID to use for recommendations"),
     product_id: str = Query(..., description="Product ID for similar product recommendations"),
     top: int = Query(4, description="Number of recommendations to show"),
-    style: str = Query("card", description="Component style: card, carousel"),
     device: str = Query("desktop", description="Target device: desktop, mobile"),
-    columns: int = Query(4, description="Max columns at full width (2–6)"),
-    size: str = Query("default", description="Visual density: compact, default, spacious"),
-    primary_color: str = Query("#3B82F6", description="Primary color hex"),
-    text_color: str = Query("#1F2937", description="Text color hex"),
-    bg_color: str = Query("#FFFFFF", description="Background color hex"),
-    border_radius: str = Query("8px", description="Border radius"),
+    # Group 1: Widget Container
+    widget_bg_color: str = Query("#FFFFFF", description="Widget background color hex"),
+    widget_padding: str = Query("md", description="Widget padding: none, sm, md, lg"),
+    # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
-    cta_text: str = Query("View", description="Call-to-action button text"),
-    show_price: bool = Query(True, description="Show product price"),
+    title_color: str = Query("#111827", description="Widget title color hex"),
+    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_alignment: str = Query("left", description="Widget title alignment: left, center"),
+    # Group 3: Layout
+    widget_style: str = Query("grid", description="Layout style: grid, carousel"),
+    widget_columns: int = Query(4, description="Max columns at full width (2-6)"),
+    gap: str = Query("md", description="Gap between cards: sm, md, lg"),
+    # Group 4: Product Card
+    card_bg_color: str = Query("#FFFFFF", description="Card background color hex"),
+    card_border_radius: str = Query("8px", description="Card border radius CSS"),
+    card_border_width: str = Query("0", description="Card border width: 0, 1, 2"),
+    card_border_color: str = Query("#E5E7EB", description="Card border color hex"),
+    card_shadow: str = Query("md", description="Card shadow: none, sm, md, lg"),
+    card_padding: str = Query("md", description="Card content padding: sm, md, lg"),
+    card_hover: str = Query("lift", description="Card hover effect: none, lift, shadow, glow"),
+    # Group 5: Product Image
     image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
+    image_fit: str = Query("cover", description="Image fit: cover, contain"),
+    image_radius: str = Query("8px", description="Image border radius CSS"),
+    # Group 6: Product Title in Card
+    product_title_color: str = Query("#1F2937", description="Product title color hex"),
+    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
+    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
+    product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
+    # Group 7: Price
+    show_price: bool = Query(True, description="Show product price"),
+    price_color: str = Query("#111827", description="Price text color hex"),
+    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    # Group 8: CTA Button
+    button_text: str = Query("View", description="CTA button text"),
+    button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
+    button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
+    button_radius: str = Query("6px", description="Button border radius CSS"),
+    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
+    button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -574,10 +706,20 @@ async def get_similar_component(
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
         vis = apply_visual_defaults(
-            settings, style=style, columns=columns, size=size,
-            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
-            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
-            image_aspect=image_aspect, widget_title=widget_title,
+            settings,
+            widget_bg_color=widget_bg_color, widget_padding=widget_padding,
+            widget_title=widget_title, title_color=title_color, title_size=title_size, title_alignment=title_alignment,
+            widget_style=widget_style, widget_columns=widget_columns, gap=gap,
+            card_bg_color=card_bg_color, card_border_radius=card_border_radius, card_border_width=card_border_width,
+            card_border_color=card_border_color, card_shadow=card_shadow, card_padding=card_padding, card_hover=card_hover,
+            image_aspect=image_aspect, image_fit=image_fit, image_radius=image_radius,
+            product_title_color=product_title_color, product_title_size=product_title_size,
+            product_title_weight=product_title_weight, product_title_lines=product_title_lines,
+            product_title_alignment=product_title_alignment,
+            show_price=show_price, price_color=price_color, price_size=price_size,
+            button_text=button_text, button_bg_color=button_bg_color, button_text_color=button_text_color,
+            button_radius=button_radius, button_size=button_size, button_variant=button_variant,
+            button_full_width=button_full_width,
         )
 
         adapter = get_adapter(connection, session)
@@ -601,23 +743,8 @@ async def get_similar_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs,
-            style=vis["style"],
-            device=device,
-            columns=vis["columns"],
-            size=vis["size"],
-            colors={
-                "primary": vis["primary_color"],
-                "text": vis["text_color"],
-                "bg": vis["bg_color"],
-            },
-            border_radius=vis["border_radius"],
-            rec_type="similar",
-            shop_urls=shop_urls,
-            widget_title=vis["widget_title"],
-            cta_text=vis["cta_text"],
-            show_price=vis["show_price"],
-            image_aspect=vis["image_aspect"],
+            recommendations=recs, vis=vis, device=device,
+            rec_type="similar", shop_urls=shop_urls,
         )
 
         return HTMLResponse(content=html)
@@ -630,31 +757,30 @@ async def get_similar_component(
 
 def generate_recommendation_html(
     recommendations: List[Dict],
-    style: str,
+    vis: Dict[str, any],
     device: str,
-    columns: int,
-    size: str,
-    colors: Dict[str, str],
-    border_radius: str,
     rec_type: str,
     shop_urls: Dict[str, str],
-    widget_title: str = "",
-    cta_text: str = "View",
-    show_price: bool = True,
-    image_aspect: str = "square",
 ) -> str:
-    """Generate HTML component with embedded Tailwind CSS"""
+    """
+    Generate HTML component with embedded Tailwind CSS.
+
+    This function receives a resolved `vis` dict (output of apply_visual_defaults)
+    containing all 35 visual settings. Individual CSS classes are looked up from
+    the per-element CSS value maps defined above.
+    """
 
     # Empty results → return hidden empty div (nothing visible on the storefront)
     if not recommendations:
         return "<div style='display:none'></div>"
 
-    # Server-side validation: clamp columns to 2–6, fallback size to "default"
-    columns = max(2, min(6, columns))
-    if size not in SIZE_MAP:
-        size = "default"
+    # Server-side validation: clamp columns to 2–6
+    columns = max(2, min(6, vis["widget_columns"]))
 
-    sm = SIZE_MAP[size]
+    # Backward compat: treat legacy "card" style as "grid"
+    style = vis["widget_style"]
+    if style == "card":
+        style = "grid"
 
     # Widget title: use custom title if provided, otherwise auto-default by rec_type
     title_map = {
@@ -663,23 +789,30 @@ def generate_recommendation_html(
         "upsell": "You might like these too",
         "similar": "You may also like"
     }
+    title = vis["widget_title"] if vis["widget_title"] else title_map.get(rec_type, "Recommended for you")
 
-    title = widget_title if widget_title else title_map.get(rec_type, "Recommended for you")
+    # Resolve CSS classes from maps (with safe fallbacks)
+    widget_padding_class = WIDGET_PADDING_MAP.get(vis["widget_padding"], WIDGET_PADDING_MAP["md"])
+    title_size_class = TITLE_SIZE_MAP.get(vis["title_size"], TITLE_SIZE_MAP["lg"])
+    title_align = "text-center" if vis["title_alignment"] == "center" else "text-left"
+    gap_class = GAP_MAP.get(vis["gap"], GAP_MAP["md"])
+    aspect_class = IMAGE_ASPECT_MAP.get(vis["image_aspect"], IMAGE_ASPECT_MAP["square"])
 
-    # Image aspect ratio: validate against known values, fallback to "square"
-    aspect_class = IMAGE_ASPECT_MAP.get(image_aspect, IMAGE_ASPECT_MAP["square"])
+    # Product title line clamp: clamp value to 1-3
+    product_title_lines = max(1, min(3, vis["product_title_lines"]))
 
     # Responsive grid: 1 col mobile → 2 col tablet → N col desktop
     col_class = f"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-{columns}"
 
     # Generate product cards based on style
     if style == "carousel":
-        cards_html = generate_carousel_cards(recommendations, colors, border_radius, shop_urls, sm, cta_text, show_price, aspect_class)
-        container_class = f"flex overflow-x-auto {sm['carousel_gap']} pb-4 scrollbar-hide"
+        cards_html = generate_carousel_cards(recommendations, vis, shop_urls, aspect_class, columns)
+        carousel_gap = GAP_MAP.get(vis["gap"], GAP_MAP["md"]).replace("gap-", "space-x-")
+        container_class = f"flex overflow-x-auto {carousel_gap} pb-4 scrollbar-hide"
     else:
-        # "card" or any other value — responsive grid
-        cards_html = generate_grid_cards(recommendations, colors, border_radius, shop_urls, sm, cta_text, show_price, aspect_class)
-        container_class = f"{col_class} {sm['grid_gap']}"
+        # "grid" or any other value — responsive grid
+        cards_html = generate_grid_cards(recommendations, vis, shop_urls, aspect_class)
+        container_class = f"{col_class} {gap_class}"
 
     html = f"""
     <!DOCTYPE html>
@@ -689,9 +822,9 @@ def generate_recommendation_html(
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
-            .line-clamp-2 {{
+            .line-clamp-custom {{
                 display: -webkit-box;
-                -webkit-line-clamp: 2;
+                -webkit-line-clamp: {product_title_lines};
                 -webkit-box-orient: vertical;
                 overflow: hidden;
             }}
@@ -704,9 +837,9 @@ def generate_recommendation_html(
             }}
         </style>
     </head>
-    <body style="background-color: {colors['bg']};">
-        <div class="w-full max-w-7xl mx-auto {sm['container_padding']}">
-            <h3 class="{sm['heading_text']} font-bold {sm['heading_margin']}" style="color: {colors['text']}">{title}</h3>
+    <body style="background-color: {vis['widget_bg_color']}; margin: 0;">
+        <div class="w-full max-w-7xl mx-auto {widget_padding_class}">
+            <h3 class="{title_size_class} font-bold mb-4 {title_align}" style="color: {vis['title_color']}">{title}</h3>
             <div class="{container_class}">
                 {cards_html}
             </div>
@@ -765,9 +898,57 @@ def _build_product_url(shop_urls: Dict[str, str], handle: str, product_id: str) 
     return "#"
 
 
-def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], border_radius: str, shop_urls: Dict[str, str], sm: Dict, cta_text: str, show_price: bool, aspect_class: str) -> str:
-    """Generate responsive grid product cards using size map."""
+def _build_button_html(vis: Dict[str, any], product_id: str, position, handle: str, product_url: str) -> str:
+    """
+    Build CTA button HTML with variant support (solid/outline/ghost).
+
+    Variants:
+    - solid: filled background, white text (default)
+    - outline: transparent bg, colored border + text
+    - ghost: transparent bg, colored text, no border
+    """
+    btn_size = BUTTON_SIZE_MAP.get(vis["button_size"], BUTTON_SIZE_MAP["md"])
+    width_class = "w-full" if vis["button_full_width"] else ""
+    variant = vis["button_variant"]
+
+    # Variant-specific inline styles
+    if variant == "outline":
+        style = f"color: {vis['button_bg_color']}; border: 2px solid {vis['button_bg_color']}; background: transparent; border-radius: {vis['button_radius']}"
+    elif variant == "ghost":
+        style = f"color: {vis['button_bg_color']}; background: transparent; border: none; border-radius: {vis['button_radius']}"
+    else:
+        # solid (default)
+        style = f"background-color: {vis['button_bg_color']}; color: {vis['button_text_color']}; border-radius: {vis['button_radius']}"
+
+    return f"""
+                    <button data-rec-click
+                            data-product-id="{product_id}"
+                            data-position="{position}"
+                            data-handle="{handle}"
+                            data-product-url="{product_url}"
+                            class="{btn_size['padding']} {btn_size['text']} {width_class} font-medium hover:opacity-90 transition-opacity"
+                            style="{style}">
+                        {vis['button_text']}
+                    </button>"""
+
+
+def generate_grid_cards(recommendations: List[Dict], vis: Dict[str, any], shop_urls: Dict[str, str], aspect_class: str) -> str:
+    """Generate responsive grid product cards using individual visual settings."""
     cards = []
+
+    # Resolve CSS classes from vis dict
+    shadow_class = CARD_SHADOW_MAP.get(vis["card_shadow"], CARD_SHADOW_MAP["md"])
+    padding_class = CARD_PADDING_MAP.get(vis["card_padding"], CARD_PADDING_MAP["md"])
+    hover_class = CARD_HOVER_MAP.get(vis["card_hover"], CARD_HOVER_MAP["lift"])
+    title_size_class = PRODUCT_TITLE_SIZE_MAP.get(vis["product_title_size"], PRODUCT_TITLE_SIZE_MAP["sm"])
+    title_weight_class = PRODUCT_TITLE_WEIGHT_MAP.get(vis["product_title_weight"], PRODUCT_TITLE_WEIGHT_MAP["semibold"])
+    title_align = "text-center" if vis["product_title_alignment"] == "center" else "text-left"
+    price_size_class = PRICE_SIZE_MAP.get(vis["price_size"], PRICE_SIZE_MAP["md"])
+
+    # Card border: only add border style if width > 0
+    border_style = ""
+    if vis["card_border_width"] != "0":
+        border_style = f"border: {vis['card_border_width']}px solid {vis['card_border_color']};"
 
     for rec in recommendations:
         # Handle different data structures from engine
@@ -780,34 +961,40 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
 
         product_url = _build_product_url(shop_urls, handle, product_id)
 
-        # Conditionally render price span — uses text color (not primary) to differentiate from CTA button
-        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["text"]}">${float(price):.2f}</span>' if show_price else ''
+        # Conditionally render price span
+        price_html = f'<span class="font-bold {price_size_class}" style="color: {vis["price_color"]}">${float(price):.2f}</span>' if vis["show_price"] else ''
 
-        card = f"""
-        <div class="w-full flex flex-col bg-white rounded-lg {sm['shadow']} transition-all duration-300 transform hover:-translate-y-1"
-             style="border-radius: {border_radius}; background-color: {colors['bg']}">
-            <div class="{aspect_class} bg-gray-100 rounded-t-lg overflow-hidden">
-                <img src="{image_url or 'https://via.placeholder.com/300x300?text=No+Image'}"
-                     alt="{title}"
-                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                     loading="lazy">
-            </div>
-            <div class="{sm['card_padding']} flex flex-col flex-1">
-                <h4 class="font-semibold {sm['title_text']} mb-2 line-clamp-2" style="color: {colors['text']}">
-                    {title}
-                </h4>
+        # Build button HTML with variant support
+        button_html = _build_button_html(vis, product_id, position, handle, product_url)
+
+        # Button container: if full width, stack vertically; otherwise flex row
+        if vis["button_full_width"]:
+            footer_html = f"""
+                <div class="mt-auto">
+                    {price_html}
+                    {button_html}
+                </div>"""
+        else:
+            footer_html = f"""
                 <div class="flex items-center justify-between mt-auto">
                     {price_html}
-                    <button data-rec-click
-                            data-product-id="{product_id}"
-                            data-position="{position}"
-                            data-handle="{handle}"
-                            data-product-url="{product_url}"
-                            class="{sm['button_padding']} rounded-md text-white {sm['button_text']} font-medium hover:opacity-90 transition-opacity"
-                            style="background-color: {colors['primary']}">
-                        {cta_text}
-                    </button>
-                </div>
+                    {button_html}
+                </div>"""
+
+        card = f"""
+        <div class="w-full flex flex-col {shadow_class} {hover_class} transition-all duration-300 transform overflow-hidden"
+             style="border-radius: {vis['card_border_radius']}; background-color: {vis['card_bg_color']}; {border_style}">
+            <div class="{aspect_class} bg-gray-100 overflow-hidden" style="border-radius: {vis['image_radius']} {vis['image_radius']} 0 0;">
+                <img src="{image_url or 'https://via.placeholder.com/300x300?text=No+Image'}"
+                     alt="{title}"
+                     class="w-full h-full object-{vis['image_fit']} hover:scale-105 transition-transform duration-300"
+                     loading="lazy">
+            </div>
+            <div class="{padding_class} flex flex-col flex-1">
+                <h4 class="{title_weight_class} {title_size_class} {title_align} mb-2 line-clamp-custom" style="color: {vis['product_title_color']}">
+                    {title}
+                </h4>
+                {footer_html}
             </div>
         </div>
         """
@@ -816,9 +1003,23 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
     return ''.join(cards)
 
 
-def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str], border_radius: str, shop_urls: Dict[str, str], sm: Dict, cta_text: str, show_price: bool, aspect_class: str) -> str:
-    """Generate carousel product cards using size map."""
+def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], shop_urls: Dict[str, str], aspect_class: str, columns: int) -> str:
+    """Generate carousel product cards using individual visual settings."""
     cards = []
+
+    # Resolve CSS classes from vis dict
+    shadow_class = CARD_SHADOW_MAP.get(vis["card_shadow"], CARD_SHADOW_MAP["md"])
+    padding_class = CARD_PADDING_MAP.get(vis["card_padding"], CARD_PADDING_MAP["md"])
+    title_size_class = PRODUCT_TITLE_SIZE_MAP.get(vis["product_title_size"], PRODUCT_TITLE_SIZE_MAP["sm"])
+    title_weight_class = PRODUCT_TITLE_WEIGHT_MAP.get(vis["product_title_weight"], PRODUCT_TITLE_WEIGHT_MAP["semibold"])
+    title_align = "text-center" if vis["product_title_alignment"] == "center" else "text-left"
+    price_size_class = PRICE_SIZE_MAP.get(vis["price_size"], PRICE_SIZE_MAP["md"])
+    carousel_width = CAROUSEL_WIDTH_MAP.get(columns, CAROUSEL_WIDTH_MAP[4])
+
+    # Card border: only add border style if width > 0
+    border_style = ""
+    if vis["card_border_width"] != "0":
+        border_style = f"border: {vis['card_border_width']}px solid {vis['card_border_color']};"
 
     for rec in recommendations:
         product_id = rec.get('id') or rec.get('product_id', '')
@@ -830,33 +1031,39 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
 
         product_url = _build_product_url(shop_urls, handle, product_id)
 
-        # Conditionally render price span — uses text color (not primary) to differentiate from CTA button
-        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["text"]}">${float(price):.2f}</span>' if show_price else ''
+        # Conditionally render price span
+        price_html = f'<span class="font-bold {price_size_class}" style="color: {vis["price_color"]}">${float(price):.2f}</span>' if vis["show_price"] else ''
 
-        card = f"""
-        <div class="flex-none {sm['carousel_card_width']} flex flex-col bg-white rounded-lg {sm['shadow']} transition-all duration-300"
-             style="border-radius: {border_radius}; background-color: {colors['bg']}">
-            <div class="{aspect_class} bg-gray-100 rounded-t-lg overflow-hidden">
-                <img src="{image_url or 'https://via.placeholder.com/250x250?text=No+Image'}"
-                     alt="{title}"
-                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
-            </div>
-            <div class="{sm['card_padding']} flex flex-col flex-1">
-                <h4 class="font-medium {sm['title_text']} mb-2 line-clamp-2" style="color: {colors['text']}">
-                    {title}
-                </h4>
+        # Build button HTML with variant support
+        button_html = _build_button_html(vis, product_id, position, handle, product_url)
+
+        # Button container: if full width, stack vertically; otherwise flex row
+        if vis["button_full_width"]:
+            footer_html = f"""
+                <div class="mt-auto">
+                    {price_html}
+                    {button_html}
+                </div>"""
+        else:
+            footer_html = f"""
                 <div class="flex items-center justify-between mt-auto">
                     {price_html}
-                    <button data-rec-click
-                            data-product-id="{product_id}"
-                            data-position="{position}"
-                            data-handle="{handle}"
-                            data-product-url="{product_url}"
-                            class="{sm['button_padding']} rounded text-white {sm['button_text']} font-medium hover:opacity-90"
-                            style="background-color: {colors['primary']}">
-                        {cta_text}
-                    </button>
-                </div>
+                    {button_html}
+                </div>"""
+
+        card = f"""
+        <div class="flex-none {carousel_width} flex flex-col {shadow_class} transition-all duration-300 overflow-hidden"
+             style="border-radius: {vis['card_border_radius']}; background-color: {vis['card_bg_color']}; {border_style}">
+            <div class="{aspect_class} bg-gray-100 overflow-hidden" style="border-radius: {vis['image_radius']} {vis['image_radius']} 0 0;">
+                <img src="{image_url or 'https://via.placeholder.com/250x250?text=No+Image'}"
+                     alt="{title}"
+                     class="w-full h-full object-{vis['image_fit']} hover:scale-105 transition-transform duration-300">
+            </div>
+            <div class="{padding_class} flex flex-col flex-1">
+                <h4 class="{title_weight_class} {title_size_class} {title_align} mb-2 line-clamp-custom" style="color: {vis['product_title_color']}">
+                    {title}
+                </h4>
+                {footer_html}
             </div>
         </div>
         """

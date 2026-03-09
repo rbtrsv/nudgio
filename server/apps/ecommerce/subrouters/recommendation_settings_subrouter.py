@@ -78,18 +78,48 @@ async def create_or_update_settings(
                 min_price_increase_percent=payload.min_price_increase_percent,
                 shop_base_url=payload.shop_base_url,
                 product_url_template=payload.product_url_template,
-                # Brand identity defaults
+                # Group 1: Widget Container
+                widget_bg_color=payload.widget_bg_color,
+                widget_padding=payload.widget_padding,
+                # Group 2: Widget Title
+                widget_title=payload.widget_title,
+                title_color=payload.title_color,
+                title_size=payload.title_size,
+                title_alignment=payload.title_alignment,
+                # Group 3: Layout
                 widget_style=payload.widget_style,
                 widget_columns=payload.widget_columns,
-                widget_size=payload.widget_size,
-                primary_color=payload.primary_color,
-                text_color=payload.text_color,
-                bg_color=payload.bg_color,
-                border_radius=payload.border_radius,
-                cta_text=payload.cta_text,
-                show_price=payload.show_price,
+                gap=payload.gap,
+                # Group 4: Product Card
+                card_bg_color=payload.card_bg_color,
+                card_border_radius=payload.card_border_radius,
+                card_border_width=payload.card_border_width,
+                card_border_color=payload.card_border_color,
+                card_shadow=payload.card_shadow,
+                card_padding=payload.card_padding,
+                card_hover=payload.card_hover,
+                # Group 5: Product Image
                 image_aspect=payload.image_aspect,
-                widget_title=payload.widget_title,
+                image_fit=payload.image_fit,
+                image_radius=payload.image_radius,
+                # Group 6: Product Title in Card
+                product_title_color=payload.product_title_color,
+                product_title_size=payload.product_title_size,
+                product_title_weight=payload.product_title_weight,
+                product_title_lines=payload.product_title_lines,
+                product_title_alignment=payload.product_title_alignment,
+                # Group 7: Price
+                show_price=payload.show_price,
+                price_color=payload.price_color,
+                price_size=payload.price_size,
+                # Group 8: CTA Button
+                button_text=payload.button_text,
+                button_bg_color=payload.button_bg_color,
+                button_text_color=payload.button_text_color,
+                button_radius=payload.button_radius,
+                button_size=payload.button_size,
+                button_variant=payload.button_variant,
+                button_full_width=payload.button_full_width,
             )
             db.add(new_settings)
             await db.commit()

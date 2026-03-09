@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connections';
 import { useRecommendations } from '@/modules/ecommerce/hooks/use-recommendations';
+import { getProducts, type DataProduct } from '@/modules/ecommerce/service/data.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
 import { Button } from '@/modules/shadcnui/components/ui/button';
 import { Input } from '@/modules/shadcnui/components/ui/input';
@@ -34,6 +35,38 @@ export default function RecommendationsPage() {
   const [lookbackDays, setLookbackDays] = useState(30);
   const [method, setMethod] = useState<'volume' | 'value' | 'balanced'>('volume');
   const [minPriceIncrease, setMinPriceIncrease] = useState(10);
+
+  // Active tab state (for conditional product fetching)
+  const [activeTab, setActiveTab] = useState('bestsellers');
+
+  // Product dropdown state (for cross-sell, upsell, similar tabs)
+  const [products, setProducts] = useState<DataProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsFetched, setProductsFetched] = useState(false);
+
+  const needsProductId = activeTab !== 'bestsellers';
+
+  // Fetch products when a non-bestseller tab is selected and connection is active
+  useEffect(() => {
+    if (!needsProductId || !activeConnectionId || productsFetched) return;
+
+    const fetchProductList = async () => {
+      setProductsLoading(true);
+      const response = await getProducts(activeConnectionId);
+      setProducts(response.products);
+      setProductsFetched(true);
+      setProductsLoading(false);
+    };
+
+    fetchProductList();
+  }, [needsProductId, activeConnectionId, productsFetched]);
+
+  // Reset fetched state when connection changes (need to re-fetch for new connection)
+  useEffect(() => {
+    setProductsFetched(false);
+    setProducts([]);
+    setProductId('');
+  }, [activeConnectionId]);
 
   const handleFetch = async (type: string) => {
     if (!activeConnectionId) return;
@@ -104,6 +137,9 @@ export default function RecommendationsPage() {
               onValueChange={(value) => {
                 setActiveConnection(parseInt(value));
                 clearResult();
+                setProductId('');
+                setProductsFetched(false);
+                setProducts([]);
               }}
             >
               <SelectTrigger className="w-full sm:w-80">
@@ -129,7 +165,7 @@ export default function RecommendationsPage() {
 
       {/* Recommendation Type Tabs */}
       {activeConnectionId && (
-        <Tabs defaultValue="bestsellers" onValueChange={() => clearResult()}>
+        <Tabs defaultValue="bestsellers" onValueChange={(tab) => { setActiveTab(tab); clearResult(); }}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="bestsellers">Bestsellers</TabsTrigger>
             <TabsTrigger value="cross-sell">Cross-Sell</TabsTrigger>
@@ -183,8 +219,19 @@ export default function RecommendationsPage() {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
-                    <Label>Product ID</Label>
-                    <Input value={productId} onChange={(e) => setProductId(e.target.value)} placeholder="Enter product ID" />
+                    <Label>Product</Label>
+                    <Select value={productId} onValueChange={(v) => setProductId(v)} disabled={productsLoading}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={productsLoading ? 'Loading products...' : 'Select a product'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {products.map((p) => (
+                          <SelectItem key={p.product_id} value={p.product_id}>
+                            {p.title} (#{p.product_id})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Limit</Label>
@@ -212,8 +259,19 @@ export default function RecommendationsPage() {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="space-y-2">
-                    <Label>Product ID</Label>
-                    <Input value={productId} onChange={(e) => setProductId(e.target.value)} placeholder="Enter product ID" />
+                    <Label>Product</Label>
+                    <Select value={productId} onValueChange={(v) => setProductId(v)} disabled={productsLoading}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={productsLoading ? 'Loading products...' : 'Select a product'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {products.map((p) => (
+                          <SelectItem key={p.product_id} value={p.product_id}>
+                            {p.title} (#{p.product_id})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Limit</Label>
@@ -245,8 +303,19 @@ export default function RecommendationsPage() {
               <CardContent className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
-                    <Label>Product ID</Label>
-                    <Input value={productId} onChange={(e) => setProductId(e.target.value)} placeholder="Enter product ID" />
+                    <Label>Product</Label>
+                    <Select value={productId} onValueChange={(v) => setProductId(v)} disabled={productsLoading}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={productsLoading ? 'Loading products...' : 'Select a product'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {products.map((p) => (
+                          <SelectItem key={p.product_id} value={p.product_id}>
+                            {p.title} (#{p.product_id})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Limit</Label>

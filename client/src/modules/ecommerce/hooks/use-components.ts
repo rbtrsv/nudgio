@@ -15,23 +15,56 @@ import {
 export type WidgetType = 'bestsellers' | 'cross-sell' | 'upsell' | 'similar';
 
 /**
- * Default values — only include data attributes that differ from these
+ * Default values — only include data attributes that differ from these.
+ * Keys use kebab-case for data-* attribute names.
  */
 const EMBED_DEFAULTS: Record<string, string> = {
+  // Algorithm / data
   top: '4',
-  style: 'card',
-  columns: '4',
-  size: 'default',
-  'primary-color': '#3B82F6',
-  'text-color': '#1F2937',
-  'bg-color': '#FFFFFF',
-  'border-radius': '8px',
-  'cta-text': 'View',
-  'show-price': 'true',
-  'image-aspect': 'square',
   'lookback-days': '30',
   method: 'volume',
   'min-price-increase': '10',
+  // Group 1: Widget Container
+  'widget-bg-color': '#FFFFFF',
+  'widget-padding': 'md',
+  // Group 2: Widget Title
+  'title-color': '#111827',
+  'title-size': 'lg',
+  'title-alignment': 'left',
+  // Group 3: Layout
+  'widget-style': 'grid',
+  'widget-columns': '4',
+  gap: 'md',
+  // Group 4: Product Card
+  'card-bg-color': '#FFFFFF',
+  'card-border-radius': '8px',
+  'card-border-width': '0',
+  'card-border-color': '#E5E7EB',
+  'card-shadow': 'md',
+  'card-padding': 'md',
+  'card-hover': 'lift',
+  // Group 5: Product Image
+  'image-aspect': 'square',
+  'image-fit': 'cover',
+  'image-radius': '8px',
+  // Group 6: Product Title in Card
+  'product-title-color': '#1F2937',
+  'product-title-size': 'sm',
+  'product-title-weight': 'semibold',
+  'product-title-lines': '2',
+  'product-title-alignment': 'left',
+  // Group 7: Price
+  'show-price': 'true',
+  'price-color': '#111827',
+  'price-size': 'md',
+  // Group 8: CTA Button
+  'button-text': 'View',
+  'button-bg-color': '#3B82F6',
+  'button-text-color': '#FFFFFF',
+  'button-radius': '6px',
+  'button-size': 'md',
+  'button-variant': 'solid',
+  'button-full-width': 'false',
 };
 
 /**
@@ -113,21 +146,53 @@ export function useComponents() {
     serverUrl: string,
     widgetType: WidgetType,
     config: {
+      // Algorithm / data
       top?: number;
-      style?: string;
-      columns?: number;
-      size?: string;
-      primaryColor?: string;
-      textColor?: string;
-      bgColor?: string;
-      borderRadius?: string;
-      widgetTitle?: string;
-      ctaText?: string;
-      showPrice?: boolean;
-      imageAspect?: string;
       lookbackDays?: number;
       method?: string;
       minPriceIncrease?: number;
+      // Group 1: Widget Container
+      widgetBgColor?: string;
+      widgetPadding?: string;
+      // Group 2: Widget Title
+      widgetTitle?: string;
+      titleColor?: string;
+      titleSize?: string;
+      titleAlignment?: string;
+      // Group 3: Layout
+      widgetStyle?: string;
+      widgetColumns?: number;
+      gap?: string;
+      // Group 4: Product Card
+      cardBgColor?: string;
+      cardBorderRadius?: string;
+      cardBorderWidth?: string;
+      cardBorderColor?: string;
+      cardShadow?: string;
+      cardPadding?: string;
+      cardHover?: string;
+      // Group 5: Product Image
+      imageAspect?: string;
+      imageFit?: string;
+      imageRadius?: string;
+      // Group 6: Product Title in Card
+      productTitleColor?: string;
+      productTitleSize?: string;
+      productTitleWeight?: string;
+      productTitleLines?: number;
+      productTitleAlignment?: string;
+      // Group 7: Price
+      showPrice?: boolean;
+      priceColor?: string;
+      priceSize?: string;
+      // Group 8: CTA Button
+      buttonText?: string;
+      buttonBgColor?: string;
+      buttonTextColor?: string;
+      buttonRadius?: string;
+      buttonSize?: string;
+      buttonVariant?: string;
+      buttonFullWidth?: boolean;
     },
   ): string => {
     // Build data attributes — only include non-default values
@@ -136,21 +201,54 @@ export function useComponents() {
       `data-type="${widgetType}"`,
     ];
 
+    // Map camelCase config keys → kebab-case data-* attribute names
     const attrMap: Record<string, string> = {
+      // Algorithm / data
       top: String(config.top ?? 4),
-      style: config.style ?? 'card',
-      columns: String(config.columns ?? 4),
-      size: config.size ?? 'default',
-      'primary-color': config.primaryColor ?? '#3B82F6',
-      'text-color': config.textColor ?? '#1F2937',
-      'bg-color': config.bgColor ?? '#FFFFFF',
-      'border-radius': config.borderRadius ?? '8px',
-      'cta-text': config.ctaText ?? 'View',
-      'show-price': String(config.showPrice ?? true),
-      'image-aspect': config.imageAspect ?? 'square',
       'lookback-days': String(config.lookbackDays ?? 30),
       method: config.method ?? 'volume',
       'min-price-increase': String(config.minPriceIncrease ?? 10),
+      // Group 1: Widget Container
+      'widget-bg-color': config.widgetBgColor ?? '#FFFFFF',
+      'widget-padding': config.widgetPadding ?? 'md',
+      // Group 2: Widget Title
+      'title-color': config.titleColor ?? '#111827',
+      'title-size': config.titleSize ?? 'lg',
+      'title-alignment': config.titleAlignment ?? 'left',
+      // Group 3: Layout
+      'widget-style': config.widgetStyle ?? 'grid',
+      'widget-columns': String(config.widgetColumns ?? 4),
+      gap: config.gap ?? 'md',
+      // Group 4: Product Card
+      'card-bg-color': config.cardBgColor ?? '#FFFFFF',
+      'card-border-radius': config.cardBorderRadius ?? '8px',
+      'card-border-width': config.cardBorderWidth ?? '0',
+      'card-border-color': config.cardBorderColor ?? '#E5E7EB',
+      'card-shadow': config.cardShadow ?? 'md',
+      'card-padding': config.cardPadding ?? 'md',
+      'card-hover': config.cardHover ?? 'lift',
+      // Group 5: Product Image
+      'image-aspect': config.imageAspect ?? 'square',
+      'image-fit': config.imageFit ?? 'cover',
+      'image-radius': config.imageRadius ?? '8px',
+      // Group 6: Product Title in Card
+      'product-title-color': config.productTitleColor ?? '#1F2937',
+      'product-title-size': config.productTitleSize ?? 'sm',
+      'product-title-weight': config.productTitleWeight ?? 'semibold',
+      'product-title-lines': String(config.productTitleLines ?? 2),
+      'product-title-alignment': config.productTitleAlignment ?? 'left',
+      // Group 7: Price
+      'show-price': String(config.showPrice ?? true),
+      'price-color': config.priceColor ?? '#111827',
+      'price-size': config.priceSize ?? 'md',
+      // Group 8: CTA Button
+      'button-text': config.buttonText ?? 'View',
+      'button-bg-color': config.buttonBgColor ?? '#3B82F6',
+      'button-text-color': config.buttonTextColor ?? '#FFFFFF',
+      'button-radius': config.buttonRadius ?? '6px',
+      'button-size': config.buttonSize ?? 'md',
+      'button-variant': config.buttonVariant ?? 'solid',
+      'button-full-width': String(config.buttonFullWidth ?? false),
     };
 
     // widget-title has no default (empty = auto) — only include if user set one
