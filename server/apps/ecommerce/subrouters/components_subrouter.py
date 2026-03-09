@@ -847,10 +847,32 @@ def generate_recommendation_html(
 
         <script>
             // Report content height to parent frame for auto-resize (iframe embedding)
-            window.addEventListener('load', () => {{
+            // Uses multiple strategies: load event, image loads, ResizeObserver, and delayed fallback
+            // to ensure the iframe height matches content after Tailwind CDN + images finish rendering
+            function reportHeight() {{
                 const height = document.body.scrollHeight;
                 window.parent.postMessage({{ type: 'nudgio-resize', height: height }}, '*');
+            }}
+
+            // Strategy 1: On initial load (Tailwind CDN may not have applied styles yet)
+            window.addEventListener('load', reportHeight);
+
+            // Strategy 2: After images finish loading (they change content height)
+            document.querySelectorAll('img').forEach(img => {{
+                if (!img.complete) {{
+                    img.addEventListener('load', reportHeight);
+                    img.addEventListener('error', reportHeight);
+                }}
             }});
+
+            // Strategy 3: Delayed fallback — catches Tailwind CDN late processing
+            setTimeout(reportHeight, 500);
+            setTimeout(reportHeight, 1500);
+
+            // Strategy 4: ResizeObserver — catches any future layout shifts
+            if (typeof ResizeObserver !== 'undefined') {{
+                new ResizeObserver(reportHeight).observe(document.body);
+            }}
 
             // Track recommendation clicks
             document.querySelectorAll('[data-rec-click]').forEach(el => {{

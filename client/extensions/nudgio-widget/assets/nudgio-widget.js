@@ -55,6 +55,10 @@
         } catch {
           // Cross-origin fallback
         }
+
+        // Delayed fallback — catches Tailwind CDN late processing
+        setTimeout(function () { resizeIframe(iframe); }, 500);
+        setTimeout(function () { resizeIframe(iframe); }, 1500);
       });
 
       // If already loaded (cached), resize immediately
@@ -76,4 +80,21 @@
     initWidgets();
   });
   observer.observe(document.body, { childList: true, subtree: true });
+
+  // Listen for postMessage from iframe content (fallback for cross-origin + additional strategy)
+  // Backend HTML sends nudgio-resize messages with content height
+  window.addEventListener("message", function (e) {
+    if (e.data && e.data.type === "nudgio-resize" && e.data.height > 0) {
+      var iframes = document.querySelectorAll(".nudgio-recommendations iframe");
+      iframes.forEach(function (iframe) {
+        try {
+          if (iframe.contentWindow === e.source) {
+            iframe.style.height = e.data.height + "px";
+          }
+        } catch {
+          // Cross-origin — cannot compare contentWindow
+        }
+      });
+    }
+  });
 })();
