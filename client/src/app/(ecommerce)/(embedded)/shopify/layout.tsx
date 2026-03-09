@@ -215,6 +215,7 @@ export default function ShopifyEmbeddedLayout({
         <s-link href="/shopify/settings">Settings</s-link>
         <s-link href="/shopify/recommendations">Recommendations</s-link>
         <s-link href="/shopify/components">Components</s-link>
+        <s-link href="/shopify/documentation">Documentation</s-link>
         <s-link href="/shopify/billing">Billing</s-link>
       </s-app-nav>
 

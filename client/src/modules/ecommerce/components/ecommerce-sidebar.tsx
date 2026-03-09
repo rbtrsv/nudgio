@@ -13,6 +13,7 @@ import {
   TrendingUp,
   LayoutGrid,
   BarChart3,
+  BookOpen,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -196,6 +197,14 @@ export function EcommerceSidebar({ ...props }: React.ComponentProps<typeof Sideb
                   <Link href="/analytics">
                     <BarChart3 className="h-4 w-4" />
                     <span>Analytics</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive("/documentation")} tooltip="Documentation">
+                  <Link href="/documentation">
+                    <BookOpen className="h-4 w-4" />
+                    <span>Documentation</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

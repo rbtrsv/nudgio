@@ -43,6 +43,48 @@ import {
 } from '@/modules/ecommerce/service/shopify-embedded.service';
 
 // ==========================================
+// Color Field — swatch + text input (matches standalone dashboard pattern)
+// ==========================================
+
+function ColorField({ label, value, details, onChange }: {
+  label: string;
+  value: string;
+  details: string;
+  onChange: (val: string) => void;
+}) {
+  // Validate hex for the native color input (requires #RRGGBB format)
+  const isValidHex = /^#[0-9A-Fa-f]{6}$/.test(value);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+      <input
+        type="color"
+        value={isValidHex ? value : '#000000'}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: '36px',
+          height: '36px',
+          marginTop: '22px',
+          border: '1px solid #ccc',
+          borderRadius: '6px',
+          padding: '2px',
+          cursor: 'pointer',
+          flexShrink: 0,
+        }}
+      />
+      <div style={{ flex: 1 }}>
+        <s-text-field
+          label={label}
+          value={value}
+          onChange={(e) => onChange(e.currentTarget.value)}
+          details={details}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
 // Loading State
 // ==========================================
 
@@ -434,7 +476,7 @@ export default function ShopifySettingsPage() {
       <s-section heading="Widget Container">
         <s-box padding="base">
           <s-stack direction="block" gap="base">
-            <s-text-field label="Background Color" value={widgetBgColor} onChange={(e) => setWidgetBgColor(e.currentTarget.value)} details="Hex color (e.g. #FFFFFF)" />
+            <ColorField label="Background Color" value={widgetBgColor} onChange={setWidgetBgColor} details="Hex color (e.g. #FFFFFF)" />
             <s-select label="Padding" value={widgetPadding} onChange={(e) => setWidgetPadding(e.currentTarget.value)}>
               <s-option value="none">None</s-option>
               <s-option value="sm">Small</s-option>
@@ -450,7 +492,7 @@ export default function ShopifySettingsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <s-text-field label="Title Text" value={widgetTitle} onChange={(e) => setWidgetTitle(e.currentTarget.value)} details="Leave empty for auto-default based on widget type." />
-            <s-text-field label="Title Color" value={titleColor} onChange={(e) => setTitleColor(e.currentTarget.value)} details="Hex color (e.g. #111827)" />
+            <ColorField label="Title Color" value={titleColor} onChange={setTitleColor} details="Hex color (e.g. #111827)" />
             <s-select label="Title Size" value={titleSize} onChange={(e) => setTitleSize(e.currentTarget.value)}>
               <s-option value="sm">Small</s-option>
               <s-option value="md">Medium</s-option>
@@ -487,14 +529,14 @@ export default function ShopifySettingsPage() {
       <s-section heading="Product Card">
         <s-box padding="base">
           <s-stack direction="block" gap="base">
-            <s-text-field label="Card Background" value={cardBgColor} onChange={(e) => setCardBgColor(e.currentTarget.value)} details="Hex color (e.g. #FFFFFF)" />
+            <ColorField label="Card Background" value={cardBgColor} onChange={setCardBgColor} details="Hex color (e.g. #FFFFFF)" />
             <s-text-field label="Card Border Radius" value={cardBorderRadius} onChange={(e) => setCardBorderRadius(e.currentTarget.value)} details="CSS value (e.g. 8px)" />
             <s-select label="Card Border Width" value={cardBorderWidth} onChange={(e) => setCardBorderWidth(e.currentTarget.value)}>
               <s-option value="0">None</s-option>
               <s-option value="1">1px</s-option>
               <s-option value="2">2px</s-option>
             </s-select>
-            <s-text-field label="Card Border Color" value={cardBorderColor} onChange={(e) => setCardBorderColor(e.currentTarget.value)} details="Hex color (e.g. #E5E7EB)" />
+            <ColorField label="Card Border Color" value={cardBorderColor} onChange={setCardBorderColor} details="Hex color (e.g. #E5E7EB)" />
             <s-select label="Card Shadow" value={cardShadow} onChange={(e) => setCardShadow(e.currentTarget.value)}>
               <s-option value="none">None</s-option>
               <s-option value="sm">Small</s-option>
@@ -538,7 +580,7 @@ export default function ShopifySettingsPage() {
       <s-section heading="Product Title">
         <s-box padding="base">
           <s-stack direction="block" gap="base">
-            <s-text-field label="Title Color" value={productTitleColor} onChange={(e) => setProductTitleColor(e.currentTarget.value)} details="Hex color (e.g. #1F2937)" />
+            <ColorField label="Title Color" value={productTitleColor} onChange={setProductTitleColor} details="Hex color (e.g. #1F2937)" />
             <s-select label="Title Size" value={productTitleSize} onChange={(e) => setProductTitleSize(e.currentTarget.value)}>
               <s-option value="xs">Extra Small</s-option>
               <s-option value="sm">Small</s-option>
@@ -565,7 +607,7 @@ export default function ShopifySettingsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <s-checkbox label="Show Price" checked={showPrice || undefined} onChange={(e) => setShowPrice(e.currentTarget.checked)} />
-            <s-text-field label="Price Color" value={priceColor} onChange={(e) => setPriceColor(e.currentTarget.value)} details="Hex color (e.g. #111827)" />
+            <ColorField label="Price Color" value={priceColor} onChange={setPriceColor} details="Hex color (e.g. #111827)" />
             <s-select label="Price Size" value={priceSize} onChange={(e) => setPriceSize(e.currentTarget.value)}>
               <s-option value="sm">Small</s-option>
               <s-option value="md">Medium</s-option>
@@ -580,8 +622,8 @@ export default function ShopifySettingsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <s-text-field label="Button Text" value={buttonText} onChange={(e) => setButtonText(e.currentTarget.value)} details="e.g. View, Shop Now, Add to Cart" />
-            <s-text-field label="Button Color" value={buttonBgColor} onChange={(e) => setButtonBgColor(e.currentTarget.value)} details="Hex color (e.g. #3B82F6)" />
-            <s-text-field label="Button Text Color" value={buttonTextColor} onChange={(e) => setButtonTextColor(e.currentTarget.value)} details="Hex color (e.g. #FFFFFF)" />
+            <ColorField label="Button Color" value={buttonBgColor} onChange={setButtonBgColor} details="Hex color (e.g. #3B82F6)" />
+            <ColorField label="Button Text Color" value={buttonTextColor} onChange={setButtonTextColor} details="Hex color (e.g. #FFFFFF)" />
             <s-text-field label="Button Border Radius" value={buttonRadius} onChange={(e) => setButtonRadius(e.currentTarget.value)} details="CSS value (e.g. 6px, 9999px for pill)" />
             <s-select label="Button Size" value={buttonSize} onChange={(e) => setButtonSize(e.currentTarget.value)}>
               <s-option value="sm">Small</s-option>
