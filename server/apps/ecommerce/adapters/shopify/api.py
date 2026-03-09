@@ -14,13 +14,14 @@ class ShopifyAdapter:
     Uses Shopify's GraphQL Admin API to fetch products and orders.
     """
 
-    def __init__(self, connection: EcommerceConnection):
+    def __init__(self, connection: EcommerceConnection, access_token: str = None):
         self.connection = connection
-        # API credentials from EcommerceConnection:
+        # API credentials:
         # store_url = store domain (e.g., "m0stv8-wr.myshopify.com")
-        # api_secret = access token (e.g., "shpat_...")
+        # access_token = Shopify access token (e.g., "shpat_...")
+        # Prefer explicit access_token param (decrypted by factory) over connection field
         self.store_domain = connection.store_url
-        self.access_token = connection.api_secret
+        self.access_token = access_token or connection.api_secret
         # Config-driven API version (default "2026-01")
         self.api_version = settings.SHOPIFY_API_VERSION
 

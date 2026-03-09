@@ -22,13 +22,14 @@ class MagentoApiAdapter:
     # Magento REST API max pageSize
     MAX_PAGE_SIZE = 300
 
-    def __init__(self, connection: EcommerceConnection):
+    def __init__(self, connection: EcommerceConnection, api_key: str = None, api_secret: str = None):
         self.connection = connection
-        # API credentials from EcommerceConnection:
+        # API credentials:
         # store_url = store base URL (e.g., "https://mymagento.com")
         # api_secret = integration access token
+        # Prefer explicit params (decrypted by factory) over connection fields
         self.store_url = connection.store_url.rstrip("/")
-        self.access_token = connection.api_secret
+        self.access_token = api_secret or connection.api_secret
         self.base_url = f"{self.store_url}/rest/default/V1"
 
     def _get_headers(self) -> Dict[str, str]:

@@ -478,8 +478,9 @@ def generate_recommendation_html(
 ) -> str:
     """Generate HTML component with embedded Tailwind CSS"""
 
+    # Empty results → return hidden empty div (nothing visible on the storefront)
     if not recommendations:
-        return "<div class='text-center text-gray-500 p-4'>No recommendations available</div>"
+        return "<div style='display:none'></div>"
 
     # Server-side validation: clamp columns to 2–6, fallback size to "default"
     columns = max(2, min(6, columns))

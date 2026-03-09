@@ -13,24 +13,26 @@ class PlatformAdapter(ABC):
     Each platform (Shopify, WooCommerce, Magento) implements this interface.
     """
     
-    def __init__(self, connection: EcommerceConnection):
+    def __init__(self, connection: EcommerceConnection, db_password: str = None):
         self.connection = connection
+        # Prefer explicit db_password (decrypted by factory) over connection field
+        self._db_password = db_password or connection.db_password
         self.engine = self._create_engine()
-    
+
     def _create_engine(self) -> AsyncEngine:
         """Create async database engine for customer's ecommerce database"""
         # Different platforms use different databases:
-        # - Shopify: PostgreSQL 
+        # - Shopify: PostgreSQL
         # - WooCommerce: MySQL (WordPress)
         # - Magento: MySQL
-        
+
         if self.connection.platform == "shopify":
             # Shopify uses PostgreSQL
-            db_url = f"postgresql+asyncpg://{self.connection.db_user}:{self.connection.db_password}@{self.connection.db_host}:{self.connection.db_port}/{self.connection.db_name}"
+            db_url = f"postgresql+asyncpg://{self.connection.db_user}:{self._db_password}@{self.connection.db_host}:{self.connection.db_port}/{self.connection.db_name}"
         else:
             # WooCommerce and Magento typically use MySQL
-            db_url = f"mysql+aiomysql://{self.connection.db_user}:{self.connection.db_password}@{self.connection.db_host}:{self.connection.db_port}/{self.connection.db_name}"
-        
+            db_url = f"mysql+aiomysql://{self.connection.db_user}:{self._db_password}@{self.connection.db_host}:{self.connection.db_port}/{self.connection.db_name}"
+
         return create_async_engine(db_url, echo=False, future=True)
     
     @abstractmethod

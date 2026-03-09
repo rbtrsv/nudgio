@@ -3,6 +3,8 @@ from ..adapters.base import PlatformAdapter
 from ..schemas.recommendation_schemas import BestsellerMethod
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 class RecommendationEngine:
     """
@@ -100,7 +102,7 @@ class RecommendationEngine:
             return recommendations
             
         except Exception as e:
-            logging.error(f"Error generating bestsellers: {e}")
+            logger.error(f"Error generating bestsellers: {e}", exc_info=True)
             return []
     
     async def get_cross_sell(
@@ -121,7 +123,12 @@ class RecommendationEngine:
             order_items = await self.adapter.get_order_items(lookback_days)
             products = await self.adapter.get_products()
             products_dict = {str(p['product_id']): p for p in products}
-            
+
+            logger.info(
+                "Cross-sell: product_id=%s, order_items=%d, products=%d, product_in_catalog=%s",
+                product_id, len(order_items), len(products), str(product_id) in products_dict
+            )
+
             # Group items by order
             orders = {}
             for item in order_items:
@@ -129,20 +136,25 @@ class RecommendationEngine:
                 if order_id not in orders:
                     orders[order_id] = []
                 orders[order_id].append(str(item.get('product_id', '')))
-            
+
             # Find co-occurrences with target product
             target_product_id = str(product_id)
             co_occurrences = {}
-            
+
             for order_id, product_ids in orders.items():
                 if target_product_id in product_ids:
                     for pid in product_ids:
                         if pid != target_product_id and pid:
                             co_occurrences[pid] = co_occurrences.get(pid, 0) + 1
-            
+
+            logger.info(
+                "Cross-sell: orders=%d, target_in_orders=%s, co_occurrences=%d",
+                len(orders), any(target_product_id in pids for pids in orders.values()), len(co_occurrences)
+            )
+
             # Sort by frequency
             sorted_cooccur = sorted(co_occurrences.items(), key=lambda x: x[1], reverse=True)
-            
+
             # Build recommendations
             recommendations = []
             for i, (pid, count) in enumerate(sorted_cooccur[:limit]):
@@ -163,11 +175,11 @@ class RecommendationEngine:
                         'position': i + 1,
                         'co_occurrence_count': count
                     })
-            
+
             return recommendations
-            
+
         except Exception as e:
-            logging.error(f"Error generating cross-sell recommendations: {e}")
+            logger.error(f"Error generating cross-sell recommendations: {e}", exc_info=True)
             return []
     
     async def get_upsell(
@@ -187,14 +199,22 @@ class RecommendationEngine:
         try:
             products = await self.adapter.get_products()
             products_dict = {str(p['product_id']): p for p in products}
-            
+
             if str(product_id) not in products_dict:
+                logger.warning("Upsell: product_id=%s NOT FOUND in catalog (%d products)", product_id, len(products))
                 return []
-            
+
             base_product = products_dict[str(product_id)]
             base_price = float(base_product.get('price', 0))
             min_upsell_price = base_price * (1 + min_price_increase_percent / 100)
-            
+
+            logger.info(
+                "Upsell: product_id=%s, base_price=%.2f, min_upsell_price=%.2f, "
+                "base_product_type='%s', products=%d",
+                product_id, base_price, min_upsell_price,
+                base_product.get('product_type', ''), len(products)
+            )
+
             # Filter upsell candidates
             upsell_candidates = []
             for product in products:
@@ -202,7 +222,7 @@ class RecommendationEngine:
                 if (str(product['product_id']) != str(product_id) and
                     current_price >= min_upsell_price and
                     product.get('product_type') == base_product.get('product_type')):
-                    
+
                     price_increase = ((current_price - base_price) / base_price) * 100
                     # Shopify adapter returns 'image_url' (string),
                     # WooCommerce/Magento return 'images' (list) — handle both
@@ -218,18 +238,20 @@ class RecommendationEngine:
                         'image_url': image_url,
                         'price_increase_percent': round(price_increase, 2)
                     })
-            
+
+            logger.info("Upsell: found %d candidates", len(upsell_candidates))
+
             # Sort by price (ascending for better upsells)
             upsell_candidates.sort(key=lambda x: x['price'])
-            
+
             # Add position
             for i, product in enumerate(upsell_candidates[:limit]):
                 product['position'] = i + 1
-            
+
             return upsell_candidates[:limit]
-            
+
         except Exception as e:
-            logging.error(f"Error generating upsell recommendations: {e}")
+            logger.error(f"Error generating upsell recommendations: {e}", exc_info=True)
             return []
     
     async def get_similar(
@@ -247,26 +269,32 @@ class RecommendationEngine:
         try:
             products = await self.adapter.get_products()
             products_dict = {str(p['product_id']): p for p in products}
-            
+
             if str(product_id) not in products_dict:
+                logger.warning("Similar: product_id=%s NOT FOUND in catalog (%d products)", product_id, len(products))
                 return []
-            
+
             base_product = products_dict[str(product_id)]
-            
+
+            logger.info(
+                "Similar: product_id=%s, base_product_type='%s', base_vendor='%s', products=%d",
+                product_id, base_product.get('product_type', ''), base_product.get('vendor', ''), len(products)
+            )
+
             # Find similar products
             similar_products = []
             for product in products:
                 if str(product['product_id']) != str(product_id):
                     similarity_score = 0
-                    
+
                     # Same product type/category
                     if product.get('product_type') == base_product.get('product_type'):
                         similarity_score += 0.6
-                    
+
                     # Same vendor
                     if product.get('vendor') == base_product.get('vendor'):
                         similarity_score += 0.4
-                    
+
                     if similarity_score > 0:
                         # Shopify adapter returns 'image_url' (string),
                         # WooCommerce/Magento return 'images' (list) — handle both
@@ -282,16 +310,18 @@ class RecommendationEngine:
                             'image_url': image_url,
                             'similarity_score': similarity_score
                         })
-            
+
+            logger.info("Similar: found %d candidates", len(similar_products))
+
             # Sort by similarity score
             similar_products.sort(key=lambda x: x['similarity_score'], reverse=True)
-            
+
             # Add position
             for i, product in enumerate(similar_products[:limit]):
                 product['position'] = i + 1
-            
+
             return similar_products[:limit]
-            
+
         except Exception as e:
-            logging.error(f"Error generating similar product recommendations: {e}")
+            logger.error(f"Error generating similar product recommendations: {e}", exc_info=True)
             return []

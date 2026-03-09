@@ -16,15 +16,16 @@ class WooCommerceApiAdapter:
     # WooCommerce REST API max per_page
     MAX_PER_PAGE = 100
 
-    def __init__(self, connection: EcommerceConnection):
+    def __init__(self, connection: EcommerceConnection, api_key: str = None, api_secret: str = None):
         self.connection = connection
-        # API credentials from EcommerceConnection:
+        # API credentials:
         # store_url = store base URL (e.g., "https://mystore.com")
         # api_key = consumer_key (e.g., "ck_xxx")
         # api_secret = consumer_secret (e.g., "cs_xxx")
+        # Prefer explicit params (decrypted by factory) over connection fields
         self.store_url = connection.store_url.rstrip("/")
-        self.consumer_key = connection.api_key
-        self.consumer_secret = connection.api_secret
+        self.consumer_key = api_key or connection.api_key
+        self.consumer_secret = api_secret or connection.api_secret
         self.base_url = f"{self.store_url}/wp-json/wc/v3"
 
     def _get_auth(self) -> aiohttp.BasicAuth:
