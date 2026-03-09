@@ -143,6 +143,22 @@ async def _get_connection_by_shop(shop: str, db: AsyncSession) -> EcommerceConne
 # Error HTML Templates
 # ==========================================
 
+def _sanitize_proxy_param(value: str) -> str:
+    """
+    Sanitize a string query parameter from Shopify App Proxy requests.
+
+    Shopify Theme Editor appends tracking params (e.g. ?oseid=...) to the
+    iframe src URL. This contaminates the last query parameter's value
+    because the editor uses '?' instead of '&', making it part of the
+    value instead of a separate parameter.
+
+    Example: cta_text=View?oseid=abc123 → cta_text should be "View"
+
+    Strips everything after the first '?' in the value.
+    """
+    return value.split("?")[0].strip()
+
+
 def _error_html(message: str) -> str:
     """Generate minimal error HTML for iframe display."""
     return f"""<!DOCTYPE html>
@@ -195,6 +211,18 @@ async def get_bestsellers_widget(
     7. Return HTMLResponse for iframe rendering
     """
     try:
+        # Sanitize string params — Shopify Theme Editor appends ?oseid=... to iframe URLs
+        style = _sanitize_proxy_param(style)
+        size = _sanitize_proxy_param(size)
+        method = _sanitize_proxy_param(method)
+        primary_color = _sanitize_proxy_param(primary_color)
+        text_color = _sanitize_proxy_param(text_color)
+        bg_color = _sanitize_proxy_param(bg_color)
+        border_radius = _sanitize_proxy_param(border_radius)
+        widget_title = _sanitize_proxy_param(widget_title)
+        cta_text = _sanitize_proxy_param(cta_text)
+        image_aspect = _sanitize_proxy_param(image_aspect)
+
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
             logger.error("App Proxy: SHOPIFY_CLIENT_SECRET not configured")
@@ -321,13 +349,23 @@ async def get_cross_sell_widget(
     8. Return HTMLResponse for iframe rendering
     """
     try:
+        # Sanitize string params — Shopify Theme Editor appends ?oseid=... to iframe URLs
+        style = _sanitize_proxy_param(style)
+        size = _sanitize_proxy_param(size)
+        primary_color = _sanitize_proxy_param(primary_color)
+        text_color = _sanitize_proxy_param(text_color)
+        bg_color = _sanitize_proxy_param(bg_color)
+        border_radius = _sanitize_proxy_param(border_radius)
+        widget_title = _sanitize_proxy_param(widget_title)
+        cta_text = _sanitize_proxy_param(cta_text)
+        image_aspect = _sanitize_proxy_param(image_aspect)
+
         # Step 0: product_id required — only available on product pages
         if not product_id:
             return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
 
-        # Sanitize product_id — Shopify App Proxy can append query params
-        # (e.g. "12345?oseid=abc") to the value. Strip anything after "?"
-        product_id = product_id.split("?")[0].strip()
+        # Sanitize product_id
+        product_id = _sanitize_proxy_param(product_id)
 
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
@@ -454,13 +492,23 @@ async def get_upsell_widget(
     8. Return HTMLResponse for iframe rendering
     """
     try:
+        # Sanitize string params — Shopify Theme Editor appends ?oseid=... to iframe URLs
+        style = _sanitize_proxy_param(style)
+        size = _sanitize_proxy_param(size)
+        primary_color = _sanitize_proxy_param(primary_color)
+        text_color = _sanitize_proxy_param(text_color)
+        bg_color = _sanitize_proxy_param(bg_color)
+        border_radius = _sanitize_proxy_param(border_radius)
+        widget_title = _sanitize_proxy_param(widget_title)
+        cta_text = _sanitize_proxy_param(cta_text)
+        image_aspect = _sanitize_proxy_param(image_aspect)
+
         # Step 0: product_id required — only available on product pages
         if not product_id:
             return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
 
-        # Sanitize product_id — Shopify App Proxy can append query params
-        # (e.g. "12345?oseid=abc") to the value. Strip anything after "?"
-        product_id = product_id.split("?")[0].strip()
+        # Sanitize product_id
+        product_id = _sanitize_proxy_param(product_id)
 
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
@@ -586,13 +634,23 @@ async def get_similar_widget(
     8. Return HTMLResponse for iframe rendering
     """
     try:
+        # Sanitize string params — Shopify Theme Editor appends ?oseid=... to iframe URLs
+        style = _sanitize_proxy_param(style)
+        size = _sanitize_proxy_param(size)
+        primary_color = _sanitize_proxy_param(primary_color)
+        text_color = _sanitize_proxy_param(text_color)
+        bg_color = _sanitize_proxy_param(bg_color)
+        border_radius = _sanitize_proxy_param(border_radius)
+        widget_title = _sanitize_proxy_param(widget_title)
+        cta_text = _sanitize_proxy_param(cta_text)
+        image_aspect = _sanitize_proxy_param(image_aspect)
+
         # Step 0: product_id required — only available on product pages
         if not product_id:
             return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
 
-        # Sanitize product_id — Shopify App Proxy can append query params
-        # (e.g. "12345?oseid=abc") to the value. Strip anything after "?"
-        product_id = product_id.split("?")[0].strip()
+        # Sanitize product_id
+        product_id = _sanitize_proxy_param(product_id)
 
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
