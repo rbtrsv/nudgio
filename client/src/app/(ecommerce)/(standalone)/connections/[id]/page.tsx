@@ -429,7 +429,7 @@ export default function ConnectionDetailPage() {
                     try {
                       await updateConnection(connectionId, {
                         auto_sync_enabled: editAutoSyncEnabled,
-                        sync_interval: editSyncInterval,
+                        sync_interval: editSyncInterval as 'hourly' | 'every_6_hours' | 'daily' | 'weekly',
                       });
                       await fetchConnections();
                     } finally {
