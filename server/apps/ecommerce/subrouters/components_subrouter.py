@@ -107,6 +107,13 @@ CAROUSEL_WIDTH_MAP = {
     6: "w-80",
 }
 
+# Min card width per column count — used by CSS auto-fill grid
+# Lower values = more columns fit in narrow containers
+GRID_MIN_WIDTH_MAP = {2: 280, 3: 220, 4: 200, 5: 170, 6: 150}
+
+# Gap in pixels — for inline grid style (Tailwind gap classes don't work with inline grid)
+GAP_PX_MAP = {"sm": 8, "md": 16, "lg": 24}
+
 
 # ==========================================
 # Hardcoded Visual Defaults — single source of truth
@@ -375,7 +382,7 @@ async def get_bestsellers_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="bestseller", shop_urls=shop_urls,
         )
 
@@ -498,7 +505,7 @@ async def get_cross_sell_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="cross-sell", shop_urls=shop_urls,
         )
 
@@ -621,7 +628,7 @@ async def get_upsell_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="upsell", shop_urls=shop_urls,
         )
 
@@ -743,7 +750,7 @@ async def get_similar_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="similar", shop_urls=shop_urls,
         )
 
@@ -758,7 +765,6 @@ async def get_similar_component(
 def generate_recommendation_html(
     recommendations: List[Dict],
     vis: Dict[str, any],
-    device: str,
     rec_type: str,
     shop_urls: Dict[str, str],
 ) -> str:
@@ -801,18 +807,22 @@ def generate_recommendation_html(
     # Product title line clamp: clamp value to 1-3
     product_title_lines = max(1, min(3, vis["product_title_lines"]))
 
-    # Responsive grid: 1 col mobile → 2 col tablet → N col desktop
-    col_class = f"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-{columns}"
+    # CSS auto-fill grid — responds to actual container width, not viewport
+    # Works correctly inside iframes (WordPress shortcode, Shopify App Proxy, standalone embed)
+    min_width = GRID_MIN_WIDTH_MAP.get(columns, 200)
+    gap_px = GAP_PX_MAP.get(vis["gap"], 16)
+    grid_style = f"display: grid; grid-template-columns: repeat(auto-fill, minmax(min({min_width}px, 100%), 1fr)); gap: {gap_px}px;"
 
     # Generate product cards based on style
     if style == "carousel":
         cards_html = generate_carousel_cards(recommendations, vis, shop_urls, aspect_class, columns)
         carousel_gap = GAP_MAP.get(vis["gap"], GAP_MAP["md"]).replace("gap-", "space-x-")
         container_class = f"flex overflow-x-auto {carousel_gap} pb-4 scrollbar-hide"
+        container_attr = f'class="{container_class}"'
     else:
-        # "grid" or any other value — responsive grid
+        # "grid" or any other value — auto-fill responsive grid
         cards_html = generate_grid_cards(recommendations, vis, shop_urls, aspect_class)
-        container_class = f"{col_class} {gap_class}"
+        container_attr = f'style="{grid_style}"'
 
     html = f"""
     <!DOCTYPE html>
@@ -837,10 +847,10 @@ def generate_recommendation_html(
             }}
         </style>
     </head>
-    <body style="background-color: {vis['widget_bg_color']}; margin: 0; overflow-x: hidden;">
+    <body style="background-color: {vis['widget_bg_color']}; margin: 0; overflow: hidden;">
         <div class="w-full {widget_padding_class}">
             <h3 class="{title_size_class} font-bold mb-4 {title_align}" style="color: {vis['title_color']}">{title}</h3>
-            <div class="{container_class}">
+            <div {container_attr}>
                 {cards_html}
             </div>
         </div>
@@ -850,7 +860,7 @@ def generate_recommendation_html(
             // Uses multiple strategies: load event, image loads, ResizeObserver, and delayed fallback
             // to ensure the iframe height matches content after Tailwind CDN + images finish rendering
             function reportHeight() {{
-                const height = document.body.scrollHeight;
+                const height = document.body.scrollHeight + 2;
                 window.parent.postMessage({{ type: 'nudgio-resize', height: height }}, '*');
             }}
 

@@ -1013,7 +1013,7 @@ async def get_bestsellers_component(
 
         # Generate HTML component
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="bestseller", shop_urls=shop_urls,
         )
 
@@ -1146,7 +1146,7 @@ async def get_cross_sell_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="cross-sell", shop_urls=shop_urls,
         )
 
@@ -1279,7 +1279,7 @@ async def get_upsell_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="upsell", shop_urls=shop_urls,
         )
 
@@ -1411,7 +1411,7 @@ async def get_similar_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, vis=vis, device=device,
+            recommendations=recs, vis=vis,
             rec_type="similar", shop_urls=shop_urls,
         )
 
