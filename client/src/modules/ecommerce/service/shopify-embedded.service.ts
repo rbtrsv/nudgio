@@ -121,6 +121,18 @@ export interface EmbeddedSettingsDetail {
   min_price_increase_percent: number;
   shop_base_url: string | null;
   product_url_template: string | null;
+  // Brand identity defaults — visual settings for widget rendering
+  widget_style: string | null;
+  widget_columns: number | null;
+  widget_size: string | null;
+  primary_color: string | null;
+  text_color: string | null;
+  bg_color: string | null;
+  border_radius: string | null;
+  cta_text: string | null;
+  show_price: boolean | null;
+  image_aspect: string | null;
+  widget_title: string | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -140,6 +152,18 @@ export interface EmbeddedSettingsPayload {
   crosssell_lookback_days: number;
   max_recommendations: number;
   min_price_increase_percent: number;
+  // Brand identity defaults — visual settings for widget rendering (all optional)
+  widget_style?: string | null;
+  widget_columns?: number | null;
+  widget_size?: string | null;
+  primary_color?: string | null;
+  text_color?: string | null;
+  bg_color?: string | null;
+  border_radius?: string | null;
+  cta_text?: string | null;
+  show_price?: boolean | null;
+  image_aspect?: string | null;
+  widget_title?: string | null;
 }
 
 /** Simple message response */
@@ -233,6 +257,10 @@ export interface EmbeddedComponentParams {
   text_color?: string;
   bg_color?: string;
   border_radius?: string;
+  widget_title?: string;
+  cta_text?: string;
+  show_price?: boolean;
+  image_aspect?: 'square' | 'portrait' | 'landscape';
 }
 
 // ==========================================
@@ -541,6 +569,10 @@ export const getComponentHtml = async (
   if (params.text_color) searchParams.set('text_color', params.text_color);
   if (params.bg_color) searchParams.set('bg_color', params.bg_color);
   if (params.border_radius) searchParams.set('border_radius', params.border_radius);
+  if (params.widget_title) searchParams.set('widget_title', params.widget_title);
+  if (params.cta_text) searchParams.set('cta_text', params.cta_text);
+  if (params.show_price !== undefined) searchParams.set('show_price', String(params.show_price));
+  if (params.image_aspect) searchParams.set('image_aspect', params.image_aspect);
 
   // Map type to endpoint
   const endpointMap: Record<string, string> = {

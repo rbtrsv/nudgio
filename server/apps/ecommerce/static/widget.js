@@ -58,6 +58,9 @@
     'text-color': '#1F2937',
     'bg-color': '#FFFFFF',
     'border-radius': '8px',
+    'cta-text': 'View',
+    'show-price': 'true',
+    'image-aspect': 'square',
     'lookback-days': '30',
     method: 'volume',
     'min-price-increase': '10'
@@ -76,6 +79,10 @@
     'text-color': 'text_color',
     'bg-color': 'bg_color',
     'border-radius': 'border_radius',
+    'widget-title': 'widget_title',
+    'cta-text': 'cta_text',
+    'show-price': 'show_price',
+    'image-aspect': 'image_aspect',
     'lookback-days': 'lookback_days',
     'method': 'method',
     'min-price-increase': 'min_price_increase'

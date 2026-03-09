@@ -35,6 +35,10 @@ export const WidgetParamsSchema = z.object({
   text_color: z.string().default('#1F2937'),
   bg_color: z.string().default('#FFFFFF'),
   border_radius: z.string().default('8px'),
+  widget_title: z.string().default(''),
+  cta_text: z.string().default('View'),
+  show_price: z.boolean().default(true),
+  image_aspect: z.enum(['square', 'portrait', 'landscape']).default('square'),
 });
 
 // ==========================================

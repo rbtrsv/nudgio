@@ -1568,5 +1568,94 @@ Add success alert when redirected from Shopify OAuth with `?shopify_connected=tr
 - ✅ Privacy policy — `/legal/privacy-policy` (GDPR/CCPA)
 - ✅ Terms of service — `/legal/terms-of-service` (SaaS terms, Romanian jurisdiction)
 
+### Widget Settings Enhancement (5 New Configurable Fields)
+**Goal:** Add `widget_title`, `cta_text`, `show_price`, `border_radius`, `image_aspect` across all delivery paths (server HTML generator, all backend subrouters, Shopify Liquid, WordPress plugin, frontend schemas/services/UI, universal widget.js).
+
+#### Server — HTML Generator ✅
+- ✅ `IMAGE_ASPECT_MAP` constant: square → `aspect-square`, portrait → `aspect-[3/4]`, landscape → `aspect-video` (all + `object-cover`)
+- ✅ `generate_recommendation_html()` accepts `widget_title=""`, `cta_text="View"`, `show_price=True`, `image_aspect="square"`
+- ✅ Title logic: use widget_title if provided, else auto-default from title_map (bestseller→"Popular now", cross-sell→"Frequently bought together", upsell→"You might like these too", similar→"You may also like")
+- ✅ `generate_grid_cards()` + `generate_carousel_cards()`: cta_text replaces hardcoded "View", conditional price_html, aspect_class from IMAGE_ASPECT_MAP
+
+#### Server — Standalone Endpoints ✅
+- ✅ `components_subrouter.py` — 4 endpoints (bestsellers, cross-sell, upsell, similar) accept + pass widget_title, cta_text, show_price, image_aspect to `generate_recommendation_html()`
+
+#### Server — Shopify App Proxy Endpoints ✅
+- ✅ `shopify_app_proxy_subrouter.py` — 4 endpoints accept + pass new params
+
+#### Server — Shopify Embedded Endpoints ✅
+- ✅ `shopify_embedded_subrouter.py` — 4 embedded component endpoints accept + pass widget_title, cta_text, show_price, image_aspect to generate_recommendation_html()
+
+#### Server — Public Widget Endpoints ✅
+- ✅ `widget_subrouter.py` — 4 public widget endpoints accept + pass new params to generate_recommendation_html()
+
+#### Server — Widget Sign Endpoint ✅
+- ✅ `widget_sign_subrouter.py` — sign endpoint includes new params (cta_text, show_price, image_aspect in params dict, widget_title only when non-empty) in HMAC-signed URL
+
+#### Shopify Theme Extension ✅
+- ✅ `nudgio-recommendations.liquid` — 5 new `{% schema %}` settings (widget_title text, cta_text text, show_price checkbox, border_radius text, image_aspect select) + URL params with separate variable encoding
+
+#### WordPress Plugin ✅
+- ✅ `class-nudgio-settings.php` — 4 new register_setting + add_settings_field + renderer methods
+- ✅ `class-nudgio-shortcode.php` — 4 new shortcode attributes + params array entries
+- ✅ `block.json` — 4 new block attributes (widget_title, cta_text, show_price, image_aspect)
+- ✅ `settings-page.php` — Visual Editing section, new shortcode examples, Account & Subscription section
+
+#### Universal widget.js ✅
+- ✅ `widget.js` — DEFAULTS object updated with cta-text, show-price, image-aspect. ATTR_MAP updated with widget-title→widget_title, cta-text→cta_text, show-price→show_price, image-aspect→image_aspect.
+
+#### Frontend Schemas/Services ✅
+- ✅ `components.schemas.ts` — WidgetParamsSchema updated with widget_title, cta_text, show_price, image_aspect
+- ✅ `components.service.ts` — buildWidgetQuery() updated with 4 new params
+- ✅ `shopify-embedded.service.ts` — EmbeddedComponentParams interface + getComponentHtml() searchParams builder updated
+
+#### Frontend Hooks ✅
+- ✅ `use-components.ts` — EMBED_DEFAULTS updated (cta-text, show-price, image-aspect), generateEmbedCode config + attrMap updated, widget-title handled separately (only included when non-empty)
+
+#### Frontend UI Pages ✅
+- ✅ Shopify embedded Components page (`shopify/components/page.tsx`) — state + controls for widget_title (text field), cta_text (text field), show_price (checkbox), image_aspect (select)
+- ✅ Standalone Components page (`(standalone)/components/page.tsx`) — state + controls for all 4 new settings, embed code generation updated
+
+#### Shopify Recommendations Page ✅
+- ✅ Type picker fixed — replaced s-button-group with s-select dropdown (button-group onClick doesn't fire in Polaris web components)
+
+### Brand Identity Defaults (Visual Fields in RecommendationSettings) ✅
+**Goal:** Save visual settings (colors, border radius, CTA text, image aspect, etc.) to DB so Custom Integration users get "set once, use everywhere" — no data-attributes needed. Fallback chain: URL param (explicit) → DB brand defaults → hardcoded defaults.
+
+#### Model ✅
+- ✅ 11 nullable columns on `RecommendationSettings`: `widget_style` (String 50), `widget_columns` (Integer), `widget_size` (String 50), `primary_color` (String 50), `text_color` (String 50), `bg_color` (String 50), `border_radius` (String 50), `cta_text` (String 100), `show_price` (Boolean), `image_aspect` (String 50), `widget_title` (String 200)
+
+#### Backend Schemas ✅
+- ✅ `RecommendationSettingsCreate` — 11 new optional fields
+- ✅ `RecommendationSettingsUpdate` — 11 new optional fields
+- ✅ `RecommendationSettingsDetail` — 11 new nullable fields
+
+#### Fallback Helper ✅
+- ✅ `apply_visual_defaults()` in `components_subrouter.py` — `VISUAL_DEFAULTS` dict (single source of truth), `_URL_TO_DB_MAP` mapping, per-param fallback logic
+
+#### Applied in 4 Subrouters (16 endpoints) ✅
+- ✅ `components_subrouter.py` — 4 standalone endpoints
+- ✅ `widget_subrouter.py` — 4 public widget endpoints
+- ✅ `shopify_embedded_subrouter.py` — 4 embedded component endpoints
+- ✅ `shopify_app_proxy_subrouter.py` — 4 app proxy endpoints
+
+#### Settings Create Blocks ✅
+- ✅ `recommendation_settings_subrouter.py` — standalone create block includes 11 visual fields
+- ✅ `shopify_embedded_subrouter.py` — embedded create block includes 11 visual fields
+
+#### Frontend Schema ✅
+- ✅ `recommendation-settings.schemas.ts` — 11 fields in `RecommendationSettingsSchema` and `CreateOrUpdateSettingsSchema`
+
+#### Frontend — Shopify Embedded Service ✅
+- ✅ `EmbeddedSettingsDetail` — 11 new nullable fields
+- ✅ `EmbeddedSettingsPayload` — 11 new optional fields
+
+#### Frontend — Components Pages ✅
+- ✅ Standalone Components page — "Save as Brand Defaults" button (`createOrUpdateSettings`)
+- ✅ Shopify Components page — "Save as Brand Defaults" `<s-button>` (`updateSettings`)
+
+#### Migration ⚠️
+- ⚠️ **Not included** — user creates migration manually (11 nullable columns, no defaults needed)
+
 ### Nice to Have
 - ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page; Standalone: Stripe via accounts module)

@@ -22,6 +22,17 @@ router = APIRouter(
 
 
 # ==========================================
+# Image Aspect Ratio Map — Tailwind classes per aspect ratio option
+# ==========================================
+
+IMAGE_ASPECT_MAP = {
+    "square": "aspect-square",       # 1:1
+    "portrait": "aspect-[3/4]",      # 3:4
+    "landscape": "aspect-video",     # 16:9
+}
+
+
+# ==========================================
 # Size Map — proportional CSS classes per size tier
 # ==========================================
 
@@ -72,6 +83,97 @@ SIZE_MAP = {
         "carousel_gap": "space-x-6",
     },
 }
+
+
+# ==========================================
+# Hardcoded Visual Defaults — single source of truth
+# ==========================================
+
+VISUAL_DEFAULTS = {
+    "style": "card",
+    "columns": 4,
+    "size": "default",
+    "primary_color": "#3B82F6",
+    "text_color": "#1F2937",
+    "bg_color": "#FFFFFF",
+    "border_radius": "8px",
+    "cta_text": "View",
+    "show_price": True,
+    "image_aspect": "square",
+    "widget_title": "",
+}
+
+# Maps URL param names to DB column names on RecommendationSettings
+_URL_TO_DB_MAP = {
+    "style": "widget_style",
+    "columns": "widget_columns",
+    "size": "widget_size",
+    "primary_color": "primary_color",
+    "text_color": "text_color",
+    "bg_color": "bg_color",
+    "border_radius": "border_radius",
+    "cta_text": "cta_text",
+    "show_price": "show_price",
+    "image_aspect": "image_aspect",
+    "widget_title": "widget_title",
+}
+
+
+def apply_visual_defaults(
+    settings: Optional[RecommendationSettings],
+    *,
+    style: str,
+    columns: int,
+    size: str,
+    primary_color: str,
+    text_color: str,
+    bg_color: str,
+    border_radius: str,
+    cta_text: str,
+    show_price: bool,
+    image_aspect: str,
+    widget_title: str,
+) -> Dict[str, any]:
+    """
+    Apply the fallback chain: URL param (explicit) → DB brand defaults → hardcoded defaults.
+
+    For each visual parameter:
+    - URL value != hardcoded default → user explicitly set it → use URL value
+    - URL value == hardcoded default AND DB has value → use DB value
+    - URL value == hardcoded default AND DB is None → keep hardcoded default
+
+    Returns a dict with resolved values keyed by URL param names.
+    """
+    url_values = {
+        "style": style,
+        "columns": columns,
+        "size": size,
+        "primary_color": primary_color,
+        "text_color": text_color,
+        "bg_color": bg_color,
+        "border_radius": border_radius,
+        "cta_text": cta_text,
+        "show_price": show_price,
+        "image_aspect": image_aspect,
+        "widget_title": widget_title,
+    }
+
+    resolved = {}
+    for param_name, url_val in url_values.items():
+        hardcoded = VISUAL_DEFAULTS[param_name]
+        db_col = _URL_TO_DB_MAP[param_name]
+
+        if url_val != hardcoded:
+            # URL value differs from hardcoded → user explicitly set it → use URL value
+            resolved[param_name] = url_val
+        elif settings is not None and getattr(settings, db_col, None) is not None:
+            # URL value matches hardcoded AND DB has a saved value → use DB value
+            resolved[param_name] = getattr(settings, db_col)
+        else:
+            # URL value matches hardcoded AND DB is None → keep hardcoded default
+            resolved[param_name] = hardcoded
+
+    return resolved
 
 
 def get_default_shop_urls(connection: EcommerceConnection, settings: Optional[RecommendationSettings]) -> Dict[str, str]:
@@ -155,6 +257,10 @@ async def get_bestsellers_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -177,6 +283,14 @@ async def get_bestsellers_component(
 
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
+
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
 
         adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
@@ -201,18 +315,22 @@ async def get_bestsellers_component(
         # Generate HTML component
         html = generate_recommendation_html(
             recommendations=recs,
-            style=style,
+            style=vis["style"],
             device=device,
-            columns=columns,
-            size=size,
+            columns=vis["columns"],
+            size=vis["size"],
             colors={
-                "primary": primary_color,
-                "text": text_color,
-                "bg": bg_color
+                "primary": vis["primary_color"],
+                "text": vis["text_color"],
+                "bg": vis["bg_color"],
             },
-            border_radius=border_radius,
+            border_radius=vis["border_radius"],
             rec_type="bestseller",
-            shop_urls=shop_urls
+            shop_urls=shop_urls,
+            widget_title=vis["widget_title"],
+            cta_text=vis["cta_text"],
+            show_price=vis["show_price"],
+            image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -237,6 +355,10 @@ async def get_cross_sell_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -260,6 +382,14 @@ async def get_cross_sell_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
@@ -282,18 +412,22 @@ async def get_cross_sell_component(
         # Generate HTML component
         html = generate_recommendation_html(
             recommendations=recs,
-            style=style,
+            style=vis["style"],
             device=device,
-            columns=columns,
-            size=size,
+            columns=vis["columns"],
+            size=vis["size"],
             colors={
-                "primary": primary_color,
-                "text": text_color,
-                "bg": bg_color
+                "primary": vis["primary_color"],
+                "text": vis["text_color"],
+                "bg": vis["bg_color"],
             },
-            border_radius=border_radius,
+            border_radius=vis["border_radius"],
             rec_type="cross-sell",
-            shop_urls=shop_urls
+            shop_urls=shop_urls,
+            widget_title=vis["widget_title"],
+            cta_text=vis["cta_text"],
+            show_price=vis["show_price"],
+            image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -318,6 +452,10 @@ async def get_upsell_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -341,6 +479,14 @@ async def get_upsell_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
@@ -363,18 +509,22 @@ async def get_upsell_component(
         # Generate HTML component
         html = generate_recommendation_html(
             recommendations=recs,
-            style=style,
+            style=vis["style"],
             device=device,
-            columns=columns,
-            size=size,
+            columns=vis["columns"],
+            size=vis["size"],
             colors={
-                "primary": primary_color,
-                "text": text_color,
-                "bg": bg_color
+                "primary": vis["primary_color"],
+                "text": vis["text_color"],
+                "bg": vis["bg_color"],
             },
-            border_radius=border_radius,
+            border_radius=vis["border_radius"],
             rec_type="upsell",
-            shop_urls=shop_urls
+            shop_urls=shop_urls,
+            widget_title=vis["widget_title"],
+            cta_text=vis["cta_text"],
+            show_price=vis["show_price"],
+            image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -398,6 +548,10 @@ async def get_similar_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session)
 ):
@@ -421,6 +575,14 @@ async def get_similar_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, session)
         engine = RecommendationEngine(adapter)
 
@@ -443,18 +605,22 @@ async def get_similar_component(
         # Generate HTML component
         html = generate_recommendation_html(
             recommendations=recs,
-            style=style,
+            style=vis["style"],
             device=device,
-            columns=columns,
-            size=size,
+            columns=vis["columns"],
+            size=vis["size"],
             colors={
-                "primary": primary_color,
-                "text": text_color,
-                "bg": bg_color
+                "primary": vis["primary_color"],
+                "text": vis["text_color"],
+                "bg": vis["bg_color"],
             },
-            border_radius=border_radius,
+            border_radius=vis["border_radius"],
             rec_type="similar",
-            shop_urls=shop_urls
+            shop_urls=shop_urls,
+            widget_title=vis["widget_title"],
+            cta_text=vis["cta_text"],
+            show_price=vis["show_price"],
+            image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -474,7 +640,11 @@ def generate_recommendation_html(
     colors: Dict[str, str],
     border_radius: str,
     rec_type: str,
-    shop_urls: Dict[str, str]
+    shop_urls: Dict[str, str],
+    widget_title: str = "",
+    cta_text: str = "View",
+    show_price: bool = True,
+    image_aspect: str = "square",
 ) -> str:
     """Generate HTML component with embedded Tailwind CSS"""
 
@@ -489,6 +659,7 @@ def generate_recommendation_html(
 
     sm = SIZE_MAP[size]
 
+    # Widget title: use custom title if provided, otherwise auto-default by rec_type
     title_map = {
         "bestseller": "Popular now",
         "cross-sell": "Frequently bought together",
@@ -496,18 +667,21 @@ def generate_recommendation_html(
         "similar": "You may also like"
     }
 
-    title = title_map.get(rec_type, "Recommended for you")
+    title = widget_title if widget_title else title_map.get(rec_type, "Recommended for you")
+
+    # Image aspect ratio: validate against known values, fallback to "square"
+    aspect_class = IMAGE_ASPECT_MAP.get(image_aspect, IMAGE_ASPECT_MAP["square"])
 
     # Responsive grid: 1 col mobile → 2 col tablet → N col desktop
     col_class = f"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-{columns}"
 
     # Generate product cards based on style
     if style == "carousel":
-        cards_html = generate_carousel_cards(recommendations, colors, border_radius, shop_urls, sm)
+        cards_html = generate_carousel_cards(recommendations, colors, border_radius, shop_urls, sm, cta_text, show_price, aspect_class)
         container_class = f"flex overflow-x-auto {sm['carousel_gap']} pb-4 scrollbar-hide"
     else:
         # "card" or any other value — responsive grid
-        cards_html = generate_grid_cards(recommendations, colors, border_radius, shop_urls, sm)
+        cards_html = generate_grid_cards(recommendations, colors, border_radius, shop_urls, sm, cta_text, show_price, aspect_class)
         container_class = f"{col_class} {sm['grid_gap']}"
 
     html = f"""
@@ -594,7 +768,7 @@ def _build_product_url(shop_urls: Dict[str, str], handle: str, product_id: str) 
     return "#"
 
 
-def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], border_radius: str, shop_urls: Dict[str, str], sm: Dict) -> str:
+def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], border_radius: str, shop_urls: Dict[str, str], sm: Dict, cta_text: str, show_price: bool, aspect_class: str) -> str:
     """Generate responsive grid product cards using size map."""
     cards = []
 
@@ -609,10 +783,13 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
 
         product_url = _build_product_url(shop_urls, handle, product_id)
 
+        # Conditionally render price span
+        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["primary"]}">${price}</span>' if show_price else ''
+
         card = f"""
         <div class="w-full bg-white rounded-lg {sm['shadow']} transition-all duration-300 transform hover:-translate-y-1"
              style="border-radius: {border_radius}; background-color: {colors['bg']}">
-            <div class="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+            <div class="{aspect_class} bg-gray-100 rounded-t-lg overflow-hidden">
                 <img src="{image_url or 'https://via.placeholder.com/300x300?text=No+Image'}"
                      alt="{title}"
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
@@ -623,7 +800,7 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
                     {str(title)[:sm['title_truncate']]}
                 </h4>
                 <div class="flex items-center justify-between">
-                    <span class="font-bold {sm['price_text']}" style="color: {colors['primary']}">${price}</span>
+                    {price_html}
                     <button data-rec-click
                             data-product-id="{product_id}"
                             data-position="{position}"
@@ -631,7 +808,7 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
                             data-product-url="{product_url}"
                             class="{sm['button_padding']} rounded-md text-white {sm['button_text']} font-medium hover:opacity-90 transition-opacity"
                             style="background-color: {colors['primary']}">
-                        View
+                        {cta_text}
                     </button>
                 </div>
             </div>
@@ -642,7 +819,7 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
     return ''.join(cards)
 
 
-def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str], border_radius: str, shop_urls: Dict[str, str], sm: Dict) -> str:
+def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str], border_radius: str, shop_urls: Dict[str, str], sm: Dict, cta_text: str, show_price: bool, aspect_class: str) -> str:
     """Generate carousel product cards using size map."""
     cards = []
 
@@ -656,10 +833,13 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
 
         product_url = _build_product_url(shop_urls, handle, product_id)
 
+        # Conditionally render price span
+        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["primary"]}">${price}</span>' if show_price else ''
+
         card = f"""
         <div class="flex-none {sm['carousel_card_width']} bg-white rounded-lg {sm['shadow']} transition-all duration-300"
              style="border-radius: {border_radius}; background-color: {colors['bg']}">
-            <div class="aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+            <div class="{aspect_class} bg-gray-100 rounded-t-lg overflow-hidden">
                 <img src="{image_url or 'https://via.placeholder.com/250x250?text=No+Image'}"
                      alt="{title}"
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
@@ -669,7 +849,7 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
                     {str(title)[:sm['title_truncate']]}
                 </h4>
                 <div class="flex items-center justify-between">
-                    <span class="font-bold {sm['price_text']}" style="color: {colors['primary']}">${price}</span>
+                    {price_html}
                     <button data-rec-click
                             data-product-id="{product_id}"
                             data-position="{position}"
@@ -677,7 +857,7 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
                             data-product-url="{product_url}"
                             class="{sm['button_padding']} rounded text-white {sm['button_text']} font-medium hover:opacity-90"
                             style="background-color: {colors['primary']}">
-                        View
+                        {cta_text}
                     </button>
                 </div>
             </div>

@@ -26,6 +26,9 @@ const EMBED_DEFAULTS: Record<string, string> = {
   'text-color': '#1F2937',
   'bg-color': '#FFFFFF',
   'border-radius': '8px',
+  'cta-text': 'View',
+  'show-price': 'true',
+  'image-aspect': 'square',
   'lookback-days': '30',
   method: 'volume',
   'min-price-increase': '10',
@@ -118,6 +121,10 @@ export function useComponents() {
       textColor?: string;
       bgColor?: string;
       borderRadius?: string;
+      widgetTitle?: string;
+      ctaText?: string;
+      showPrice?: boolean;
+      imageAspect?: string;
       lookbackDays?: number;
       method?: string;
       minPriceIncrease?: number;
@@ -138,10 +145,18 @@ export function useComponents() {
       'text-color': config.textColor ?? '#1F2937',
       'bg-color': config.bgColor ?? '#FFFFFF',
       'border-radius': config.borderRadius ?? '8px',
+      'cta-text': config.ctaText ?? 'View',
+      'show-price': String(config.showPrice ?? true),
+      'image-aspect': config.imageAspect ?? 'square',
       'lookback-days': String(config.lookbackDays ?? 30),
       method: config.method ?? 'volume',
       'min-price-increase': String(config.minPriceIncrease ?? 10),
     };
+
+    // widget-title has no default (empty = auto) — only include if user set one
+    if (config.widgetTitle) {
+      attrs.push(`data-widget-title="${config.widgetTitle}"`);
+    }
 
     for (const [key, value] of Object.entries(attrMap)) {
       if (value !== EMBED_DEFAULTS[key]) {

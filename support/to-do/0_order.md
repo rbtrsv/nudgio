@@ -220,7 +220,35 @@
 ### 10. Magento Adobe Commerce Extension 🚫 Abandoned
 - 🚫 Magento 2 extension for Adobe Commerce Marketplace — too much work for too little market. Will not be implemented.
 
-### 10. Nice to Have
+### 10. Widget Settings Enhancement (5 New Configurable Fields) ✅
+- ✅ 5 new settings: `widget_title` (text, auto-default per type), `cta_text` (text, "View"), `show_price` (boolean, true), `border_radius` (text, "8px"), `image_aspect` (select: square/portrait/landscape)
+- ✅ Server HTML generator (`components_subrouter.py`) — `IMAGE_ASPECT_MAP`, updated `generate_recommendation_html()`, `generate_grid_cards()`, `generate_carousel_cards()` with cta_text, show_price, aspect_class
+- ✅ Standalone component endpoints (`components_subrouter.py`) — 4 endpoints accept + pass new params
+- ✅ Shopify App Proxy endpoints (`shopify_app_proxy_subrouter.py`) — 4 endpoints accept + pass new params
+- ✅ Shopify Theme Extension (`nudgio-recommendations.liquid`) — 5 new `{% schema %}` settings + URL params (separate variable encoding)
+- ✅ WordPress plugin — settings (`class-nudgio-settings.php`), shortcode (`class-nudgio-shortcode.php`), block.json, settings page
+- ✅ Shopify Embedded endpoints (`shopify_embedded_subrouter.py`) — 4 endpoints accept + pass new params
+- ✅ Public Widget endpoints (`widget_subrouter.py`) — 4 endpoints accept + pass new params
+- ✅ Widget Sign endpoint (`widget_sign_subrouter.py`) — new params in HMAC-signed dict
+- ✅ Universal `widget.js` — DEFAULTS + ATTR_MAP updated with new data-attributes
+- ✅ Frontend schemas/services — `components.schemas.ts`, `components.service.ts`, `shopify-embedded.service.ts` updated
+- ✅ Frontend hooks — `use-components.ts` EMBED_DEFAULTS + generateEmbedCode updated
+- ✅ Frontend UI pages — both Components pages (Shopify embedded + standalone) have controls for new settings
+- ✅ Shopify Recommendations page — replaced button-group with s-select (onClick doesn't fire in Polaris web components)
+
+### 11. Brand Identity Defaults (Visual Fields in RecommendationSettings)
+- ✅ 11 nullable visual columns added to `RecommendationSettings` model: `widget_style`, `widget_columns`, `widget_size`, `primary_color`, `text_color`, `bg_color`, `border_radius`, `cta_text`, `show_price`, `image_aspect`, `widget_title`
+- ✅ Backend schemas updated: `RecommendationSettingsCreate`, `RecommendationSettingsUpdate`, `RecommendationSettingsDetail`
+- ✅ `apply_visual_defaults()` fallback helper in `components_subrouter.py` — fallback chain: URL param (explicit) → DB brand defaults → hardcoded defaults
+- ✅ Applied in 4 subrouters (16 endpoints): `components_subrouter`, `widget_subrouter`, `shopify_embedded_subrouter`, `shopify_app_proxy_subrouter`
+- ✅ Frontend schema (`recommendation-settings.schemas.ts`) — 11 fields in both `RecommendationSettingsSchema` and `CreateOrUpdateSettingsSchema`
+- ✅ "Save as Brand Defaults" button on standalone Components page (`createOrUpdateSettings`)
+- ✅ "Save as Brand Defaults" button on Shopify Components page (`updateSettings`)
+- ✅ `EmbeddedSettingsPayload` + `EmbeddedSettingsDetail` updated in `shopify-embedded.service.ts`
+- ✅ Both settings create blocks (`recommendation_settings_subrouter` + `shopify_embedded_subrouter`) include 11 new fields
+- ⚠️ **Migration not included** — user creates migration manually
+
+### 12. Nice to Have
 - ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page with plan display + Shopify upgrade redirect; Standalone: Stripe via accounts module)
 
 ---
@@ -251,6 +279,8 @@
 14. ✅ **Universal JS Widget Snippet** — DONE. `widget.js` loader (IIFE, XHR, iframe, MutationObserver) + `widget_sign_subrouter.py` (HMAC signing, CORS) + Components page "Copy Snippet" (`generateEmbedCode()`).
 15. 🚫 **Magento Adobe Commerce Extension** — ABANDONED. Too much work for too little market.
 16. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
+17. ✅ **Widget Settings Enhancement** — DONE. 5 new configurable fields (widget_title, cta_text, show_price, border_radius, image_aspect) propagated across all delivery paths: server HTML generator, 4 subrouters (standalone, app proxy, embedded, public widget), sign endpoint, Shopify Liquid, WordPress plugin, widget.js, frontend schemas/services/hooks, both Components UI pages. Shopify Recommendations page type picker fixed (s-select instead of s-button-group).
+18. ✅ **Brand Identity Defaults** — DONE. 11 nullable visual columns on `RecommendationSettings` (widget_style, widget_columns, widget_size, primary_color, text_color, bg_color, border_radius, cta_text, show_price, image_aspect, widget_title). Fallback chain: URL param → DB brand defaults → hardcoded. `apply_visual_defaults()` helper applied in 16 endpoints across 4 subrouters. "Save as Brand Defaults" button on both Components pages. Frontend schemas + Shopify embedded service updated. Migration by user.
 
 ---
 

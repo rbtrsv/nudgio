@@ -85,6 +85,10 @@ async def sign_widget_url(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius CSS value"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     lookback_days: int = Query(30, description="Lookback window in days"),
     method: str = Query("volume", description="Bestseller method: volume, value, balanced"),
     min_price_increase: int = Query(10, description="Min price increase % for upsell"),
@@ -187,10 +191,17 @@ async def sign_widget_url(
         "text_color": text_color,
         "bg_color": bg_color,
         "border_radius": border_radius,
+        "cta_text": cta_text,
+        "show_price": str(show_price).lower(),
+        "image_aspect": image_aspect,
         "lookback_days": str(lookback_days),
         "method": method,
         "min_price_increase": str(min_price_increase),
     }
+
+    # Only include widget_title if non-empty (empty = server auto-defaults)
+    if widget_title:
+        params["widget_title"] = widget_title
 
     # Only include product_id if provided (not needed for bestsellers)
     if product_id:

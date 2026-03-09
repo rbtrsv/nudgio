@@ -25,6 +25,10 @@ const buildWidgetQuery = (params: WidgetParams): string => {
   if (params.text_color) searchParams.set('text_color', params.text_color);
   if (params.bg_color) searchParams.set('bg_color', params.bg_color);
   if (params.border_radius) searchParams.set('border_radius', params.border_radius);
+  if (params.widget_title) searchParams.set('widget_title', params.widget_title);
+  if (params.cta_text) searchParams.set('cta_text', params.cta_text);
+  if (params.show_price !== undefined) searchParams.set('show_price', String(params.show_price));
+  if (params.image_aspect) searchParams.set('image_aspect', params.image_aspect);
   return searchParams.toString();
 };
 

@@ -215,35 +215,19 @@ export default function ShopifyRecommendationsPage() {
       {/* Top spacer — breathing room between page heading and first section */}
       <s-box paddingBlockStart="base" />
 
-      {/* Type Selector — button group acting as tabs */}
+      {/* Type Selector — s-select (button-group onClick doesn't fire in Polaris web components) */}
       <s-section heading="Recommendation Type">
         <s-box padding="base">
-        <s-button-group>
-          <s-button
-            variant={activeType === 'bestsellers' ? 'primary' : undefined}
-            onClick={() => switchType('bestsellers')}
+          <s-select
+            label="Type"
+            value={activeType}
+            onChange={(e) => switchType(e.currentTarget.value as RecommendationType)}
           >
-            Bestsellers
-          </s-button>
-          <s-button
-            variant={activeType === 'cross-sell' ? 'primary' : undefined}
-            onClick={() => switchType('cross-sell')}
-          >
-            Cross-Sell
-          </s-button>
-          <s-button
-            variant={activeType === 'upsell' ? 'primary' : undefined}
-            onClick={() => switchType('upsell')}
-          >
-            Upsell
-          </s-button>
-          <s-button
-            variant={activeType === 'similar' ? 'primary' : undefined}
-            onClick={() => switchType('similar')}
-          >
-            Similar
-          </s-button>
-        </s-button-group>
+            <s-option value="bestsellers">Bestsellers</s-option>
+            <s-option value="cross-sell">Cross-Sell</s-option>
+            <s-option value="upsell">Upsell</s-option>
+            <s-option value="similar">Similar Products</s-option>
+          </s-select>
         </s-box>
       </s-section>
 

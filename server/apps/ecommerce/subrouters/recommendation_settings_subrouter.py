@@ -78,6 +78,18 @@ async def create_or_update_settings(
                 min_price_increase_percent=payload.min_price_increase_percent,
                 shop_base_url=payload.shop_base_url,
                 product_url_template=payload.product_url_template,
+                # Brand identity defaults
+                widget_style=payload.widget_style,
+                widget_columns=payload.widget_columns,
+                widget_size=payload.widget_size,
+                primary_color=payload.primary_color,
+                text_color=payload.text_color,
+                bg_color=payload.bg_color,
+                border_radius=payload.border_radius,
+                cta_text=payload.cta_text,
+                show_price=payload.show_price,
+                image_aspect=payload.image_aspect,
+                widget_title=payload.widget_title,
             )
             db.add(new_settings)
             await db.commit()

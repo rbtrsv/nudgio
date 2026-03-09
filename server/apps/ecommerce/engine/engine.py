@@ -1,3 +1,27 @@
+"""
+Recommendation Engine
+
+Core recommendation algorithms that use platform adapters to generate
+product recommendations from order and catalog data.
+
+Algorithms:
+    - get_bestsellers: sales-based ranking (volume, value, or balanced)
+    - get_cross_sell: market basket analysis (co-occurrence in orders)
+    - get_upsell: higher-priced alternatives in same category
+    - get_similar: attribute-based similarity (product_type + vendor scoring)
+
+Debug — Inspecting Shopify Store Data:
+    Shopify has no direct DB access. Use the GraphQL Admin API with the
+    access token (ecommerce_connections.api_secret) from the nudgio DB.
+    Query products and orders directly to verify catalog/order data matches
+    what the engine sees via the adapter.
+
+    Caution: get_adapter() in adapters/factory.py decrypts api_secret
+    in-place on the connection object. If the SQLAlchemy object is reused
+    across requests the token can get double-processed. Ensure adapter
+    creation uses a fresh or expunged object.
+"""
+
 from typing import List, Dict, Any
 from ..adapters.base import PlatformAdapter
 from ..schemas.recommendation_schemas import BestsellerMethod

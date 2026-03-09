@@ -5,6 +5,7 @@ import { useConnections } from '@/modules/ecommerce/hooks/use-ecommerce-connecti
 import { useComponents, type WidgetType } from '@/modules/ecommerce/hooks/use-components';
 import { getProducts, type DataProduct } from '@/modules/ecommerce/service/data.service';
 import { getWidgetAPIKeys } from '@/modules/ecommerce/service/widget-api-keys.service';
+import { createOrUpdateSettings } from '@/modules/ecommerce/service/recommendation-settings.service';
 import { type WidgetAPIKeyDetail } from '@/modules/ecommerce/schemas/widget-api-keys.schemas';
 import { API_BASE_URL } from '@/modules/accounts/utils/api.endpoints';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/modules/shadcnui/components/ui/card';
@@ -14,7 +15,7 @@ import { Label } from '@/modules/shadcnui/components/ui/label';
 import { Alert, AlertDescription } from '@/modules/shadcnui/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/modules/shadcnui/components/ui/select';
 import { Textarea } from '@/modules/shadcnui/components/ui/textarea';
-import { Loader2, LayoutGrid, Copy, CheckCircle, AlertCircle, Code } from 'lucide-react';
+import { Loader2, LayoutGrid, Copy, CheckCircle, AlertCircle, Code, Save } from 'lucide-react';
 import { getPlatformLabel } from '@/modules/ecommerce/utils/format-utils';
 
 export default function ComponentsPage() {
@@ -35,6 +36,10 @@ export default function ComponentsPage() {
   const [textColor, setTextColor] = useState('#1F2937');
   const [bgColor, setBgColor] = useState('#FFFFFF');
   const [borderRadius, setBorderRadius] = useState('8px');
+  const [widgetTitle, setWidgetTitle] = useState('');
+  const [ctaText, setCtaText] = useState('View');
+  const [showPrice, setShowPrice] = useState(true);
+  const [imageAspect, setImageAspect] = useState<'square' | 'portrait' | 'landscape'>('square');
   const [copied, setCopied] = useState(false);
 
   // Product dropdown state (for cross-sell, upsell, similar widget types)
@@ -45,6 +50,10 @@ export default function ComponentsPage() {
   // API keys state (for embed code generation)
   const [apiKeys, setApiKeys] = useState<WidgetAPIKeyDetail[]>([]);
   const [apiKeysLoading, setApiKeysLoading] = useState(false);
+
+  // Save as Brand Defaults state
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const needsProductId = widgetType !== 'bestsellers';
   const needsLookback = widgetType === 'bestsellers' || widgetType === 'cross-sell';
@@ -113,7 +122,42 @@ export default function ComponentsPage() {
       text_color: textColor,
       bg_color: bgColor,
       border_radius: borderRadius,
+      widget_title: widgetTitle,
+      cta_text: ctaText,
+      show_price: showPrice,
+      image_aspect: imageAspect,
     });
+  };
+
+  // Save current visual config as brand defaults in RecommendationSettings
+  const handleSaveBrandDefaults = async () => {
+    if (!activeConnectionId) return;
+
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    const result = await createOrUpdateSettings(activeConnectionId, {
+      widget_style: style,
+      widget_columns: columns,
+      widget_size: size,
+      primary_color: primaryColor,
+      text_color: textColor,
+      bg_color: bgColor,
+      border_radius: borderRadius,
+      cta_text: ctaText,
+      show_price: showPrice,
+      image_aspect: imageAspect,
+      widget_title: widgetTitle || null,
+    });
+
+    if (result.success) {
+      setSaveMessage('Brand defaults saved');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } else {
+      setSaveMessage(result.error || 'Failed to save');
+    }
+
+    setIsSaving(false);
   };
 
   // Generate embed code using first active API key
@@ -131,11 +175,15 @@ export default function ComponentsPage() {
       textColor,
       bgColor,
       borderRadius,
+      widgetTitle: widgetTitle || undefined,
+      ctaText,
+      showPrice,
+      imageAspect,
       lookbackDays: needsLookback ? lookbackDays : undefined,
       method: needsMethod ? method : undefined,
       minPriceIncrease: needsMinPriceIncrease ? minPriceIncrease : undefined,
     });
-  }, [apiKeys, widgetType, top, style, columns, size, primaryColor, textColor, bgColor, borderRadius, lookbackDays, method, minPriceIncrease, needsLookback, needsMethod, needsMinPriceIncrease, generateEmbedCode]);
+  }, [apiKeys, widgetType, top, style, columns, size, primaryColor, textColor, bgColor, borderRadius, widgetTitle, ctaText, showPrice, imageAspect, lookbackDays, method, minPriceIncrease, needsLookback, needsMethod, needsMinPriceIncrease, generateEmbedCode]);
 
   const handleCopy = useCallback(() => {
     const code = getEmbedSnippet();
@@ -333,18 +381,78 @@ export default function ComponentsPage() {
                 <Label>Border Radius</Label>
                 <Input value={borderRadius} onChange={(e) => setBorderRadius(e.target.value)} placeholder="8px" />
               </div>
+
+              {/* Widget Title */}
+              <div className="space-y-2">
+                <Label>Widget Title</Label>
+                <Input value={widgetTitle} onChange={(e) => setWidgetTitle(e.target.value)} placeholder="Leave empty for auto-default" />
+              </div>
+
+              {/* CTA Text */}
+              <div className="space-y-2">
+                <Label>Button Text</Label>
+                <Input value={ctaText} onChange={(e) => setCtaText(e.target.value)} placeholder="View" />
+              </div>
+
+              {/* Show Price */}
+              <div className="space-y-2">
+                <Label>Show Price</Label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={showPrice}
+                    onChange={(e) => setShowPrice(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  <span className="text-sm text-muted-foreground">Display product prices</span>
+                </div>
+              </div>
+
+              {/* Image Aspect Ratio */}
+              <div className="space-y-2">
+                <Label>Image Aspect Ratio</Label>
+                <Select value={imageAspect} onValueChange={(v) => setImageAspect(v as 'square' | 'portrait' | 'landscape')}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="square">Square (1:1)</SelectItem>
+                    <SelectItem value="portrait">Portrait (3:4)</SelectItem>
+                    <SelectItem value="landscape">Landscape (16:9)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <Button onClick={handleGenerate} disabled={isLoading || (needsProductId && !productId)}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                'Generate Preview'
+            <div className="flex items-center gap-3">
+              <Button onClick={handleGenerate} disabled={isLoading || (needsProductId && !productId)}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  'Generate Preview'
+                )}
+              </Button>
+
+              {/* Save current visual config as brand defaults in DB */}
+              <Button variant="outline" onClick={handleSaveBrandDefaults} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save as Brand Defaults
+                  </>
+                )}
+              </Button>
+
+              {saveMessage && (
+                <span className="text-sm text-muted-foreground">{saveMessage}</span>
               )}
-            </Button>
+            </div>
           </CardContent>
         </Card>
       )}

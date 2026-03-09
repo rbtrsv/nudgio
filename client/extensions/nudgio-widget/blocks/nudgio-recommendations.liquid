@@ -29,6 +29,20 @@
 {% assign params = params | append: "&primary_color=" | append: primary_encoded %}
 {% assign params = params | append: "&text_color=" | append: text_encoded %}
 {% assign params = params | append: "&bg_color=" | append: bg_encoded %}
+{% assign border_radius_encoded = block.settings.border_radius | url_encode %}
+{% assign params = params | append: "&border_radius=" | append: border_radius_encoded %}
+{% assign params = params | append: "&image_aspect=" | append: block.settings.image_aspect %}
+{% if block.settings.widget_title != blank %}
+  {% assign widget_title_encoded = block.settings.widget_title | url_encode %}
+  {% assign params = params | append: "&widget_title=" | append: widget_title_encoded %}
+{% endif %}
+{% if block.settings.cta_text != blank %}
+  {% assign cta_text_encoded = block.settings.cta_text | url_encode %}
+  {% assign params = params | append: "&cta_text=" | append: cta_text_encoded %}
+{% endif %}
+{% unless block.settings.show_price %}
+  {% assign params = params | append: "&show_price=false" %}
+{% endunless %}
 
 {% comment %} For product-specific widget types, pass the current product ID {% endcomment %}
 {% if block.settings.widget_type != "bestsellers" and product %}
@@ -135,6 +149,43 @@
       "id": "bg_color",
       "label": "Background Color",
       "default": "#FFFFFF"
+    },
+    {
+      "type": "text",
+      "id": "widget_title",
+      "label": "Widget Title",
+      "default": "",
+      "info": "Leave empty for auto-default based on widget type (e.g., \"Popular now\", \"Frequently bought together\")."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button Text",
+      "default": "View"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "Show Price",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "border_radius",
+      "label": "Border Radius",
+      "default": "8px",
+      "info": "CSS border-radius value (e.g., 8px, 0.5rem, 50%)."
+    },
+    {
+      "type": "select",
+      "id": "image_aspect",
+      "label": "Image Aspect Ratio",
+      "default": "square",
+      "options": [
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "landscape", "label": "Landscape (16:9)" }
+      ]
     }
   ]
 }

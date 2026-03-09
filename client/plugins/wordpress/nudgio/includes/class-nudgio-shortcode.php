@@ -63,6 +63,10 @@ class Nudgio_Shortcode {
                 'text_color'                 => get_option( 'nudgio_default_text_color', '#1F2937' ),
                 'bg_color'                   => get_option( 'nudgio_default_bg_color', '#FFFFFF' ),
                 'border_radius'              => get_option( 'nudgio_default_border_radius', '8px' ),
+                'widget_title'               => get_option( 'nudgio_default_widget_title', '' ),
+                'cta_text'                   => get_option( 'nudgio_default_cta_text', 'View' ),
+                'show_price'                 => get_option( 'nudgio_default_show_price', true ) ? 'true' : 'false',
+                'image_aspect'               => get_option( 'nudgio_default_image_aspect', 'square' ),
                 'lookback_days'              => '30',
                 'method'                     => 'volume',
                 'min_price_increase_percent' => '10',
@@ -123,7 +127,16 @@ class Nudgio_Shortcode {
             'text_color'    => sanitize_hex_color( $atts['text_color'] ),
             'bg_color'      => sanitize_hex_color( $atts['bg_color'] ),
             'border_radius' => sanitize_text_field( $atts['border_radius'] ),
+            'cta_text'      => sanitize_text_field( $atts['cta_text'] ),
+            'show_price'    => sanitize_text_field( $atts['show_price'] ),
+            'image_aspect'  => sanitize_text_field( $atts['image_aspect'] ),
         );
+
+        // Only include widget_title if non-empty (empty = server auto-defaults)
+        $widget_title = sanitize_text_field( $atts['widget_title'] );
+        if ( ! empty( $widget_title ) ) {
+            $params['widget_title'] = $widget_title;
+        }
 
         // Add type-specific params
         if ( 'bestsellers' === $type ) {

@@ -118,6 +118,20 @@ class RecommendationSettings(BaseMixin, Base):
     shop_base_url: Mapped[str | None] = mapped_column(String(500), nullable=True)  # "https://myshop.myshopify.com"
     product_url_template: Mapped[str | None] = mapped_column(String(500), nullable=True)  # "/products/{handle}"
 
+    # Brand identity defaults — visual settings for widget rendering
+    # None = use hardcoded default in widget endpoints. Fallback chain: URL param → DB → hardcoded.
+    widget_style: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "card", "carousel"
+    widget_columns: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 2-6
+    widget_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "compact", "default", "spacious"
+    primary_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#3B82F6"
+    text_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#1F2937"
+    bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
+    border_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "8px"
+    cta_text: Mapped[str | None] = mapped_column(String(100), nullable=True)  # "View", "Shop Now"
+    show_price: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False
+    image_aspect: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "square", "portrait", "landscape"
+    widget_title: Mapped[str | None] = mapped_column(String(200), nullable=True)  # "Our Picks", "" (empty = auto)
+
     # Relationships
     connection: Mapped["EcommerceConnection"] = relationship(back_populates="settings")
 

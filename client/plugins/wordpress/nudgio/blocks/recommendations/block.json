@@ -60,6 +60,23 @@
             "type": "string",
             "default": "8px"
         },
+        "widget_title": {
+            "type": "string",
+            "default": ""
+        },
+        "cta_text": {
+            "type": "string",
+            "default": "View"
+        },
+        "show_price": {
+            "type": "boolean",
+            "default": true
+        },
+        "image_aspect": {
+            "type": "string",
+            "default": "square",
+            "enum": [ "square", "portrait", "landscape" ]
+        },
         "lookback_days": {
             "type": "number",
             "default": 30

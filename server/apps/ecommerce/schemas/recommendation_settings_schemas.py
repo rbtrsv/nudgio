@@ -22,6 +22,18 @@ class RecommendationSettingsCreate(BaseModel):
     min_price_increase_percent: int = Field(default=10, description="Minimum price increase percentage for upsell recommendations (0-1000)")
     shop_base_url: str | None = Field(default=None, description="Shop base URL, e.g. https://myshop.myshopify.com")
     product_url_template: str | None = Field(default=None, description="Product URL template, e.g. /products/{handle}")
+    # Brand identity defaults — visual settings for widget rendering
+    widget_style: str | None = Field(default=None, description="Widget layout style: card, carousel")
+    widget_columns: int | None = Field(default=None, description="Max grid columns at full width (2-6)")
+    widget_size: str | None = Field(default=None, description="Visual density: compact, default, spacious")
+    primary_color: str | None = Field(default=None, description="Primary/accent color hex, e.g. #3B82F6")
+    text_color: str | None = Field(default=None, description="Text color hex, e.g. #1F2937")
+    bg_color: str | None = Field(default=None, description="Background color hex, e.g. #FFFFFF")
+    border_radius: str | None = Field(default=None, description="CSS border radius, e.g. 8px")
+    cta_text: str | None = Field(default=None, description="Call-to-action button text, e.g. View, Shop Now")
+    show_price: bool | None = Field(default=None, description="Whether to display product prices")
+    image_aspect: str | None = Field(default=None, description="Image aspect ratio: square, portrait, landscape")
+    widget_title: str | None = Field(default=None, description="Custom widget heading (empty string = auto-default by type)")
 
     @field_validator('bestseller_lookback_days', 'crosssell_lookback_days')
     @classmethod
@@ -54,6 +66,18 @@ class RecommendationSettingsUpdate(BaseModel):
     min_price_increase_percent: int | None = Field(default=None, description="Minimum price increase percentage for upsell recommendations (0-1000)")
     shop_base_url: str | None = Field(default=None, description="Shop base URL, e.g. https://myshop.myshopify.com")
     product_url_template: str | None = Field(default=None, description="Product URL template, e.g. /products/{handle}")
+    # Brand identity defaults — visual settings for widget rendering
+    widget_style: str | None = Field(default=None, description="Widget layout style: card, carousel")
+    widget_columns: int | None = Field(default=None, description="Max grid columns at full width (2-6)")
+    widget_size: str | None = Field(default=None, description="Visual density: compact, default, spacious")
+    primary_color: str | None = Field(default=None, description="Primary/accent color hex, e.g. #3B82F6")
+    text_color: str | None = Field(default=None, description="Text color hex, e.g. #1F2937")
+    bg_color: str | None = Field(default=None, description="Background color hex, e.g. #FFFFFF")
+    border_radius: str | None = Field(default=None, description="CSS border radius, e.g. 8px")
+    cta_text: str | None = Field(default=None, description="Call-to-action button text, e.g. View, Shop Now")
+    show_price: bool | None = Field(default=None, description="Whether to display product prices")
+    image_aspect: str | None = Field(default=None, description="Image aspect ratio: square, portrait, landscape")
+    widget_title: str | None = Field(default=None, description="Custom widget heading (empty string = auto-default by type)")
 
 
 # ==========================================
@@ -71,6 +95,18 @@ class RecommendationSettingsDetail(BaseModel):
     min_price_increase_percent: int = Field(description="Minimum upsell price increase percentage")
     shop_base_url: str | None = Field(default=None, description="Shop base URL")
     product_url_template: str | None = Field(default=None, description="Product URL template")
+    # Brand identity defaults — visual settings for widget rendering
+    widget_style: str | None = Field(default=None, description="Widget layout style")
+    widget_columns: int | None = Field(default=None, description="Max grid columns at full width")
+    widget_size: str | None = Field(default=None, description="Visual density")
+    primary_color: str | None = Field(default=None, description="Primary/accent color hex")
+    text_color: str | None = Field(default=None, description="Text color hex")
+    bg_color: str | None = Field(default=None, description="Background color hex")
+    border_radius: str | None = Field(default=None, description="CSS border radius")
+    cta_text: str | None = Field(default=None, description="Call-to-action button text")
+    show_price: bool | None = Field(default=None, description="Whether to display product prices")
+    image_aspect: str | None = Field(default=None, description="Image aspect ratio")
+    widget_title: str | None = Field(default=None, description="Custom widget heading")
     created_at: datetime = Field(description="When the settings were created")
     updated_at: datetime | None = Field(default=None, description="When the settings were last updated")
 

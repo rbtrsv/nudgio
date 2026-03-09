@@ -79,7 +79,7 @@ from ..utils.dependency_utils import (
     enforce_embedded_rate_limit,
     enforce_embedded_monthly_order_limit,
 )
-from .components_subrouter import generate_recommendation_html, get_default_shop_urls
+from .components_subrouter import generate_recommendation_html, get_default_shop_urls, apply_visual_defaults
 
 logger = logging.getLogger(__name__)
 
@@ -530,6 +530,18 @@ async def update_settings(
                 min_price_increase_percent=payload.min_price_increase_percent,
                 shop_base_url=payload.shop_base_url,
                 product_url_template=payload.product_url_template,
+                # Brand identity defaults
+                widget_style=payload.widget_style,
+                widget_columns=payload.widget_columns,
+                widget_size=payload.widget_size,
+                primary_color=payload.primary_color,
+                text_color=payload.text_color,
+                bg_color=payload.bg_color,
+                border_radius=payload.border_radius,
+                cta_text=payload.cta_text,
+                show_price=payload.show_price,
+                image_aspect=payload.image_aspect,
+                widget_title=payload.widget_title,
             )
             db.add(new_settings)
             await db.commit()
@@ -857,6 +869,10 @@ async def get_bestsellers_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -885,6 +901,14 @@ async def get_bestsellers_component(
         # Default URLs by platform if not configured
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            rec_settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
@@ -908,14 +932,18 @@ async def get_bestsellers_component(
         # Generate HTML component
         html = generate_recommendation_html(
             recommendations=recs,
-            style=style,
+            style=vis["style"],
             device=device,
-            columns=columns,
-            size=size,
-            colors={"primary": primary_color, "text": text_color, "bg": bg_color},
-            border_radius=border_radius,
+            columns=vis["columns"],
+            size=vis["size"],
+            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
+            border_radius=vis["border_radius"],
             rec_type="bestseller",
             shop_urls=shop_urls,
+            widget_title=vis["widget_title"],
+            cta_text=vis["cta_text"],
+            show_price=vis["show_price"],
+            image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -941,6 +969,10 @@ async def get_cross_sell_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -965,6 +997,14 @@ async def get_cross_sell_component(
         rec_settings = settings_result.scalar_one_or_none()
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            rec_settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
@@ -983,10 +1023,12 @@ async def get_cross_sell_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, style=style, device=device,
-            columns=columns, size=size,
-            colors={"primary": primary_color, "text": text_color, "bg": bg_color},
-            border_radius=border_radius, rec_type="cross-sell", shop_urls=shop_urls,
+            recommendations=recs, style=vis["style"], device=device,
+            columns=vis["columns"], size=vis["size"],
+            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
+            border_radius=vis["border_radius"], rec_type="cross-sell", shop_urls=shop_urls,
+            widget_title=vis["widget_title"], cta_text=vis["cta_text"],
+            show_price=vis["show_price"], image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -1012,6 +1054,10 @@ async def get_upsell_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -1036,6 +1082,14 @@ async def get_upsell_component(
         rec_settings = settings_result.scalar_one_or_none()
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            rec_settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
@@ -1054,10 +1108,12 @@ async def get_upsell_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, style=style, device=device,
-            columns=columns, size=size,
-            colors={"primary": primary_color, "text": text_color, "bg": bg_color},
-            border_radius=border_radius, rec_type="upsell", shop_urls=shop_urls,
+            recommendations=recs, style=vis["style"], device=device,
+            columns=vis["columns"], size=vis["size"],
+            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
+            border_radius=vis["border_radius"], rec_type="upsell", shop_urls=shop_urls,
+            widget_title=vis["widget_title"], cta_text=vis["cta_text"],
+            show_price=vis["show_price"], image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)
@@ -1082,6 +1138,10 @@ async def get_similar_component(
     text_color: str = Query("#1F2937", description="Text color hex"),
     bg_color: str = Query("#FFFFFF", description="Background color hex"),
     border_radius: str = Query("8px", description="Border radius"),
+    widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
+    cta_text: str = Query("View", description="Call-to-action button text"),
+    show_price: bool = Query(True, description="Show product price"),
+    image_aspect: str = Query("square", description="Image aspect ratio: square, portrait, landscape"),
     connection: EcommerceConnection = Depends(get_shopify_connection),
     db: AsyncSession = Depends(get_session),
 ):
@@ -1106,6 +1166,14 @@ async def get_similar_component(
         rec_settings = settings_result.scalar_one_or_none()
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
+        # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
+        vis = apply_visual_defaults(
+            rec_settings, style=style, columns=columns, size=size,
+            primary_color=primary_color, text_color=text_color, bg_color=bg_color,
+            border_radius=border_radius, cta_text=cta_text, show_price=show_price,
+            image_aspect=image_aspect, widget_title=widget_title,
+        )
+
         adapter = get_adapter(connection, db)
         engine = RecommendationEngine(adapter)
 
@@ -1124,10 +1192,12 @@ async def get_similar_component(
             )
 
         html = generate_recommendation_html(
-            recommendations=recs, style=style, device=device,
-            columns=columns, size=size,
-            colors={"primary": primary_color, "text": text_color, "bg": bg_color},
-            border_radius=border_radius, rec_type="similar", shop_urls=shop_urls,
+            recommendations=recs, style=vis["style"], device=device,
+            columns=vis["columns"], size=vis["size"],
+            colors={"primary": vis["primary_color"], "text": vis["text_color"], "bg": vis["bg_color"]},
+            border_radius=vis["border_radius"], rec_type="similar", shop_urls=shop_urls,
+            widget_title=vis["widget_title"], cta_text=vis["cta_text"],
+            show_price=vis["show_price"], image_aspect=vis["image_aspect"],
         )
 
         return HTMLResponse(content=html)

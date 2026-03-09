@@ -238,6 +238,58 @@ class Nudgio_Settings {
             'nudgio',
             'nudgio_defaults_section'
         );
+
+        register_setting( 'nudgio_settings', 'nudgio_default_widget_title', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '',
+        ) );
+        add_settings_field(
+            'nudgio_default_widget_title',
+            __( 'Widget Title', 'nudgio-technologies' ),
+            array( $this, 'render_widget_title_field' ),
+            'nudgio',
+            'nudgio_defaults_section'
+        );
+
+        register_setting( 'nudgio_settings', 'nudgio_default_cta_text', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'View',
+        ) );
+        add_settings_field(
+            'nudgio_default_cta_text',
+            __( 'Button Text', 'nudgio-technologies' ),
+            array( $this, 'render_cta_text_field' ),
+            'nudgio',
+            'nudgio_defaults_section'
+        );
+
+        register_setting( 'nudgio_settings', 'nudgio_default_show_price', array(
+            'type'              => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default'           => true,
+        ) );
+        add_settings_field(
+            'nudgio_default_show_price',
+            __( 'Show Price', 'nudgio-technologies' ),
+            array( $this, 'render_show_price_field' ),
+            'nudgio',
+            'nudgio_defaults_section'
+        );
+
+        register_setting( 'nudgio_settings', 'nudgio_default_image_aspect', array(
+            'type'              => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'square',
+        ) );
+        add_settings_field(
+            'nudgio_default_image_aspect',
+            __( 'Image Aspect Ratio', 'nudgio-technologies' ),
+            array( $this, 'render_image_aspect_field' ),
+            'nudgio',
+            'nudgio_defaults_section'
+        );
     }
 
     // ==========================================
@@ -352,6 +404,38 @@ class Nudgio_Settings {
         $value = get_option( 'nudgio_default_border_radius', '8px' );
         echo '<input type="text" name="nudgio_default_border_radius" value="' . esc_attr( $value ) . '" class="small-text" />';
         echo '<p class="description">' . esc_html__( 'CSS border-radius value (e.g., 8px, 0.5rem, 50%).', 'nudgio-technologies' ) . '</p>';
+    }
+
+    public function render_widget_title_field() {
+        $value = get_option( 'nudgio_default_widget_title', '' );
+        echo '<input type="text" name="nudgio_default_widget_title" value="' . esc_attr( $value ) . '" class="regular-text" />';
+        echo '<p class="description">' . esc_html__( 'Leave empty for auto-default based on widget type (e.g., "Popular now", "Frequently bought together").', 'nudgio-technologies' ) . '</p>';
+    }
+
+    public function render_cta_text_field() {
+        $value = get_option( 'nudgio_default_cta_text', 'View' );
+        echo '<input type="text" name="nudgio_default_cta_text" value="' . esc_attr( $value ) . '" class="small-text" />';
+        echo '<p class="description">' . esc_html__( 'Call-to-action button text (e.g., "View", "Shop Now", "Add to Cart").', 'nudgio-technologies' ) . '</p>';
+    }
+
+    public function render_show_price_field() {
+        $value = get_option( 'nudgio_default_show_price', true );
+        echo '<label><input type="checkbox" name="nudgio_default_show_price" value="1"' . checked( $value, true, false ) . ' /> ';
+        echo esc_html__( 'Display product price on widget cards.', 'nudgio-technologies' ) . '</label>';
+    }
+
+    public function render_image_aspect_field() {
+        $value = get_option( 'nudgio_default_image_aspect', 'square' );
+        $aspects = array(
+            'square'    => __( 'Square (1:1)', 'nudgio-technologies' ),
+            'portrait'  => __( 'Portrait (3:4)', 'nudgio-technologies' ),
+            'landscape' => __( 'Landscape (16:9)', 'nudgio-technologies' ),
+        );
+        echo '<select name="nudgio_default_image_aspect">';
+        foreach ( $aspects as $k => $label ) {
+            echo '<option value="' . esc_attr( $k ) . '"' . selected( $value, $k, false ) . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select>';
     }
 
     // ==========================================

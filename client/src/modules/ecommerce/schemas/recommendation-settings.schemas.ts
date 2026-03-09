@@ -42,6 +42,18 @@ export const RecommendationSettingsSchema = z.object({
   min_price_increase_percent: z.number(),
   shop_base_url: z.string().nullable(),
   product_url_template: z.string().nullable(),
+  // Brand identity defaults — visual settings for widget rendering
+  widget_style: z.string().nullable(),
+  widget_columns: z.number().nullable(),
+  widget_size: z.string().nullable(),
+  primary_color: z.string().nullable(),
+  text_color: z.string().nullable(),
+  bg_color: z.string().nullable(),
+  border_radius: z.string().nullable(),
+  cta_text: z.string().nullable(),
+  show_price: z.boolean().nullable(),
+  image_aspect: z.string().nullable(),
+  widget_title: z.string().nullable(),
   created_at: z.string(),
   updated_at: z.string().nullable(),
 });
@@ -65,6 +77,18 @@ export const CreateOrUpdateSettingsSchema = z.object({
   min_price_increase_percent: z.number().min(0).max(1000).default(10),
   shop_base_url: z.string().nullable().optional(),
   product_url_template: z.string().nullable().optional(),
+  // Brand identity defaults — visual settings for widget rendering
+  widget_style: z.string().nullable().optional(),
+  widget_columns: z.number().min(2).max(6).nullable().optional(),
+  widget_size: z.string().nullable().optional(),
+  primary_color: z.string().nullable().optional(),
+  text_color: z.string().nullable().optional(),
+  bg_color: z.string().nullable().optional(),
+  border_radius: z.string().nullable().optional(),
+  cta_text: z.string().nullable().optional(),
+  show_price: z.boolean().nullable().optional(),
+  image_aspect: z.string().nullable().optional(),
+  widget_title: z.string().nullable().optional(),
 });
 
 // ==========================================

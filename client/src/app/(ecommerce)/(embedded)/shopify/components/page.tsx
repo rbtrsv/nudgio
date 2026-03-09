@@ -28,6 +28,7 @@ import { useEmbedded } from '../layout';
 import {
   getComponentHtml,
   getProducts,
+  updateSettings,
   type EmbeddedProduct,
 } from '@/modules/ecommerce/service/shopify-embedded.service';
 
@@ -58,6 +59,10 @@ export default function ShopifyComponentsPage() {
   const [textColor, setTextColor] = useState('#1F2937');
   const [bgColor, setBgColor] = useState('#FFFFFF');
   const [borderRadius, setBorderRadius] = useState('8px');
+  const [widgetTitle, setWidgetTitle] = useState('');
+  const [ctaText, setCtaText] = useState('View');
+  const [showPrice, setShowPrice] = useState(true);
+  const [imageAspect, setImageAspect] = useState<'square' | 'portrait' | 'landscape'>('square');
 
   // Product dropdown state
   const [products, setProducts] = useState<EmbeddedProduct[]>([]);
@@ -70,6 +75,10 @@ export default function ShopifyComponentsPage() {
   const [html, setHtml] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Save as Brand Defaults state
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // Derived flags
   const needsProductId = widgetType !== 'bestsellers';
@@ -134,6 +143,10 @@ export default function ShopifyComponentsPage() {
         text_color: textColor,
         bg_color: bgColor,
         border_radius: borderRadius,
+        widget_title: widgetTitle || undefined,
+        cta_text: ctaText,
+        show_price: showPrice,
+        image_aspect: imageAspect,
       });
 
       setHtml(result);
@@ -143,6 +156,44 @@ export default function ShopifyComponentsPage() {
       console.error('Component generate error:', err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // ==========================================
+  // Save as Brand Defaults
+  // ==========================================
+
+  const handleSaveBrandDefaults = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      const token = await getSessionToken();
+      await updateSettings(token, {
+        bestseller_method: method,
+        bestseller_lookback_days: lookbackDays,
+        crosssell_lookback_days: lookbackDays,
+        max_recommendations: top,
+        min_price_increase_percent: minPriceIncrease,
+        widget_style: style,
+        widget_columns: columns,
+        widget_size: size,
+        primary_color: primaryColor,
+        text_color: textColor,
+        bg_color: bgColor,
+        border_radius: borderRadius,
+        cta_text: ctaText,
+        show_price: showPrice,
+        image_aspect: imageAspect,
+        widget_title: widgetTitle || null,
+      });
+      setSaveMessage('Brand defaults saved');
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save';
+      setSaveMessage(message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -342,6 +393,41 @@ export default function ShopifyComponentsPage() {
               details="CSS value (e.g. 8px)"
             />
 
+            {/* Widget Title */}
+            <s-text-field
+              label="Widget Title"
+              value={widgetTitle}
+              onChange={(e) => setWidgetTitle(e.currentTarget.value)}
+              details="Leave empty for auto-default based on widget type."
+            />
+
+            {/* CTA Text */}
+            <s-text-field
+              label="Button Text"
+              value={ctaText}
+              onChange={(e) => setCtaText(e.currentTarget.value)}
+              details="Call-to-action button text (e.g. View, Shop Now, Add to Cart)."
+            />
+
+            {/* Show Price */}
+            <s-checkbox
+              checked={showPrice || undefined}
+              onChange={(e) => setShowPrice(e.currentTarget.checked)}
+            >
+              Show Price
+            </s-checkbox>
+
+            {/* Image Aspect Ratio */}
+            <s-select
+              label="Image Aspect Ratio"
+              value={imageAspect}
+              onChange={(e) => setImageAspect(e.currentTarget.value as 'square' | 'portrait' | 'landscape')}
+            >
+              <s-option value="square">Square (1:1)</s-option>
+              <s-option value="portrait">Portrait (3:4)</s-option>
+              <s-option value="landscape">Landscape (16:9)</s-option>
+            </s-select>
+
             {/* Generate Button */}
             <s-button
               variant="primary"
@@ -350,6 +436,20 @@ export default function ShopifyComponentsPage() {
             >
               {isLoading ? 'Generating...' : 'Generate Preview'}
             </s-button>
+
+            {/* Save current visual config as brand defaults in DB */}
+            <s-button
+              onClick={handleSaveBrandDefaults}
+              disabled={isSaving || undefined}
+            >
+              {isSaving ? 'Saving...' : 'Save as Brand Defaults'}
+            </s-button>
+
+            {saveMessage && (
+              <s-banner tone="info" dismiss>
+                <s-paragraph>{saveMessage}</s-paragraph>
+              </s-banner>
+            )}
 
           </s-stack>
         </s-box>
