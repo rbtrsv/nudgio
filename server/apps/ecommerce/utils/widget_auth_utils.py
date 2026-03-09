@@ -260,3 +260,120 @@ async def check_widget_rate_limit(key_id: int, client_ip: str) -> bool:
 class WidgetAuthError(Exception):
     """Raised when widget HMAC signature verification fails."""
     pass
+
+
+# ==========================================
+# WooCommerce Sync HMAC Verification (POST Body)
+# ==========================================
+
+async def verify_woocommerce_sync_signature(
+    headers: dict[str, str], body_bytes: bytes, db: AsyncSession
+) -> tuple[WidgetAPIKey, EcommerceConnection]:
+    """
+    Verify HMAC-signed WooCommerce sync POST request using raw body signing.
+
+    Same security model as verify_widget_signature but for POST requests:
+    - Headers carry auth params instead of query string
+    - HMAC covers the raw request body instead of canonical query string
+
+    Headers:
+        X-Nudgio-Key-Id — the widget API key ID
+        X-Nudgio-Timestamp — Unix timestamp
+        X-Nudgio-Nonce — random hex string
+        X-Nudgio-Signature — HMAC-SHA256(request_body_raw, api_secret)
+
+    This function:
+    1. Extract key_id, timestamp, nonce, signature from headers
+    2. Validate all required headers are present
+    3. Check timestamp not expired (within 5 minutes)
+    4. Look up key_id in DB (active + not deleted)
+    5. Load the connection (active + not deleted)
+    6. Decrypt the stored API secret using Fernet (encryption_utils.py)
+    7. Compute HMAC-SHA256(body_bytes, decrypted_secret)
+    8. Compare with signature (hmac.compare_digest — constant-time)
+    9. Return (key, connection)
+
+    Args:
+        headers: Request headers dict
+        body_bytes: Raw request body bytes
+        db: Database session
+
+    Returns:
+        Tuple of (WidgetAPIKey, EcommerceConnection)
+
+    Raises:
+        WidgetAuthError with descriptive message on any failure
+    """
+    # Step 1: Extract auth headers
+    key_id_str = headers.get("x-nudgio-key-id")
+    ts_str = headers.get("x-nudgio-timestamp")
+    nonce = headers.get("x-nudgio-nonce")
+    signature = headers.get("x-nudgio-signature")
+
+    # Step 2: Validate all required headers are present
+    if not key_id_str or not ts_str or not nonce or not signature:
+        raise WidgetAuthError("Missing required authentication headers")
+
+    try:
+        key_id = int(key_id_str)
+    except ValueError:
+        raise WidgetAuthError("Invalid key_id")
+
+    # Step 3: Check timestamp not expired
+    try:
+        ts = int(ts_str)
+    except ValueError:
+        raise WidgetAuthError("Invalid timestamp")
+
+    now = int(time.time())
+    if abs(now - ts) > SIGNATURE_MAX_AGE_SECONDS:
+        raise WidgetAuthError("Signature expired")
+
+    # Step 4: Look up key_id in DB (active + not deleted)
+    result = await db.execute(
+        select(WidgetAPIKey).where(
+            and_(
+                WidgetAPIKey.id == key_id,
+                WidgetAPIKey.is_active == True,
+                WidgetAPIKey.deleted_at.is_(None),
+            )
+        )
+    )
+    api_key = result.scalar_one_or_none()
+    if not api_key:
+        raise WidgetAuthError("Invalid or inactive API key")
+
+    # Step 5: Load the connection (active + not deleted)
+    conn_result = await db.execute(
+        select(EcommerceConnection).where(
+            and_(
+                EcommerceConnection.id == api_key.connection_id,
+                EcommerceConnection.is_active == True,
+                EcommerceConnection.deleted_at.is_(None),
+            )
+        )
+    )
+    connection = conn_result.scalar_one_or_none()
+    if not connection:
+        raise WidgetAuthError("Connection not found or inactive")
+
+    # Step 6: Decrypt the stored API secret
+    try:
+        decrypted_secret = decrypt_password(api_key.api_key_encrypted)
+    except Exception:
+        logger.error(f"WooCommerce sync auth: failed to decrypt API key id={key_id}")
+        raise WidgetAuthError("Internal authentication error")
+
+    # Step 7: Compute HMAC-SHA256(body_bytes, decrypted_secret)
+    computed = hmac_mod.new(
+        decrypted_secret.encode("utf-8"),
+        body_bytes,
+        hashlib.sha256,
+    ).hexdigest()
+
+    # Step 8: Constant-time compare
+    if not hmac_mod.compare_digest(computed, signature):
+        raise WidgetAuthError("Invalid signature")
+
+    # Step 9: Return (key, connection)
+    return api_key, connection

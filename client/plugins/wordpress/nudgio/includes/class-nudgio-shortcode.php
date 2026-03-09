@@ -112,15 +112,15 @@ class Nudgio_Shortcode {
         $encrypted  = get_option( 'nudgio_api_secret', '' );
         $server_url = esc_url_raw( get_option( 'nudgio_server_url', 'https://server.nudgio.tech' ) );
 
-        // No credentials configured — output nothing (don't show broken iframe)
+        // No credentials configured — output HTML comment for debugging (View Source)
         if ( ! $key_id || empty( $encrypted ) ) {
-            return '';
+            return '<!-- Nudgio: No API credentials configured. Go to Settings → Nudgio Technologies. -->';
         }
 
         // Decrypt the stored secret
         $secret = Nudgio_Settings::decrypt_secret( $encrypted );
         if ( false === $secret ) {
-            return '';
+            return '<!-- Nudgio: Failed to decrypt API secret. Re-enter your API secret in Settings → Nudgio Technologies. -->';
         }
 
         // Sanitize type to allowed values
@@ -139,10 +139,13 @@ class Nudgio_Shortcode {
             }
         }
 
+        // Debug: output detected product context as HTML comment (visible in View Source)
+        $debug_output = '<!-- Nudgio: type="' . esc_html( $type ) . '" | product_id="' . esc_html( $product_id ) . '" | is_product_page=' . ( is_singular( 'product' ) ? 'yes' : 'no' ) . ' -->';
+
         // Step 4: Guard — product-dependent types on non-product pages output nothing
         $product_required_types = array( 'cross-sell', 'upsell', 'similar' );
         if ( in_array( $type, $product_required_types, true ) && empty( $product_id ) ) {
-            return '';
+            return $debug_output . '<!-- Nudgio: type="' . esc_html( $type ) . '" requires a product page or explicit product_id attribute. No product context detected. -->';
         }
 
         // Step 5: Build params array with ALL widget params + auth params
@@ -252,6 +255,6 @@ class Nudgio_Shortcode {
         $output .= '})();';
         $output .= '</script>';
 
-        return $output;
+        return $debug_output . $output;
     }
 }

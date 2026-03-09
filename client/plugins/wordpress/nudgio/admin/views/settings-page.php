@@ -46,6 +46,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 
     <hr />
 
+    <!-- Data Sync -->
+    <h2><?php esc_html_e( 'Data Sync', 'nudgio-technologies' ); ?></h2>
+    <p class="description">
+        <?php esc_html_e(
+            'Push your WooCommerce products, orders, and order items to the Nudgio server. This enables cross-sell, upsell, and similar product recommendations. Syncs automatically every 6 hours and on product/order changes.',
+            'nudgio-technologies'
+        ); ?>
+    </p>
+    <?php
+    // Display last sync status if available
+    $last_sync_at      = get_option( 'nudgio_last_sync_at', '' );
+    $last_sync_status  = get_option( 'nudgio_last_sync_status', '' );
+    $last_sync_message = get_option( 'nudgio_last_sync_message', '' );
+    if ( $last_sync_at ) : ?>
+        <p>
+            <strong><?php esc_html_e( 'Last sync:', 'nudgio-technologies' ); ?></strong>
+            <?php echo esc_html( $last_sync_at ); ?>
+            &mdash;
+            <span style="color: <?php echo 'success' === $last_sync_status ? '#00a32a' : '#d63638'; ?>;">
+                <?php echo esc_html( $last_sync_message ); ?>
+            </span>
+        </p>
+    <?php endif; ?>
+    <p>
+        <button type="button" id="nudgio-sync-data" class="button button-secondary">
+            <?php esc_html_e( 'Sync Data', 'nudgio-technologies' ); ?>
+        </button>
+        <span id="nudgio-sync-result" style="margin-left: 10px;"></span>
+    </p>
+
+    <hr />
+
     <!-- Visual Editing (Gutenberg) — Recommended approach -->
     <div class="notice notice-info inline" style="margin: 20px 0; padding: 16px 20px; border-left-width: 4px;">
         <h2 style="margin-top: 0;"><?php esc_html_e( 'Recommended: Visual Editing (Gutenberg Block)', 'nudgio-technologies' ); ?></h2>
@@ -185,6 +217,50 @@ if ( ! defined( 'ABSPATH' ) ) {
         .finally(function() {
             btn.disabled = false;
             btn.textContent = '<?php echo esc_js( __( 'Test Connection', 'nudgio-technologies' ) ); ?>';
+        });
+    });
+})();
+</script>
+
+<!-- Sync Data JavaScript -->
+<script type="text/javascript">
+(function() {
+    var btn = document.getElementById('nudgio-sync-data');
+    var result = document.getElementById('nudgio-sync-result');
+    if (!btn) return;
+
+    btn.addEventListener('click', function() {
+        btn.disabled = true;
+        btn.textContent = '<?php echo esc_js( __( 'Syncing...', 'nudgio-technologies' ) ); ?>';
+        result.textContent = '';
+        result.style.color = '';
+
+        var data = new FormData();
+        data.append('action', 'nudgio_sync_data');
+        data.append('nonce', '<?php echo esc_js( wp_create_nonce( 'nudgio_sync_data' ) ); ?>');
+
+        fetch(ajaxurl, {
+            method: 'POST',
+            body: data,
+            credentials: 'same-origin',
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+            if (json.success) {
+                result.textContent = json.data;
+                result.style.color = '#00a32a';
+            } else {
+                result.textContent = json.data;
+                result.style.color = '#d63638';
+            }
+        })
+        .catch(function(err) {
+            result.textContent = '<?php echo esc_js( __( 'Request failed.', 'nudgio-technologies' ) ); ?>';
+            result.style.color = '#d63638';
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.textContent = '<?php echo esc_js( __( 'Sync Data', 'nudgio-technologies' ) ); ?>';
         });
     });
 })();

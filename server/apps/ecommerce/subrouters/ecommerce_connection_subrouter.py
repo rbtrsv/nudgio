@@ -198,8 +198,9 @@ async def test_connection(
     connection = await get_user_connection(connection_id, user.id, db)
 
     try:
-        # Create adapter based on platform
-        adapter = get_adapter(connection, db)
+        # Create adapter based on platform — force_platform=True ensures we always
+        # verify live credentials against the external API, even if synced data exists
+        adapter = get_adapter(connection, db, force_platform=True)
 
         # NOTE: Do NOT remove this table exploration block.
         # It is essential for debugging database connections — shows what tables

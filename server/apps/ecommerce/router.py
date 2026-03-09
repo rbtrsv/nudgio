@@ -45,6 +45,9 @@ from .subrouters.shopify_embedded_subrouter import router as shopify_embedded_ro
 # Public widget delivery (HMAC signed URL auth — non-Shopify platforms)
 from .subrouters.widget_subrouter import router as widget_router
 
+# WooCommerce sync (HMAC body signing auth — WooCommerce plugin data push)
+from .subrouters.woocommerce_sync_subrouter import router as woocommerce_sync_router
+
 # Widget API key management (JWT-gated CRUD)
 from .subrouters.widget_api_key_subrouter import router as widget_api_key_router
 
@@ -63,6 +66,7 @@ router.include_router(shopify_embedded_router)  # Session token auth handled int
 router.include_router(shopify_app_proxy_router)  # HMAC auth handled internally
 router.include_router(widget_router)  # HMAC signed URL auth handled internally
 router.include_router(widget_sign_router)  # Public sign endpoint (generates signed URLs for widget.js)
+router.include_router(woocommerce_sync_router)  # HMAC body signing auth handled internally
 
 # Gated — everything else requires active service
 # See require_active_subscription in dependency_utils.py for details.

@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.2.2
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -137,6 +137,20 @@ These types require a product context. On non-product pages, the shortcode outpu
 
 == Changelog ==
 
+= 1.3.1 =
+* Renamed sync endpoints from /plugin-sync to /woocommerce-sync (requires server update deployed simultaneously)
+
+= 1.3.0 =
+* Added automatic WooCommerce data sync — products, orders, and order items are pushed to the Nudgio server via HMAC-authenticated endpoints
+* New "Sync Data" button on Settings page with last sync status display
+* WP-Cron scheduled sync every 6 hours
+* Real-time sync on product create/update and order status changes (completed, processing)
+* Single product and single order sync methods for granular real-time updates
+
+= 1.2.3 =
+* Added HTML debug comments visible in View Source for troubleshooting (credentials, product detection, guard triggers)
+* Shows detected product_id and is_product_page status in HTML comments
+
 = 1.2.2 =
 * Fixed boolean serialization for show_price and button_full_width — sanitize_text_field(false) produced empty string which FastAPI rejected with 422
 
@@ -175,6 +189,15 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.3.1 =
+Sync endpoint rename — deploy server and plugin together.
+
+= 1.3.0 =
+Automatic WooCommerce data sync. Products, orders, and order items now push to Nudgio automatically (every 6 hours + real-time on changes). Manual "Sync Data" button added to Settings.
+
+= 1.2.3 =
+Added HTML debug comments for troubleshooting shortcode rendering issues.
 
 = 1.2.2 =
 Fixed boolean fields (show_price, button_full_width) causing 422 errors on the server.

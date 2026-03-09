@@ -36,6 +36,9 @@ class Nudgio_Settings {
 
         // Handle "Test Connection" AJAX request
         add_action( 'wp_ajax_nudgio_test_connection', array( $this, 'ajax_test_connection' ) );
+
+        // Handle "Sync Data" AJAX request
+        add_action( 'wp_ajax_nudgio_sync_data', array( $this, 'ajax_sync_data' ) );
     }
 
     // ==========================================
@@ -504,6 +507,40 @@ class Nudgio_Settings {
      */
     public function render_settings_page() {
         require_once NUDGIO_PLUGIN_DIR . 'admin/views/settings-page.php';
+    }
+
+    // ==========================================
+    // Sync Data (AJAX Handler)
+    // ==========================================
+
+    /**
+     * Handle "Sync Data" AJAX request.
+     *
+     * Calls Nudgio_Sync::sync_all() to push products, orders, and order items
+     * to the Nudgio server. Stores sync status in wp_options for display.
+     */
+    public function ajax_sync_data() {
+        // Verify nonce for AJAX security
+        check_ajax_referer( 'nudgio_sync_data', 'nonce' );
+
+        // Check user permissions
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( __( 'Permission denied.', 'nudgio-technologies' ) );
+        }
+
+        // Run the full sync
+        $results = Nudgio_Sync::sync_all();
+
+        // Store sync status in wp_options for display
+        update_option( 'nudgio_last_sync_at', current_time( 'mysql' ) );
+        update_option( 'nudgio_last_sync_status', $results['success'] ? 'success' : 'error' );
+        update_option( 'nudgio_last_sync_message', $results['message'] );
+
+        if ( $results['success'] ) {
+            wp_send_json_success( $results['message'] );
+        } else {
+            wp_send_json_error( $results['message'] );
+        }
     }
 
     // ==========================================

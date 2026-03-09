@@ -62,13 +62,14 @@ adapters/
 └── magento/database.py      → MagentoAdapter (direct MySQL, EAV)
 ```
 
-### Subrouters (`server/apps/ecommerce/subrouters/`) — 11 subrouters, 66+ routes
+### Subrouters (`server/apps/ecommerce/subrouters/`) — 12 subrouters, 69+ routes
 
 - `ecommerce_connection_subrouter.py` — CRUD + test connection
 - `recommendation_settings_subrouter.py` — CRUD per connection
 - `recommendation_subrouter.py` — bestsellers, cross-sell, up-sell, similar
 - `components_subrouter.py` — HTML widget generation + `apply_visual_defaults()` helper
 - `data_subrouter.py` — raw product/order data + import + sync
+- `woocommerce_sync_subrouter.py` — WooCommerce plugin data push (HMAC body signing auth)
 - `shopify_oauth_subrouter.py` — Shopify OAuth 2.0 flow
 - `woocommerce_auth_subrouter.py` — WooCommerce auto-auth
 - `widget_api_key_subrouter.py` — JWT-gated CRUD for widget API keys
@@ -85,7 +86,7 @@ adapters/
 - `cache_utils.py` — ABC + `InMemoryCacheBackend` + `DragonflyCacheBackend`
 - `encryption_utils.py` — Fernet symmetric encryption for credentials
 - `rate_limiting_utils.py` — ABC + `InMemoryRateLimitBackend` + `DragonflyRateLimitBackend`
-- `widget_auth_utils.py` — HMAC-SHA256 for public widget endpoints
+- `widget_auth_utils.py` — HMAC-SHA256 for public widget endpoints + `verify_woocommerce_sync_signature()` for POST body signing
 - `sync_utils.py` — shared upsert helpers + `sync_connection_data()` + ghost row pruning
 - `shopify_session_utils.py` — session token verify + Token Exchange API
 - `shopify_billing_utils.py` — Shopify Billing API helpers
@@ -93,7 +94,7 @@ adapters/
 ### Router (`server/apps/ecommerce/router.py`)
 
 Prefix: `/ecommerce`. Split into ungated and gated:
-- **Ungated**: Shopify OAuth + WooCommerce auth + webhooks + billing + embedded (session token) + App Proxy (HMAC) + Widget (HMAC signed URL)
+- **Ungated**: Shopify OAuth + WooCommerce auth + webhooks + billing + embedded (session token) + App Proxy (HMAC) + Widget (HMAC signed URL) + WooCommerce Sync (HMAC body signing)
 - **Gated**: Everything else via `require_active_subscription` dependency
 
 ### Custom Integration — Tab Layout
@@ -171,6 +172,10 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - **searchCriteria filter logic**: Filter groups are AND'd together. Filters within a group are OR'd.
 - **No built-in rate limiting**: Recommend max 5 req/sec. `input_limit` defaults: max 20 items per bulk PUT/POST.
 - **`default` in URL = default store view**: Can be replaced with specific store code (e.g., `rest/us_en/V1`).
+
+### WooCommerce Data Flow
+- **Two data paths for WooCommerce**: (1) WooCommerce API connection (`connection_method="api"`) → `WooCommerceApiAdapter` queries store REST API **live** on every widget request — no ingested data needed, bestsellers/cross-sell/upsell/similar all work immediately. (2) WooCommerce plugin push sync → pushes data to `ingested_products`/`ingested_orders`/`ingested_order_items` via `woocommerce_sync_subrouter.py`. After first successful sync, the adapter factory automatically switches to `IngestAdapter` (local PostgreSQL reads) for all widget/recommendation requests — reducing latency vs. live REST API calls.
+- **Plugin auto-sync triggers**: WP-Cron every 6 hours + real-time hooks on product/order changes + manual "Sync Data" button. First sync after credential entry requires manual button click (cron first run is up to 6 hours away).
 
 ### General
 - **Nudgio server has NO `/api/v1/` prefix**: Routes are directly at `/ecommerce/...`. Never add `/api/v1/` to billing callbacks, webhook URIs, auth redirects, app proxy, etc.
@@ -346,7 +351,7 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - ✅ API key management UI in dashboard — "API Keys" 3rd tab on connection detail page (hidden for Shopify)
 - ✅ Components page "Copy Snippet" — generates `<div>` + `<script>` snippet with API key + widget.js loader
 
-### 7. WooCommerce WordPress Plugin (R1 — Shortcode + Settings) ✅
+### 7. WooCommerce WordPress Plugin ✅
 - ✅ WordPress plugin at `client/plugins/wordpress/nudgio/` — iframe-based rendering (HMAC-signed URLs, same pattern as Shopify)
 - ✅ `[nudgio]` shortcode — signed iframe URLs, auto-resize JS, auto-detects product ID on WooCommerce product pages
 - ✅ WP Admin settings page — Key ID, encrypted API Secret, Server URL, default widget settings, Test Connection
@@ -355,6 +360,17 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - ✅ Gutenberg block — `nudgio/recommendations` block with Columns RangeControl (2–6) + Size SelectControl (compact/default/spacious), live preview placeholder, block.json + index.js + render.php
 - ✅ Rename plugin directory
 - ✅ Submit to WordPress Plugin Directory
+- ✅ **WooCommerce Auto-Sync (Plugin Push via HMAC)** — v1.3.0:
+  - ✅ Server: `woocommerce_sync_subrouter.py` — 3 POST endpoints (`/woocommerce-sync/products`, `/orders`, `/order-items`), HMAC-SHA256 body signing auth via headers (`X-Nudgio-Key-Id`, `X-Nudgio-Timestamp`, `X-Nudgio-Nonce`, `X-Nudgio-Signature`), connection_id derived from API key, reuses existing `upsert_products()`/`upsert_orders()`/`upsert_order_items()` from `sync_utils.py`, batch limit 5000
+  - ✅ Server: `verify_woocommerce_sync_signature()` in `widget_auth_utils.py` — same security model as widget HMAC but for POST body (headers instead of query params)
+  - ✅ Server: `image_url` field added to `ProductData` schema (was missing — WooCommerce sends product images)
+  - ✅ Server: `woocommerce_sync_router` mounted on ungated router in `router.py`
+  - ✅ Plugin: `class-nudgio-sync.php` — `sync_all()`, `sync_products()`, `sync_orders()`, `sync_order_items()`, `sync_single_product()`, `sync_single_order()`, `sign_and_post()`. Batches in chunks of 500. WooCommerce field mapping (get_id, get_name, get_slug, get_type, get_sku, get_price, get_image_id, get_stock_quantity, get_status, get_total, get_customer_id, get_items, get_variation_id, get_quantity, get_date_created)
+  - ✅ Plugin: "Sync Data" button on Settings page with AJAX handler + last sync status display (`nudgio_last_sync_at`, `nudgio_last_sync_status`, `nudgio_last_sync_message` in wp_options)
+  - ✅ Plugin: WP-Cron scheduled sync every 6 hours (`nudgio_cron_sync`)
+  - ✅ Plugin: Real-time WooCommerce hooks — `woocommerce_update_product` + `woocommerce_new_product` → single product sync (10s delay), `woocommerce_order_status_changed` (completed/processing) → single order + items sync (10s delay)
+  - ✅ Plugin: Deactivation cleanup — clears all cron events (`nudgio_cron_sync`, `nudgio_sync_single_product`, `nudgio_sync_single_order`)
+  - ✅ Plugin: Version bump to 1.3.0 (header, constant, readme.txt, changelog, upgrade notice)
 
 ### 8. Custom Integration Platform + Data Sync Tab ✅
 - ✅ `CUSTOM_INTEGRATION` added to `PlatformType` enum (backend + frontend)
@@ -465,7 +481,7 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 ### 🟢 Low Priority — Future Expansions
 9. **Production DragonflyDB** — provision in Coolify, switch cache + rate limit backends (⏸️ on hold).
 10. ✅ **Public Widget API** — DONE. `WidgetAPIKey` model (Fernet-encrypted), HMAC-signed URL auth, 4 public widget endpoints, key management UI (3rd tab), dedicated rate limiting. 66 routes total.
-11. ✅ **WooCommerce WordPress Plugin (R1)** — DONE. `[nudgio]` shortcode + WP Admin settings page + iframe rendering + HMAC signing + Test Connection. Verified on `wp.nudgio.tech`.
+11. ✅ **WooCommerce WordPress Plugin** — DONE. R1: `[nudgio]` shortcode + WP Admin settings page + iframe rendering + HMAC signing + Test Connection. R2 (v1.3.0): Auto-Sync via HMAC body signing — `woocommerce_sync_subrouter.py` (3 POST endpoints), `class-nudgio-sync.php` (full sync + single product/order sync), WP-Cron every 6h, real-time WooCommerce hooks, "Sync Data" button + status display. Verified on `wp.nudgio.tech`.
 12. ✅ **Custom Integration Platform + Data Sync Tab** — DONE. `CUSTOM_INTEGRATION` enum, ingest-only create form, Data Sync as own tab (hidden for ingest), `format-utils.ts` label mappers, Push API Integration Guide in API Keys tab.
 13. ✅ **Data Ingestion + Local Storage (V3)** — DONE. 3 ingested tables + migration + IngestAdapter + factory routing + shared upsert helpers + `sync_connection_data()` with ghost row pruning + periodic sync scheduler (asyncio loop, `SKIP LOCKED`, lifespan) + per-connection sync settings (5 fields, SyncInterval enum, PATCH logic) + frontend Data Sync card (toggle, interval, status, Sync Now).
 14. ✅ **Universal JS Widget Snippet** — DONE. `widget.js` loader (IIFE, XHR, iframe, MutationObserver) + `widget_sign_subrouter.py` (HMAC signing, CORS) + Components page "Copy Snippet" (`generateEmbedCode()`).

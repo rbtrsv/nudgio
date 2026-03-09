@@ -21,6 +21,7 @@ class ProductData(BaseModel):
     vendor: str | None = Field(default=None, description="Product vendor/brand")
     sku: str | None = Field(default=None, description="Stock keeping unit")
     price: float = Field(description="Product price")
+    image_url: str | None = Field(default=None, description="Product image URL")
     inventory_quantity: int | None = Field(default=None, description="Current inventory quantity")
     status: str | None = Field(default="active", description="Product status: active, draft, archived")
     created_at: datetime | None = Field(default=None, description="When the product was created on the platform")
