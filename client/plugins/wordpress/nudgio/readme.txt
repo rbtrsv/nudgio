@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -137,6 +137,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 
 == Changelog ==
 
+= 1.2.2 =
+* Fixed boolean serialization for show_price and button_full_width — sanitize_text_field(false) produced empty string which FastAPI rejected with 422
+
 = 1.2.1 =
 * Fixed short description exceeding 150-character limit for WordPress Plugin Directory
 
@@ -172,6 +175,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.2.2 =
+Fixed boolean fields (show_price, button_full_width) causing 422 errors on the server.
 
 = 1.2.1 =
 Fixed short description for WordPress Plugin Directory compliance.
