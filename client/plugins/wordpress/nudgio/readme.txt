@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,13 +60,18 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 
 * `type` — bestsellers, cross-sell, upsell, similar (default: bestsellers)
 * `count` — number of products to show (default: 4)
-* `style` — card, carousel, list (default: card)
-* `device` — desktop, mobile (default: desktop)
+* `style` — card, carousel (default: card)
+* `columns` — max columns at full width, 2-6 (default: 4)
+* `size` — compact, default, spacious (default: default)
 * `product_id` — specific product ID (auto-detected on product pages)
 * `primary_color` — hex color for buttons/accents
 * `text_color` — hex color for text
 * `bg_color` — hex color for background
-* `border_radius` — CSS border-radius value
+* `border_radius` — CSS border-radius value (default: 8px)
+* `widget_title` — custom widget heading (leave empty for auto-default)
+* `cta_text` — button text, e.g. View, Shop Now (default: View)
+* `show_price` — show product price: true/false (default: true)
+* `image_aspect` — square, portrait, landscape (default: square)
 * `lookback_days` — order data lookback period (default: 30)
 * `method` — bestseller method: volume, value, balanced (default: volume)
 * `min_price_increase_percent` — upsell price threshold (default: 10)
@@ -76,6 +81,14 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 These types require a product context. On non-product pages, the shortcode outputs nothing unless you specify a `product_id` attribute explicitly.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added Gutenberg block with full visual editor controls (Widget Title, Button Text, Show Price, Image Aspect Ratio)
+* Added responsive columns setting (2-6, responsive cascade: 1 col mobile, 2 col tablet, N col desktop)
+* Added size setting (compact, default, spacious) for density control
+* Added widget_title, cta_text, show_price, image_aspect shortcode attributes
+* Fixed render.php block-to-shortcode mapping for all visual fields
+* Updated shortcode to pass all visual parameters through HMAC-signed URLs
 
 = 1.0.0 =
 * Initial release
@@ -87,6 +100,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+Gutenberg block with full visual controls. New shortcode attributes: columns, size, widget_title, cta_text, show_price, image_aspect.
 
 = 1.0.0 =
 Initial release.

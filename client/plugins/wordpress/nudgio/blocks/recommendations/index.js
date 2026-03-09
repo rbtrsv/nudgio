@@ -267,12 +267,51 @@
             // ------------------------------------------
             // Panel 4: Appearance
             // ------------------------------------------
+            var ToggleControl = wp.components.ToggleControl;
+
             var appearancePanel = el( PanelBody, { title: __( 'Appearance', 'nudgio' ), initialOpen: false },
+
+                // Border Radius
                 el( TextControl, {
                     label: __( 'Border Radius', 'nudgio' ),
                     help: __( 'CSS value, e.g. 8px, 0.5rem, 0', 'nudgio' ),
                     value: attributes.border_radius,
                     onChange: function ( val ) { setAttributes( { border_radius: val } ); },
+                } ),
+
+                // Widget Title
+                el( TextControl, {
+                    label: __( 'Widget Title', 'nudgio' ),
+                    help: __( 'Leave empty for auto-default based on widget type.', 'nudgio' ),
+                    value: attributes.widget_title,
+                    onChange: function ( val ) { setAttributes( { widget_title: val } ); },
+                } ),
+
+                // CTA Text
+                el( TextControl, {
+                    label: __( 'Button Text', 'nudgio' ),
+                    help: __( 'Call-to-action text (e.g. View, Shop Now, Add to Cart).', 'nudgio' ),
+                    value: attributes.cta_text,
+                    onChange: function ( val ) { setAttributes( { cta_text: val } ); },
+                } ),
+
+                // Show Price toggle
+                el( ToggleControl, {
+                    label: __( 'Show Price', 'nudgio' ),
+                    checked: attributes.show_price,
+                    onChange: function ( val ) { setAttributes( { show_price: val } ); },
+                } ),
+
+                // Image Aspect Ratio
+                el( SelectControl, {
+                    label: __( 'Image Aspect Ratio', 'nudgio' ),
+                    value: attributes.image_aspect,
+                    options: [
+                        { label: 'Square (1:1)',      value: 'square' },
+                        { label: 'Portrait (3:4)',    value: 'portrait' },
+                        { label: 'Landscape (16:9)',  value: 'landscape' },
+                    ],
+                    onChange: function ( val ) { setAttributes( { image_aspect: val } ); },
                 } )
             );
 

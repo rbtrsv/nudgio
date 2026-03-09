@@ -3,7 +3,7 @@
  * Plugin Name: Nudgio Technologies
  * Plugin URI: https://www.nudgio.tech
  * Description: Display AI-powered product recommendations on your WooCommerce store using Nudgio's recommendation engine. Supports bestsellers, cross-sell, upsell, and similar products via simple shortcodes.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 6.1
  * Requires PHP: 8.0
  * Author: Buraro Technologies
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'NUDGIO_VERSION', '1.0.0' );
+define( 'NUDGIO_VERSION', '1.1.0' );
 define( 'NUDGIO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NUDGIO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
