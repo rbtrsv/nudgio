@@ -224,3 +224,106 @@ async def set_cached_recommendations(
     key = _generate_key(f"recs_{rec_type}", connection_id=connection_id, **params)
     await cache.set(key, recommendations, ttl_seconds)
     logger.debug("Cache SET — rec_type=%s connection_id=%s ttl=%ss params=%s", rec_type, connection_id, ttl_seconds, params)
+
+
+# ==========================================
+# Infrastructure Cache — Shop Connection
+# ==========================================
+
+# TTL for infrastructure lookups (connection, service status, settings)
+INFRA_CACHE_TTL = 300  # 5 minutes
+
+async def get_cached_shop_connection(shop: str) -> Dict[str, Any] | None:
+    """
+    Get cached connection lookup by shop domain.
+
+    Returns dict with connection_id + organization_id, or None if not cached.
+    Keyed by shop domain — avoids full WHERE query on every widget render.
+    """
+    key = f"shop_conn:{shop}"
+    result = await cache.get(key)
+    if result is not None:
+        logger.debug("Cache HIT — shop_connection shop=%s", shop)
+    else:
+        logger.debug("Cache MISS — shop_connection shop=%s", shop)
+    return result
+
+
+async def set_cached_shop_connection(shop: str, connection_id: int, organization_id: int) -> None:
+    """
+    Cache connection lookup by shop domain.
+
+    Stores connection_id + organization_id as a dict.
+    On cache hit, caller uses db.get(EcommerceConnection, connection_id)
+    for an instant PK lookup (uses SQLAlchemy identity map within same request).
+    """
+    key = f"shop_conn:{shop}"
+    data = {"connection_id": connection_id, "organization_id": organization_id}
+    await cache.set(key, data, INFRA_CACHE_TTL)
+    logger.debug("Cache SET — shop_connection shop=%s connection_id=%s", shop, connection_id)
+
+
+# ==========================================
+# Infrastructure Cache — Service Status
+# ==========================================
+
+async def get_cached_service_status(organization_id: int) -> bool | None:
+    """
+    Get cached service active status by organization ID.
+
+    Returns True/False, or None if not cached.
+    Avoids re-querying subscription tables on every widget render.
+    """
+    key = f"svc_active:{organization_id}"
+    result = await cache.get(key)
+    if result is not None:
+        logger.debug("Cache HIT — service_status org_id=%s active=%s", organization_id, result)
+    else:
+        logger.debug("Cache MISS — service_status org_id=%s", organization_id)
+    return result
+
+
+async def set_cached_service_status(organization_id: int, is_active: bool) -> None:
+    """
+    Cache service active status by organization ID.
+
+    Stores a boolean — True if subscription is active or within free tier limits.
+    """
+    key = f"svc_active:{organization_id}"
+    await cache.set(key, is_active, INFRA_CACHE_TTL)
+    logger.debug("Cache SET — service_status org_id=%s active=%s", organization_id, is_active)
+
+
+# ==========================================
+# Infrastructure Cache — Recommendation Settings
+# ==========================================
+
+async def get_cached_settings(connection_id: int) -> Dict[str, Any] | None:
+    """
+    Get cached recommendation settings by connection ID.
+
+    Returns a dict of visual + URL settings fields, or None if not cached.
+    Caller reconstructs a SimpleNamespace from the dict so getattr() works
+    in apply_visual_defaults() and get_default_shop_urls().
+    """
+    key = f"rec_settings:{connection_id}"
+    result = await cache.get(key)
+    if result is not None:
+        logger.debug("Cache HIT — rec_settings connection_id=%s", connection_id)
+    else:
+        logger.debug("Cache MISS — rec_settings connection_id=%s", connection_id)
+    return result
+
+
+async def set_cached_settings(connection_id: int, settings_dict: Dict[str, Any] | None) -> None:
+    """
+    Cache recommendation settings by connection ID.
+
+    Stores a dict of visual + URL fields extracted from RecommendationSettings ORM object.
+    Stores None (as empty dict sentinel) if no settings exist for this connection.
+    """
+    key = f"rec_settings:{connection_id}"
+    # Use empty dict as sentinel for "settings row exists but is None" (no row in DB)
+    data = settings_dict if settings_dict is not None else {"_empty": True}
+    await cache.set(key, data, INFRA_CACHE_TTL)
+    logger.debug("Cache SET — rec_settings connection_id=%s", connection_id)

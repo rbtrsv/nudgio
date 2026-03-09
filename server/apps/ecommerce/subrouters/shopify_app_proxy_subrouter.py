@@ -39,7 +39,12 @@ from ..models import EcommerceConnection, RecommendationSettings
 from ..schemas.recommendation_schemas import BestsellerMethod
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
-from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
+from ..utils.cache_utils import (
+    get_cached_recommendations, set_cached_recommendations,
+    get_cached_shop_connection, set_cached_shop_connection,
+    get_cached_service_status, set_cached_service_status,
+    get_cached_settings, set_cached_settings,
+)
 from ..utils.subscription_utils import is_service_active
 from .components_subrouter import generate_recommendation_html, get_default_shop_urls, apply_visual_defaults
 
@@ -121,11 +126,25 @@ def _verify_proxy_signature(request: Request, client_secret: str) -> bool:
 
 async def _get_connection_by_shop(shop: str, db: AsyncSession) -> EcommerceConnection | None:
     """
-    Look up active Shopify connection by shop domain.
+    Look up active Shopify connection by shop domain, with cache.
+
+    Cache layer: stores connection_id by shop domain (TTL 5 min).
+    On cache hit, does an instant PK lookup via db.get() instead of full WHERE query.
+    On cache miss, runs the full query and caches the result.
 
     Deterministic: most recent active connection for this shop.
     Filters: platform=shopify, store_url=shop, is_active=True, not soft-deleted.
     """
+    # Check cache — connection_id + org_id by shop domain
+    cached = await get_cached_shop_connection(shop)
+    if cached is not None:
+        # PK lookup — instant, uses SQLAlchemy identity map within same request
+        connection = await db.get(EcommerceConnection, cached["connection_id"])
+        if connection and connection.is_active and connection.deleted_at is None:
+            return connection
+        # Cached connection no longer valid — fall through to full query
+
+    # Full WHERE query
     result = await db.execute(
         select(EcommerceConnection).where(
             and_(
@@ -136,7 +155,13 @@ async def _get_connection_by_shop(shop: str, db: AsyncSession) -> EcommerceConne
             )
         ).order_by(EcommerceConnection.created_at.desc()).limit(1)
     )
-    return result.scalars().first()
+    connection = result.scalars().first()
+
+    # Cache the result for next request
+    if connection:
+        await set_cached_shop_connection(shop, connection.id, connection.organization_id)
+
+    return connection
 
 
 # ==========================================
@@ -157,6 +182,35 @@ def _sanitize_proxy_param(value: str) -> str:
     Strips everything after the first '?' in the value.
     """
     return value.split("?")[0].strip()
+
+
+# Fields from RecommendationSettings to cache for visual/URL rendering
+_SETTINGS_CACHE_FIELDS = [
+    "shop_base_url", "product_url_template",
+    "widget_style", "widget_columns", "widget_size",
+    "primary_color", "text_color", "bg_color", "border_radius",
+    "cta_text", "show_price", "image_aspect", "widget_title",
+]
+
+
+def _settings_to_dict(rec_settings) -> dict | None:
+    """Extract cacheable fields from RecommendationSettings ORM object."""
+    if rec_settings is None:
+        return None
+    return {f: getattr(rec_settings, f, None) for f in _SETTINGS_CACHE_FIELDS}
+
+
+def _settings_from_cache(cached_dict: dict):
+    """
+    Reconstruct a settings-like object from cached dict.
+    Uses SimpleNamespace so getattr() works in apply_visual_defaults() and
+    get_default_shop_urls().
+    Returns None if cached_dict is the empty sentinel.
+    """
+    from types import SimpleNamespace
+    if cached_dict.get("_empty"):
+        return None
+    return SimpleNamespace(**cached_dict)
 
 
 def _error_html(message: str) -> str:
@@ -238,8 +292,13 @@ async def get_bestsellers_widget(
             logger.warning(f"App Proxy: no active connection for shop={shop}")
             return HTMLResponse(content=_error_html("Widget not available"), status_code=404)
 
-        # Step 3: Check entitlement (active subscription or free tier)
-        service_active = await is_service_active(connection.organization_id, db)
+        # Step 3: Check entitlement (cached — avoids subscription DB query on every render)
+        cached_status = await get_cached_service_status(connection.organization_id)
+        if cached_status is not None:
+            service_active = cached_status
+        else:
+            service_active = await is_service_active(connection.organization_id, db)
+            await set_cached_service_status(connection.organization_id, service_active)
         if not service_active:
             logger.info(f"App Proxy: service inactive for shop={shop}, org_id={connection.organization_id}")
             return HTMLResponse(
@@ -247,13 +306,18 @@ async def get_bestsellers_widget(
                 status_code=403,
             )
 
-        # Step 4: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 4: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
@@ -382,8 +446,13 @@ async def get_cross_sell_widget(
             logger.warning(f"App Proxy: no active connection for shop={shop}")
             return HTMLResponse(content=_error_html("Widget not available"), status_code=404)
 
-        # Step 3: Check entitlement (active subscription or free tier)
-        service_active = await is_service_active(connection.organization_id, db)
+        # Step 3: Check entitlement (cached — avoids subscription DB query on every render)
+        cached_status = await get_cached_service_status(connection.organization_id)
+        if cached_status is not None:
+            service_active = cached_status
+        else:
+            service_active = await is_service_active(connection.organization_id, db)
+            await set_cached_service_status(connection.organization_id, service_active)
         if not service_active:
             logger.info(f"App Proxy: service inactive for shop={shop}, org_id={connection.organization_id}")
             return HTMLResponse(
@@ -391,13 +460,18 @@ async def get_cross_sell_widget(
                 status_code=403,
             )
 
-        # Step 4: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 4: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
@@ -525,8 +599,13 @@ async def get_upsell_widget(
             logger.warning(f"App Proxy: no active connection for shop={shop}")
             return HTMLResponse(content=_error_html("Widget not available"), status_code=404)
 
-        # Step 3: Check entitlement (active subscription or free tier)
-        service_active = await is_service_active(connection.organization_id, db)
+        # Step 3: Check entitlement (cached — avoids subscription DB query on every render)
+        cached_status = await get_cached_service_status(connection.organization_id)
+        if cached_status is not None:
+            service_active = cached_status
+        else:
+            service_active = await is_service_active(connection.organization_id, db)
+            await set_cached_service_status(connection.organization_id, service_active)
         if not service_active:
             logger.info(f"App Proxy: service inactive for shop={shop}, org_id={connection.organization_id}")
             return HTMLResponse(
@@ -534,13 +613,18 @@ async def get_upsell_widget(
                 status_code=403,
             )
 
-        # Step 4: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 4: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
@@ -667,8 +751,13 @@ async def get_similar_widget(
             logger.warning(f"App Proxy: no active connection for shop={shop}")
             return HTMLResponse(content=_error_html("Widget not available"), status_code=404)
 
-        # Step 3: Check entitlement (active subscription or free tier)
-        service_active = await is_service_active(connection.organization_id, db)
+        # Step 3: Check entitlement (cached — avoids subscription DB query on every render)
+        cached_status = await get_cached_service_status(connection.organization_id)
+        if cached_status is not None:
+            service_active = cached_status
+        else:
+            service_active = await is_service_active(connection.organization_id, db)
+            await set_cached_service_status(connection.organization_id, service_active)
         if not service_active:
             logger.info(f"App Proxy: service inactive for shop={shop}, org_id={connection.organization_id}")
             return HTMLResponse(
@@ -676,13 +765,18 @@ async def get_similar_widget(
                 status_code=403,
             )
 
-        # Step 4: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 4: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded

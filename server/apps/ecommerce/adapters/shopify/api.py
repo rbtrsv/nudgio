@@ -255,7 +255,7 @@ class ShopifyAdapter:
                         createdAt
                         displayFinancialStatus
                         totalPriceSet { shopMoney { amount } }
-                        customer { id }
+                        # Future: add 'customer { id }' here + read_customers scope for personalization
                     }
                     cursor
                 }
@@ -270,13 +270,11 @@ class ShopifyAdapter:
 
         orders = []
         for node in nodes:
-            customer = node.get("customer") or {}
             total_price_set = node.get("totalPriceSet") or {}
             shop_money = total_price_set.get("shopMoney") or {}
 
             orders.append({
                 "order_id": self._extract_id(node.get("id")),
-                "customer_id": self._extract_id(customer.get("id")),
                 "total_price": float(shop_money.get("amount", 0)),
                 "financial_status": (node.get("displayFinancialStatus") or "").lower(),
                 "order_date": node.get("createdAt")
@@ -301,7 +299,7 @@ class ShopifyAdapter:
                     node {
                         id
                         createdAt
-                        customer { id }
+                        # Future: add 'customer { id }' here + read_customers scope for personalization
                         lineItems(first: 50) {
                             edges {
                                 node {
@@ -332,8 +330,6 @@ class ShopifyAdapter:
         for order_node in order_nodes:
             order_id = self._extract_id(order_node.get("id"))
             order_date = order_node.get("createdAt")
-            customer = order_node.get("customer") or {}
-            customer_id = self._extract_id(customer.get("id"))
 
             line_items_edges = (order_node.get("lineItems") or {}).get("edges", [])
             for edge in line_items_edges:
@@ -349,7 +345,6 @@ class ShopifyAdapter:
                     "price": float(shop_money.get("amount", 0)),
                     "product_title": li.get("title", ""),
                     "order_date": order_date,
-                    "customer_id": customer_id
                 })
 
                 # Stop if we've reached the limit

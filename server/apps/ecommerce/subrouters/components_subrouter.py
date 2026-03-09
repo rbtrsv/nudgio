@@ -44,7 +44,6 @@ SIZE_MAP = {
         "button_padding": "px-2 py-1",
         "button_text": "text-xs",
         "grid_gap": "gap-2",
-        "title_truncate": 25,
         "heading_text": "text-base",
         "heading_margin": "mb-2",
         "container_padding": "p-2",
@@ -59,7 +58,6 @@ SIZE_MAP = {
         "button_padding": "px-4 py-2",
         "button_text": "text-sm",
         "grid_gap": "gap-4",
-        "title_truncate": 50,
         "heading_text": "text-xl",
         "heading_margin": "mb-4",
         "container_padding": "p-4",
@@ -74,7 +72,6 @@ SIZE_MAP = {
         "button_padding": "px-6 py-3",
         "button_text": "text-base",
         "grid_gap": "gap-6",
-        "title_truncate": 60,
         "heading_text": "text-2xl",
         "heading_margin": "mb-6",
         "container_padding": "p-6",
@@ -783,11 +780,11 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
 
         product_url = _build_product_url(shop_urls, handle, product_id)
 
-        # Conditionally render price span
-        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["primary"]}">${price}</span>' if show_price else ''
+        # Conditionally render price span — uses text color (not primary) to differentiate from CTA button
+        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["text"]}">${float(price):.2f}</span>' if show_price else ''
 
         card = f"""
-        <div class="w-full bg-white rounded-lg {sm['shadow']} transition-all duration-300 transform hover:-translate-y-1"
+        <div class="w-full flex flex-col bg-white rounded-lg {sm['shadow']} transition-all duration-300 transform hover:-translate-y-1"
              style="border-radius: {border_radius}; background-color: {colors['bg']}">
             <div class="{aspect_class} bg-gray-100 rounded-t-lg overflow-hidden">
                 <img src="{image_url or 'https://via.placeholder.com/300x300?text=No+Image'}"
@@ -795,11 +792,11 @@ def generate_grid_cards(recommendations: List[Dict], colors: Dict[str, str], bor
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                      loading="lazy">
             </div>
-            <div class="{sm['card_padding']}">
+            <div class="{sm['card_padding']} flex flex-col flex-1">
                 <h4 class="font-semibold {sm['title_text']} mb-2 line-clamp-2" style="color: {colors['text']}">
-                    {str(title)[:sm['title_truncate']]}
+                    {title}
                 </h4>
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-auto">
                     {price_html}
                     <button data-rec-click
                             data-product-id="{product_id}"
@@ -833,22 +830,22 @@ def generate_carousel_cards(recommendations: List[Dict], colors: Dict[str, str],
 
         product_url = _build_product_url(shop_urls, handle, product_id)
 
-        # Conditionally render price span
-        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["primary"]}">${price}</span>' if show_price else ''
+        # Conditionally render price span — uses text color (not primary) to differentiate from CTA button
+        price_html = f'<span class="font-bold {sm["price_text"]}" style="color: {colors["text"]}">${float(price):.2f}</span>' if show_price else ''
 
         card = f"""
-        <div class="flex-none {sm['carousel_card_width']} bg-white rounded-lg {sm['shadow']} transition-all duration-300"
+        <div class="flex-none {sm['carousel_card_width']} flex flex-col bg-white rounded-lg {sm['shadow']} transition-all duration-300"
              style="border-radius: {border_radius}; background-color: {colors['bg']}">
             <div class="{aspect_class} bg-gray-100 rounded-t-lg overflow-hidden">
                 <img src="{image_url or 'https://via.placeholder.com/250x250?text=No+Image'}"
                      alt="{title}"
                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
             </div>
-            <div class="{sm['card_padding']}">
+            <div class="{sm['card_padding']} flex flex-col flex-1">
                 <h4 class="font-medium {sm['title_text']} mb-2 line-clamp-2" style="color: {colors['text']}">
-                    {str(title)[:sm['title_truncate']]}
+                    {title}
                 </h4>
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between mt-auto">
                     {price_html}
                     <button data-rec-click
                             data-product-id="{product_id}"

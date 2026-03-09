@@ -35,7 +35,11 @@ from ..models import RecommendationSettings
 from ..schemas.recommendation_schemas import BestsellerMethod
 from ..adapters.factory import get_adapter
 from ..engine.engine import RecommendationEngine
-from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
+from ..utils.cache_utils import (
+    get_cached_recommendations, set_cached_recommendations,
+    get_cached_service_status, set_cached_service_status,
+    get_cached_settings, set_cached_settings,
+)
 from ..utils.subscription_utils import is_service_active
 from ..utils.widget_auth_utils import (
     verify_widget_signature,
@@ -67,6 +71,39 @@ def _error_html(message: str) -> str:
     <p>{message}</p>
 </body>
 </html>"""
+
+
+# ==========================================
+# Settings Cache Helpers
+# ==========================================
+
+# Fields from RecommendationSettings to cache for visual/URL rendering
+_SETTINGS_CACHE_FIELDS = [
+    "shop_base_url", "product_url_template",
+    "widget_style", "widget_columns", "widget_size",
+    "primary_color", "text_color", "bg_color", "border_radius",
+    "cta_text", "show_price", "image_aspect", "widget_title",
+]
+
+
+def _settings_to_dict(rec_settings) -> dict | None:
+    """Extract cacheable fields from RecommendationSettings ORM object."""
+    if rec_settings is None:
+        return None
+    return {f: getattr(rec_settings, f, None) for f in _SETTINGS_CACHE_FIELDS}
+
+
+def _settings_from_cache(cached_dict: dict):
+    """
+    Reconstruct a settings-like object from cached dict.
+    Uses SimpleNamespace so getattr() works in apply_visual_defaults() and
+    get_default_shop_urls().
+    Returns None if cached_dict is the empty sentinel.
+    """
+    from types import SimpleNamespace
+    if cached_dict.get("_empty"):
+        return None
+    return SimpleNamespace(**cached_dict)
 
 
 # ==========================================
@@ -105,8 +142,13 @@ async def _authenticate_widget_request(
     if not rate_ok:
         raise WidgetAuthError("Rate limit exceeded")
 
-    # Step 4: Check entitlement (active subscription or free tier)
-    service_active = await is_service_active(connection.organization_id, db)
+    # Step 4: Check entitlement (cached — avoids subscription DB query on every render)
+    cached_status = await get_cached_service_status(connection.organization_id)
+    if cached_status is not None:
+        service_active = cached_status
+    else:
+        service_active = await is_service_active(connection.organization_id, db)
+        await set_cached_service_status(connection.organization_id, service_active)
     if not service_active:
         logger.info(f"Widget: service inactive for key_id={api_key.id}, org_id={connection.organization_id}")
         raise WidgetAuthError("Widget unavailable — subscription required")
@@ -159,13 +201,18 @@ async def get_bestsellers_widget(
         # Step 1: Authenticate
         api_key, connection = await _authenticate_widget_request(request, db)
 
-        # Step 2: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 2: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
@@ -273,13 +320,18 @@ async def get_cross_sell_widget(
         # Step 2: Authenticate
         api_key, connection = await _authenticate_widget_request(request, db)
 
-        # Step 3: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 3: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
@@ -386,13 +438,18 @@ async def get_upsell_widget(
         # Step 2: Authenticate
         api_key, connection = await _authenticate_widget_request(request, db)
 
-        # Step 3: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 3: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
@@ -498,13 +555,18 @@ async def get_similar_widget(
         # Step 2: Authenticate
         api_key, connection = await _authenticate_widget_request(request, db)
 
-        # Step 3: Get shop URL settings
-        settings_result = await db.execute(
-            select(RecommendationSettings).where(
-                RecommendationSettings.connection_id == connection.id
+        # Step 3: Get shop URL settings (cached — avoids settings DB query on every render)
+        cached_settings = await get_cached_settings(connection.id)
+        if cached_settings is not None:
+            rec_settings = _settings_from_cache(cached_settings)
+        else:
+            settings_result = await db.execute(
+                select(RecommendationSettings).where(
+                    RecommendationSettings.connection_id == connection.id
+                )
             )
-        )
-        rec_settings = settings_result.scalar_one_or_none()
+            rec_settings = settings_result.scalar_one_or_none()
+            await set_cached_settings(connection.id, _settings_to_dict(rec_settings))
         shop_urls = get_default_shop_urls(connection, rec_settings)
 
         # Apply visual defaults fallback chain: URL param → DB brand defaults → hardcoded
