@@ -327,22 +327,22 @@ export default function DocumentationPage() {
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-product-id</code> — product ID (for cross-sell, upsell, similar)</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-lookback-days</code> — order history window (days)</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-method</code> — volume, value, or balanced (bestsellers only)</p>
-              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-min-price-increase</code> — minimum % increase (upsell only)</p>
+              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-min-price-increase-percent</code> — minimum % increase (upsell only)</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-widget-bg-color</code> — widget background color</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-widget-padding</code> — none, sm, md, lg</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-widget-title</code> — heading text</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-title-color</code> — heading text color</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-title-size</code> — sm, md, lg, xl</p>
-              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-title-alignment</code> — left, center, right</p>
+              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-title-alignment</code> — left, center</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-widget-style</code> — grid or carousel</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-widget-columns</code> — 2, 3, 4, 5, 6</p>
-              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-gap</code> — none, sm, md, lg</p>
+              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-gap</code> — sm, md, lg</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-bg-color</code> — card background color</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-border-radius</code> — border radius (e.g. 8px)</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-border-width</code> — border width (e.g. 0, 1)</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-border-color</code> — border color</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-shadow</code> — none, sm, md, lg</p>
-              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-padding</code> — none, sm, md, lg</p>
+              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-padding</code> — sm, md, lg</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-card-hover</code> — none, lift, glow, shadow</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-image-aspect</code> — square, portrait, landscape</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-image-fit</code> — cover, contain</p>
@@ -351,10 +351,10 @@ export default function DocumentationPage() {
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-product-title-size</code> — xs, sm, md, lg</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-product-title-weight</code> — normal, medium, semibold, bold</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-product-title-lines</code> — max lines (1, 2, 3)</p>
-              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-product-title-alignment</code> — left, center, right</p>
+              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-product-title-alignment</code> — left, center</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-show-price</code> — true or false</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-price-color</code> — price text color</p>
-              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-price-size</code> — xs, sm, md, lg</p>
+              <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-price-size</code> — sm, md, lg</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-button-text</code> — CTA button label</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-button-bg-color</code> — button background color</p>
               <p className="text-xs text-muted-foreground"><code className="bg-muted px-1 py-0.5 rounded">data-button-text-color</code> — button text color</p>
@@ -410,7 +410,7 @@ export default function DocumentationPage() {
           <div>
             <h3 className="text-sm font-semibold mb-2">Gutenberg Block (Recommended)</h3>
             <p className="text-sm text-muted-foreground mb-2">
-              In the block editor, click <strong>+</strong> → search &ldquo;Nudgio&rdquo; → add the <strong>Nudgio Recommendations</strong> block.
+              In the block editor, click <strong>+</strong> → search &ldquo;Nudgio Technologies&rdquo; → add the <strong>Nudgio Recommendations</strong> block.
               Configure widget type, product ID, and visual settings in the block sidebar.
             </p>
           </div>
@@ -426,7 +426,7 @@ export default function DocumentationPage() {
 
 [nudgio type="cross-sell" product_id="SKU-001" count="4"]
 
-[nudgio type="upsell" product_id="SKU-001" count="4" min_price_increase="10"]
+[nudgio type="upsell" product_id="SKU-001" count="4" min_price_increase_percent="10"]
 
 [nudgio type="similar" product_id="SKU-001" count="4"]`}
             </pre>
