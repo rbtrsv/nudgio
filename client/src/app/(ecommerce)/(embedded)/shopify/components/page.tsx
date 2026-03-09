@@ -411,11 +411,10 @@ export default function ShopifyComponentsPage() {
 
             {/* Show Price */}
             <s-checkbox
+              label="Show Price"
               checked={showPrice || undefined}
               onChange={(e) => setShowPrice(e.currentTarget.checked)}
-            >
-              Show Price
-            </s-checkbox>
+            />
 
             {/* Image Aspect Ratio */}
             <s-select
@@ -446,7 +445,7 @@ export default function ShopifyComponentsPage() {
             </s-button>
 
             {saveMessage && (
-              <s-banner tone="info" dismiss>
+              <s-banner tone="info" onDismiss={() => setSaveMessage(null)}>
                 <s-paragraph>{saveMessage}</s-paragraph>
               </s-banner>
             )}

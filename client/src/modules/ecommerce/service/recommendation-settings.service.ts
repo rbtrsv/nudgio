@@ -6,7 +6,6 @@ import {
   SettingsListResponse,
   ConnectionSettings,
   CreateOrUpdateSettings,
-  CreateOrUpdateSettingsSchema,
 } from '../schemas/recommendation-settings.schemas';
 import { SETTINGS_ENDPOINTS } from '../utils/api.endpoints';
 import { fetchClient } from '@/modules/accounts/utils/fetch.client';
@@ -87,10 +86,8 @@ export const getAllSettings = async (): Promise<SettingsListResponse> => {
  */
 export const createOrUpdateSettings = async (
   connectionId: number,
-  data: CreateOrUpdateSettings
+  data: Partial<CreateOrUpdateSettings>
 ): Promise<SettingsResponse> => {
-  // Validate request data
-  CreateOrUpdateSettingsSchema.parse(data);
 
   try {
     // Backend returns { success, data: RecommendationSettings } — unwrap the envelope
