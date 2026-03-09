@@ -49,6 +49,11 @@
   {% assign params = params | append: "&product_id=" | append: product.id %}
 {% endif %}
 
+{% comment %} Dummy trailing parameter — Shopify Theme Editor appends ?oseid=... to the
+   iframe src, contaminating the last URL parameter's value. This sacrificial
+   param absorbs the editor suffix so real params stay clean. {% endcomment %}
+{% assign params = params | append: "&_=1" %}
+
 {% assign iframe_src = proxy_base | append: params %}
 
 {% comment %} Guard: product-specific widget types require a product page context {% endcomment %}
