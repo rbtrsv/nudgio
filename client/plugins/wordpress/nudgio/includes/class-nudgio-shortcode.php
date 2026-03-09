@@ -184,7 +184,8 @@ class Nudgio_Shortcode {
             'product_title_lines'     => absint( $atts['product_title_lines'] ),
             'product_title_alignment' => sanitize_text_field( $atts['product_title_alignment'] ),
             // Group 7: Price
-            'show_price'              => sanitize_text_field( $atts['show_price'] ),
+            // Boolean → 'true'/'false' string (sanitize_text_field(false) returns '' which FastAPI rejects)
+            'show_price'              => filter_var( $atts['show_price'], FILTER_VALIDATE_BOOLEAN ) ? 'true' : 'false',
             'price_color'             => sanitize_hex_color( $atts['price_color'] ),
             'price_size'              => sanitize_text_field( $atts['price_size'] ),
             // Group 8: CTA Button
@@ -194,7 +195,8 @@ class Nudgio_Shortcode {
             'button_radius'           => sanitize_text_field( $atts['button_radius'] ),
             'button_size'             => sanitize_text_field( $atts['button_size'] ),
             'button_variant'          => sanitize_text_field( $atts['button_variant'] ),
-            'button_full_width'       => sanitize_text_field( $atts['button_full_width'] ),
+            // Boolean → 'true'/'false' string (sanitize_text_field(false) returns '' which FastAPI rejects)
+            'button_full_width'       => filter_var( $atts['button_full_width'], FILTER_VALIDATE_BOOLEAN ) ? 'true' : 'false',
         );
 
         // Only include widget_title if non-empty (empty = server auto-defaults)

@@ -837,8 +837,8 @@ def generate_recommendation_html(
             }}
         </style>
     </head>
-    <body style="background-color: {vis['widget_bg_color']}; margin: 0;">
-        <div class="w-full max-w-7xl mx-auto {widget_padding_class}">
+    <body style="background-color: {vis['widget_bg_color']}; margin: 0; overflow-x: hidden;">
+        <div class="w-full {widget_padding_class}">
             <h3 class="{title_size_class} font-bold mb-4 {title_align}" style="color: {vis['title_color']}">{title}</h3>
             <div class="{container_class}">
                 {cards_html}
