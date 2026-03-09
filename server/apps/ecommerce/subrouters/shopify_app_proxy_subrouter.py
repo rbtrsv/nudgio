@@ -305,6 +305,10 @@ async def get_cross_sell_widget(
         if not product_id:
             return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
 
+        # Sanitize product_id — Shopify App Proxy can append query params
+        # (e.g. "12345?oseid=abc") to the value. Strip anything after "?"
+        product_id = product_id.split("?")[0].strip()
+
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
             logger.error("App Proxy: SHOPIFY_CLIENT_SECRET not configured")
@@ -418,6 +422,10 @@ async def get_upsell_widget(
         if not product_id:
             return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
 
+        # Sanitize product_id — Shopify App Proxy can append query params
+        # (e.g. "12345?oseid=abc") to the value. Strip anything after "?"
+        product_id = product_id.split("?")[0].strip()
+
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
             logger.error("App Proxy: SHOPIFY_CLIENT_SECRET not configured")
@@ -529,6 +537,10 @@ async def get_similar_widget(
         # Step 0: product_id required — only available on product pages
         if not product_id:
             return HTMLResponse(content=_error_html("Place this widget on a product page"), status_code=200)
+
+        # Sanitize product_id — Shopify App Proxy can append query params
+        # (e.g. "12345?oseid=abc") to the value. Strip anything after "?"
+        product_id = product_id.split("?")[0].strip()
 
         # Step 1: Verify HMAC signature
         if not settings.SHOPIFY_CLIENT_SECRET:
