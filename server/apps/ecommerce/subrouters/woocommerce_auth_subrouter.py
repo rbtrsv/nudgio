@@ -1,4 +1,4 @@
-from urllib.parse import urlencode
+from urllib.parse import urlencode, parse_qs, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,12 +41,14 @@ async def initiate_woocommerce_auth(
             store_url = f"https://{store_url}"
 
         # Build wc-auth authorization URL
+        # Encode store_url into callback_url so we can persist it when WooCommerce POSTs back
+        callback_params = urlencode({"store_url": store_url})
         params = {
             "app_name": "Nudgio",
             "scope": "read",
             "user_id": str(user.id),
             "return_url": f"{settings.FRONTEND_URL}/connections?wc_connected=true",
-            "callback_url": f"{settings.SERVER_URL}/ecommerce/woocommerce/callback",
+            "callback_url": f"{settings.SERVER_URL}/ecommerce/woocommerce/callback?{callback_params}",
         }
         auth_url = f"{store_url}/wc-auth/v1/authorize?{urlencode(params)}"
 
@@ -81,8 +83,7 @@ async def woocommerce_auth_callback(
         "key_permissions": "read"
     }
 
-    Note: The store_url is NOT included in the callback — we store it
-    when the user initiates the auth flow via the /auth endpoint.
+    The store_url is passed via callback_url query parameter (set during /auth initiation).
     """
     try:
         # Read raw JSON body (WooCommerce sends JSON, not form data)
@@ -91,6 +92,9 @@ async def woocommerce_auth_callback(
         user_id = body.get("user_id")
         consumer_key = body.get("consumer_key")
         consumer_secret = body.get("consumer_secret")
+
+        # store_url is passed via callback_url query parameter (set during /auth initiation)
+        store_url = request.query_params.get("store_url")
 
         if not user_id or not consumer_key or not consumer_secret:
             raise HTTPException(
@@ -127,20 +131,22 @@ async def woocommerce_auth_callback(
         if existing_connection:
             # Update existing connection with new credentials
             existing_connection.api_secret = consumer_secret
+            if store_url:
+                existing_connection.store_url = store_url
             existing_connection.is_active = True
             await db.commit()
         else:
-            # Create new connection
-            # Note: store_url is not available from callback — merchant must update it
+            # Create new connection with store_url from callback query param
             new_connection = EcommerceConnection(
                 user_id=user_id,
                 organization_id=membership.organization_id,
                 connection_name=f"WooCommerce (auto-connected)",
                 platform="woocommerce",
                 connection_method="api",
+                store_url=store_url,
                 api_key=consumer_key,
                 api_secret=consumer_secret,
-                is_active=False,  # Needs store_url and test before activation
+                is_active=False,
             )
             db.add(new_connection)
             await db.commit()

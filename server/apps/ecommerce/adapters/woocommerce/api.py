@@ -23,6 +23,8 @@ class WooCommerceApiAdapter:
         # api_key = consumer_key (e.g., "ck_xxx")
         # api_secret = consumer_secret (e.g., "cs_xxx")
         # Prefer explicit params (decrypted by factory) over connection fields
+        if not connection.store_url:
+            raise ValueError("Store URL is missing — update it in connection settings before testing")
         self.store_url = connection.store_url.rstrip("/")
         self.consumer_key = api_key or connection.api_key
         self.consumer_secret = api_secret or connection.api_secret
