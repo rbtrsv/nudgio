@@ -56,16 +56,16 @@ if ( ! defined( 'ABSPATH' ) ) {
     </p>
     <?php
     // Display last sync status if available
-    $last_sync_at      = get_option( 'nudgio_last_sync_at', '' );
-    $last_sync_status  = get_option( 'nudgio_last_sync_status', '' );
-    $last_sync_message = get_option( 'nudgio_last_sync_message', '' );
-    if ( $last_sync_at ) : ?>
+    $nudgio_last_sync_at      = get_option( 'nudgio_last_sync_at', '' );
+    $nudgio_last_sync_status  = get_option( 'nudgio_last_sync_status', '' );
+    $nudgio_last_sync_message = get_option( 'nudgio_last_sync_message', '' );
+    if ( $nudgio_last_sync_at ) : ?>
         <p>
             <strong><?php esc_html_e( 'Last sync:', 'nudgio-technologies' ); ?></strong>
-            <?php echo esc_html( $last_sync_at ); ?>
+            <?php echo esc_html( $nudgio_last_sync_at ); ?>
             &mdash;
-            <span style="color: <?php echo 'success' === $last_sync_status ? '#00a32a' : '#d63638'; ?>;">
-                <?php echo esc_html( $last_sync_message ); ?>
+            <span style="color: <?php echo 'success' === $nudgio_last_sync_status ? '#00a32a' : '#d63638'; ?>;">
+                <?php echo esc_html( $nudgio_last_sync_message ); ?>
             </span>
         </p>
     <?php endif; ?>
