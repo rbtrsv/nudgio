@@ -327,6 +327,7 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - ✅ Liquid template guard — if widget type requires product but `product` object is nil (non-product page), renders friendly HTML message instead of iframe request. Defense-in-depth alongside backend app proxy guard.
 - ✅ Responsive `columns` + `size` params (full stack) — replaced `device`-based layout with responsive grid (`columns` 2–6, default 4: 1→2→N cascade) + density control (`size` compact/default/spacious: 13-property SIZE_MAP). `device` kept as first-class API param (not deprecated), hidden from UI. `list` style removed. 17 files across server (4 subrouters), WordPress plugin (7 files: shortcode, block.json, index.js, render.php, activation, settings, docs), Shopify extension (Liquid schema), Next.js client (5 files: Zod schema, 2 services, 2 component pages). Server-side validation: clamp columns 2–6, size fallback to "default". HMAC unchanged.
 - ✅ Managed Pricing billing page — billing page rewritten for Shopify Managed Pricing. Shows current plan + plan comparison + "Manage Plan on Shopify" button that opens `https://admin.shopify.com/store/{storeHandle}/charges/nudgio/pricing_plans`. Subscribe/cancel endpoints and service functions kept with comments for manual pricing revert. Partner Dashboard → Distribution → Manage listing → Pricing content → Settings → "Managed pricing" selected.
+- ✅ Documentation page — static Polaris page (5 sections: Adding Widget to Storefront, Widget Types, Settings vs Theme Editor, Components Preview, Visual Customization). `<s-link>` added to `<s-app-nav>` (before Billing). No API calls, no backend changes.
 
 ### 4. Shopify App Store Submission (⏳ Waiting on Automated Checks)
 - ⏳ Automated embedded app checks — auto-checked every 2 hours. **BLOCKER**: "Using latest App Bridge CDN" + "Using session tokens for auth" not yet passing. Must log in and interact with app on dev store to generate session data.
@@ -426,13 +427,20 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 - ✅ Both settings create blocks (`recommendation_settings_subrouter` + `shopify_embedded_subrouter`) include 11 new fields
 - ⚠️ **Migration not included** — user creates migration manually
 
-### 12. Widget Configuration Overhaul (35 Settings, 8 Groups)
-- ❌ Replace 11 limited visual settings with 35 individually configurable settings across 8 groups
-- DROP 6 columns (`widget_size`, `primary_color`, `text_color`, `bg_color`, `border_radius`, `cta_text`), ADD 29 new, KEEP 5
-- 14 files: models, schemas, components_subrouter (SIZE_MAP → 13 CSS value maps), 4 subrouters, Liquid template, frontend types/services/UI
-- See plan file for full details: `.claude/plans/zesty-stirring-gem.md`
+### 12. Widget Configuration Overhaul (35 Settings, 8 Groups) ✅
+- ✅ Replaced 11 limited visual settings with 35 individually configurable settings across 8 groups (Widget Container, Widget Title, Layout, Product Card, Product Image, Product Title, Price, CTA Button)
+- ✅ DROP 6 columns (`widget_size`, `primary_color`, `text_color`, `bg_color`, `border_radius`, `cta_text`), ADD 29 new, KEEP 5
+- ✅ Full stack: models, schemas, `components_subrouter.py` (VISUAL_DEFAULTS + `_URL_TO_DB_MAP` + `apply_visual_defaults()`), 4 subrouters, Liquid template, frontend types/services/UI
+- ✅ WordPress plugin updated — 35 shortcode attributes, 10 Gutenberg editor panels, admin settings page with 8 groups
+- ✅ Shopify Theme Extension — 35 `{% schema %}` settings with separate color URL-encoding
+- ✅ widget.js — DEFAULTS + ATTR_MAP updated with all 35 data-* attributes
 
-### 13. Nice to Have
+### 13. Documentation Pages (Standalone + Shopify Embedded) ✅
+- ✅ Standalone documentation page — `(standalone)/documentation/page.tsx`, 7 Card sections: Quick Start, Push API (3 endpoints with full curl examples), Widget API Keys, Embedding on Custom Sites (snippet + 35 data-* attributes), WordPress Plugin (Gutenberg block + shortcode), Widget Types, Visual Settings (8 groups). BookOpen icon + sidebar link after Analytics.
+- ✅ Shopify embedded documentation page — `(embedded)/shopify/documentation/page.tsx`, 5 Polaris sections with merchant-friendly language: Adding Widget (Theme Editor steps), Widget Types, Settings vs Theme Editor (hierarchy explanation), Components Preview, Visual Customization (8 groups). `<s-link>` in `<s-app-nav>` before Billing.
+- ✅ All data-* attribute values verified against backend schemas (title_alignment, product_title_alignment, card_padding, gap, price_size corrected)
+
+### 14. Nice to Have
 - ✅ Frontend subscription page — DONE (Shopify: Managed Pricing billing page with plan display + Shopify upgrade redirect; Standalone: Stripe via accounts module)
 
 ---
@@ -465,6 +473,8 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 16. ✅ **Frontend subscription page** — DONE. Shopify: Managed Pricing page. Standalone: Stripe via accounts module.
 17. ✅ **Widget Settings Enhancement** — DONE. 5 new configurable fields (widget_title, cta_text, show_price, border_radius, image_aspect) propagated across all delivery paths: server HTML generator, 4 subrouters (standalone, app proxy, embedded, public widget), sign endpoint, Shopify Liquid, WordPress plugin, widget.js, frontend schemas/services/hooks, both Components UI pages. Shopify Recommendations page type picker fixed (s-select instead of s-button-group).
 18. ✅ **Brand Identity Defaults** — DONE. 11 nullable visual columns on `RecommendationSettings` (widget_style, widget_columns, widget_size, primary_color, text_color, bg_color, border_radius, cta_text, show_price, image_aspect, widget_title). Fallback chain: URL param → DB brand defaults → hardcoded. `apply_visual_defaults()` helper applied in 16 endpoints across 4 subrouters. "Save as Brand Defaults" button on both Components pages. Frontend schemas + Shopify embedded service updated. Migration by user.
+19. ✅ **Widget Configuration Overhaul (35 Settings)** — DONE. Replaced 11 limited settings with 35 in 8 groups. Full stack: models, schemas, 4 subrouters, Liquid, WordPress plugin (35 shortcode attrs + 10 Gutenberg panels), widget.js, frontend UI.
+20. ✅ **Documentation Pages** — DONE. Standalone (7 Card sections with curl examples, data-* reference, WordPress plugin guide) + Shopify embedded (5 Polaris sections, merchant-friendly). Sidebar + nav links added. Values verified against backend.
 
 ---
 

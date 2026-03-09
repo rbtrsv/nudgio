@@ -73,8 +73,8 @@ export default function ShopifyDocumentationPage() {
             <s-stack direction="block" gap="small">
               <s-paragraph>1. Go to <s-text type="strong">Online Store → Themes → Customize</s-text> in your Shopify admin.</s-paragraph>
               <s-paragraph>2. Navigate to the page where you want to show recommendations (e.g. product page, homepage).</s-paragraph>
-              <s-paragraph>3. Click <s-text type="strong">Add block</s-text> and search for &ldquo;Nudgio&rdquo;.</s-paragraph>
-              <s-paragraph>4. Select the <s-text type="strong">Nudgio Recommendations</s-text> block.</s-paragraph>
+              <s-paragraph>3. Click <s-text type="strong">Add block</s-text> and search for &ldquo;Nudgio Technologies&rdquo;.</s-paragraph>
+              <s-paragraph>4. Select the <s-text type="strong">Nudgio Technologies</s-text> block.</s-paragraph>
               <s-paragraph>5. Choose your widget type, colors, and layout in the sidebar panel.</s-paragraph>
               <s-paragraph>6. Click <s-text type="strong">Save</s-text> to publish your changes.</s-paragraph>
             </s-stack>
