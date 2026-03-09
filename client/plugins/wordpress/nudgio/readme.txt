@@ -4,11 +4,11 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Display AI-powered product recommendations on your WooCommerce store — bestsellers, cross-sell, upsell, and similar products with 35 visual settings in 8 groups.
+AI-powered product recommendations for WooCommerce — bestsellers, cross-sell, upsell, and similar products.
 
 == Description ==
 
@@ -34,6 +34,13 @@ Nudgio Technologies connects your WooCommerce store to the Nudgio recommendation
 * An API key generated from your Nudgio dashboard (Connection → API Keys tab)
 * WooCommerce 7.0 or later
 * PHP 8.0 or later
+
+**Third-Party Service:**
+
+This plugin connects to the Nudgio recommendation engine ([nudgio.tech](https://www.nudgio.tech)) to generate and display product recommendations. When a page containing a Nudgio shortcode or block is loaded, the plugin sends an HMAC-signed request to the Nudgio server with the Key ID, widget configuration parameters, and product ID (if applicable). No personal visitor data is collected or transmitted.
+
+* [Terms of Service](https://www.nudgio.tech/legal/terms-of-service)
+* [Privacy Policy](https://www.nudgio.tech/legal/privacy-policy)
 
 == Installation ==
 
@@ -130,6 +137,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 
 == Changelog ==
 
+= 1.2.1 =
+* Fixed short description exceeding 150-character limit for WordPress Plugin Directory
+
 = 1.2.0 =
 * Replaced 11-setting visual system with 35 individually configurable settings in 8 groups
 * Widget Container: independent background color and padding control
@@ -162,6 +172,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+Fixed short description for WordPress Plugin Directory compliance.
 
 = 1.2.0 =
 Major visual overhaul: 35 settings in 8 groups replace the old 11-setting system. Gutenberg block fully rewritten. All new shortcode attributes. See changelog for details.
