@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     <h2><?php esc_html_e( 'Data Sync', 'nudgio-technologies' ); ?></h2>
     <p class="description">
         <?php esc_html_e(
-            'Push your WooCommerce products, orders, and order items to the Nudgio server. This enables cross-sell, upsell, and similar product recommendations. Syncs automatically every 6 hours and on product/order changes.',
+            'Push your WooCommerce products, orders, and order items to the Nudgio server. This enables cross-sell, upsell, and similar product recommendations. Syncs automatically every 6 hours and on product/order changes. The timestamp below updates only when new or changed data is detected.',
             'nudgio-technologies'
         ); ?>
     </p>
