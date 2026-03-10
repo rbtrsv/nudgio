@@ -1,6 +1,40 @@
 # Nudgio — To-Do List (Ordered by Importance)
 
 > **MANDATORY**: Never create migration files. The user creates and runs migrations themselves. Only add/modify model fields. DO NOT DELETE THIS RULE.
+> **MANDATORY**: Never use agents or subagents for research. Always search and read files yourself directly. DO NOT DELETE THIS RULE.
+
+---
+
+## Coding Prompt (Always Follow)
+
+Please answer without perceiving or mirroring what you think I want to hear.
+Do not follow the global majority in your reply, and attempt to remain unbiased at all costs.
+Do not introduce speculative changes.
+Do not make assumptions.
+I always want in code comments similar to the ones provided in the examples.
+Do not delete the already existing in code comments explaining the code.
+Follow my instructions exactly as stated, with no extra information or suggestions.
+Please do not give me politically correct answer just for the sake of it.
+I have a high level IQ so adjust the answers accordingly.
+Never "fields omitted for brevity…" kind of thing.
+If I give you some official docs, use the commands from those docs because they are up to date.
+Do not suggest something that is not good coding practices.
+Do not do workarounds, always do the right thing. If you do not know what is the right thing, ask me.
+Follow a strict "Propose → Approve → Implement → Review" cycle for almost every change.
+Always understand existing patterns before suggesting changes.
+Plan and explain before implementing.
+Please ask clarifying questions if you are not sure what to do next or there are more ways in which we can proceed.
+Do not extend your authority over something I did not ask.
+Present reasoning and approach first.
+Never modify more files without my explicit permission. "Ask → Allow → Modify".
+Stick to my rules and provide exactly what's needed without adding extra complexity.
+Simple better that complex.
+One component at a time: Complete each component fully before moving to next.
+Clear communication: Explain planned changes and get approval.
+Pattern consistency: Apply the exact same patterns established in other modules.
+Quality over speed: Ensure each component is properly updated before proceeding.
+Read all the files I give you entirely before even attempting to respond or suggest something.
+When adding fields, models, or changes, always include a brief "Why:" explaining the reason it exists - not what it does, but why it's needed.
 
 ---
 
@@ -286,11 +320,16 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 ## What's Left
 
 ### 🔴 Shopify App Store Submission
-- ⏳ Automated embedded app checks — blocked on "Using latest App Bridge CDN" + "Using session tokens for auth"
-- ❌ Submit for Shopify review (2-4 week process) — blocked by above
+- ⏳ Automated embedded app checks — pending (not failed). Must log in and interact with app on dev store to generate session data. Auto-checked every 2 hours.
+- ✅ Billing callback 404 fix — `POST /billing/verify-charge` endpoint + client callback page + `charge_id` redirect from dashboard
+- ✅ `connection.access_token` → `connection.api_secret` bug fix in verify-charge endpoint
+- ✅ App Bridge script confirmed correct: raw sync `<script>` in `<head>` with `eslint-disable` (NOT `next/script beforeInteractive` — that generates `<link rel="preload">` + push array, not a real script tag. Shopify requires sync, no async/defer/module.)
+- ✅ All webhooks implemented: `app/uninstalled`, `shop/redact`, `customers/data_request`, `customers/redact`, `app_subscriptions/update` — single dispatcher with HMAC-SHA256 Base64 verification
+- ❌ Submit for Shopify review (2-4 week process) — blocked by automated checks above
 
 ### 🟡 Production DragonflyDB (⏸️ On Hold)
 - ❌ Provision in Coolify, switch cache + rate limit backends
 
 ### 🟢 Future
 - ❌ Granular sync filters (category, price range, tags, selective sync)
+
