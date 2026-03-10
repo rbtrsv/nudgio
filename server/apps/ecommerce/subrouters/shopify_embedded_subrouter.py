@@ -23,6 +23,7 @@ Stage 2 Endpoints:
 - POST /shopify/embedded/billing/subscribe — create billing subscription
 - POST /shopify/embedded/billing/cancel — cancel subscription
 - GET  /shopify/embedded/billing/status — billing status
+- POST /shopify/embedded/billing/verify-charge — verify + activate a Shopify charge
 
 Product Helpers:
 - GET  /shopify/embedded/products — product list for admin dropdown (ungated)
@@ -64,8 +65,11 @@ from ..schemas.recommendation_settings_schemas import (
 from ..utils.cache_utils import get_cached_recommendations, set_cached_recommendations
 from ..utils.shopify_billing_utils import (
     SHOPIFY_PLAN_PRICES,
+    SHOPIFY_STATUS_MAP,
     create_shopify_subscription,
     cancel_shopify_subscription,
+    get_shopify_subscription_status,
+    map_shopify_plan_to_tier,
 )
 from ..utils.shopify_session_utils import (
     verify_shopify_session_token,
@@ -1662,6 +1666,122 @@ async def billing_status(
     except HTTPException:
         raise
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+# ==========================================
+# POST /billing/verify-charge — Verify + Activate Charge
+# ==========================================
+
+@router.post("/billing/verify-charge")
+async def billing_verify_charge(
+    charge_id: int = Query(..., description="Shopify charge ID from billing callback URL"),
+    connection: EcommerceConnection = Depends(get_shopify_connection),
+    db: AsyncSession = Depends(get_session),
+):
+    """
+    Verify a Shopify charge and activate the billing record.
+
+    Called by the embedded billing callback page after Shopify redirects
+    back with a charge_id. Works with both Managed Pricing and Manual Pricing.
+
+    With Managed Pricing, Shopify creates the subscription without our
+    appSubscriptionCreate call — so there's no PENDING ShopifyBilling record.
+    This endpoint queries Shopify's API directly to verify the charge status,
+    then creates or updates the ShopifyBilling record accordingly.
+
+    This endpoint:
+    1. Get connection via get_shopify_connection dependency (session token auth)
+    2. Construct subscription GID from charge_id
+    3. Query Shopify API for subscription status via get_shopify_subscription_status()
+    4. If ACTIVE → create or update ShopifyBilling record with ACTIVE status
+    5. If not ACTIVE → create or update record with mapped status (CANCELED, PAST_DUE)
+    6. Return billing status JSON for the callback page
+    """
+    try:
+        # Construct Shopify subscription GID from numeric charge_id
+        subscription_gid = f"gid://shopify/AppSubscription/{charge_id}"
+
+        # Query Shopify API for the subscription status
+        subscription = await get_shopify_subscription_status(
+            store_domain=connection.store_url,
+            access_token=connection.access_token,
+            subscription_gid=subscription_gid,
+        )
+
+        if not subscription:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Subscription not found on Shopify for charge_id {charge_id}",
+            )
+
+        # Extract subscription details from Shopify response
+        shopify_status = subscription.get("status", "")
+        shopify_plan_name = subscription.get("name", "")
+        is_test = subscription.get("test", False)
+        created_at_str = subscription.get("createdAt")
+
+        # Map Shopify status to our billing status
+        billing_status = SHOPIFY_STATUS_MAP.get(shopify_status, "CANCELED")
+
+        # Map Shopify plan name ("Pro", "Enterprise") to our tier ("PRO", "ENTERPRISE")
+        plan_tier = map_shopify_plan_to_tier(shopify_plan_name)
+
+        # Look for existing ShopifyBilling by GID (exclude soft-deleted)
+        existing_result = await db.execute(
+            select(ShopifyBilling).where(
+                and_(
+                    ShopifyBilling.shopify_subscription_gid == subscription_gid,
+                    ShopifyBilling.deleted_at == None,
+                )
+            )
+        )
+        existing_billing = existing_result.scalar_one_or_none()
+
+        if existing_billing:
+            # Update existing record
+            existing_billing.billing_status = billing_status
+            existing_billing.plan_name = plan_tier
+            existing_billing.test = is_test
+            if billing_status == "ACTIVE":
+                existing_billing.end_date = None
+            else:
+                existing_billing.end_date = datetime.now(timezone.utc)
+
+            logger.info(
+                "Updated ShopifyBilling %s → %s for connection %s",
+                subscription_gid, billing_status, connection.id,
+            )
+        else:
+            # No existing record (Managed Pricing case) — create new one
+            new_billing = ShopifyBilling(
+                connection_id=connection.id,
+                organization_id=connection.organization_id,
+                shopify_subscription_gid=subscription_gid,
+                plan_name=plan_tier,
+                billing_status=billing_status,
+                test=is_test,
+                start_date=datetime.fromisoformat(created_at_str.replace("Z", "+00:00")) if created_at_str else datetime.now(timezone.utc),
+                end_date=None if billing_status == "ACTIVE" else datetime.now(timezone.utc),
+            )
+            db.add(new_billing)
+
+            logger.info(
+                "Created ShopifyBilling %s → %s for connection %s (Managed Pricing)",
+                subscription_gid, billing_status, connection.id,
+            )
+
+        await db.commit()
+
+        return {
+            "success": True,
+            "plan_name": plan_tier,
+            "billing_status": billing_status,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 

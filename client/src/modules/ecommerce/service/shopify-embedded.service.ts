@@ -26,6 +26,7 @@
  * - POST /billing/subscribe — create billing subscription
  * - POST /billing/cancel — cancel subscription
  * - GET  /billing/status — billing status
+ * - POST /billing/verify-charge — verify + activate a Shopify charge
  *
  * Product Helpers:
  * - GET  /products — product list for admin dropdown (ungated)
@@ -65,6 +66,7 @@ const EMBEDDED_ENDPOINTS = {
   BILLING_SUBSCRIBE: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/subscribe`,
   BILLING_CANCEL: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/cancel`,
   BILLING_STATUS: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/status`,
+  BILLING_VERIFY_CHARGE: `${API_BASE_URL}/ecommerce/shopify/embedded/billing/verify-charge`,
   // Product Helpers (ungated)
   PRODUCTS: `${API_BASE_URL}/ecommerce/shopify/embedded/products`,
 };
@@ -364,6 +366,13 @@ export interface EmbeddedComponentParams {
 export interface EmbeddedBillingSubscribeResponse {
   success: boolean;
   confirmation_url: string;
+}
+
+/** Billing verify-charge response — returned after verifying a charge with Shopify API */
+export interface EmbeddedBillingVerifyChargeResponse {
+  success: boolean;
+  plan_name: string;
+  billing_status: string;
 }
 
 // ==========================================
@@ -730,6 +739,31 @@ export const getBillingStatus = async (
     EMBEDDED_ENDPOINTS.BILLING_STATUS,
     sessionToken,
     { method: 'GET' },
+  );
+};
+
+/**
+ * Verify a Shopify charge and activate the billing record.
+ *
+ * Called by the billing callback page after Shopify redirects back
+ * with a charge_id. Queries Shopify API to verify the charge status,
+ * then creates or updates the ShopifyBilling record in our DB.
+ *
+ * Works with both Managed Pricing (no prior PENDING record) and
+ * Manual Pricing (existing PENDING record from appSubscriptionCreate).
+ *
+ * @param sessionToken Shopify session token from App Bridge idToken()
+ * @param chargeId Shopify charge ID from the callback URL query param
+ * @returns Verify response with plan_name and billing_status
+ */
+export const verifyBillingCharge = async (
+  sessionToken: string,
+  chargeId: string,
+): Promise<EmbeddedBillingVerifyChargeResponse> => {
+  return embeddedFetch<EmbeddedBillingVerifyChargeResponse>(
+    `${EMBEDDED_ENDPOINTS.BILLING_VERIFY_CHARGE}?charge_id=${encodeURIComponent(chargeId)}`,
+    sessionToken,
+    { method: 'POST' },
   );
 };
 
