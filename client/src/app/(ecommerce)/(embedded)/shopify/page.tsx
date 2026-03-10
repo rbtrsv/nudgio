@@ -11,10 +11,17 @@
  *
  * Data comes from EmbeddedContext (populated by layout.tsx via POST /init).
  * All UI uses Polaris web components (s-page, s-section, s-box, etc.).
+ *
+ * Charge ID redirect:
+ * Shopify Managed Pricing sometimes redirects to /shopify?charge_id=X instead of
+ * /shopify/billing/callback?charge_id=X. If charge_id is in the URL, this page
+ * redirects to the billing callback page to activate the subscription.
  */
 
 'use client';
 
+import { Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEmbedded } from './layout';
 
 // ==========================================
@@ -51,11 +58,31 @@ function DashboardError({ error, onRetry }: { error: string; onRetry: () => void
 }
 
 // ==========================================
-// Dashboard Page
+// Charge ID Redirect Hook
 // ==========================================
 
-export default function ShopifyDashboardPage() {
+/** If charge_id is in the URL, redirect to billing callback page to activate it. */
+function useChargeIdRedirect() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const chargeId = searchParams.get('charge_id');
+    if (chargeId) {
+      router.replace(`/shopify/billing/callback?charge_id=${encodeURIComponent(chargeId)}`);
+    }
+  }, [searchParams, router]);
+}
+
+// ==========================================
+// Dashboard Page (inner — uses useSearchParams)
+// ==========================================
+
+function ShopifyDashboardInner() {
   const { connection, stats, billing, isLoading, error, refresh } = useEmbedded();
+
+  // Redirect to billing callback if charge_id is present
+  useChargeIdRedirect();
 
   // Loading state — show spinner while POST /init is in progress
   if (isLoading) {
@@ -159,5 +186,17 @@ export default function ShopifyDashboardPage() {
       <s-box paddingBlockEnd="base" />
 
     </s-page>
+  );
+}
+
+// ==========================================
+// Dashboard Page (Suspense wrapper for useSearchParams)
+// ==========================================
+
+export default function ShopifyDashboardPage() {
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <ShopifyDashboardInner />
+    </Suspense>
   );
 }

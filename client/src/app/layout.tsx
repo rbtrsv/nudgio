@@ -33,13 +33,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* App Bridge API key — required for App Bridge CDN to initialize.
-            Value = client_id from shopify.app.toml (Shopify Partner Dashboard).
-            App Bridge reads this meta tag to know which app it belongs to. */}
+        {/* App Bridge API key — must appear before App Bridge script on all routes */}
         <meta name="shopify-api-key" content="37b4b12ed793e4127ba69f5e8d5f5922" />
-        {/* App Bridge — Shopify embedded app communication (session tokens, navigation, toast).
-            Must be the FIRST script tag, synchronous (no async/defer/type=module).
-            Only initializes inside Shopify Admin iframe — no-op on other pages. */}
+        {/* App Bridge — must be synchronous per Shopify requirements */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
         <ThemeScript />
         <link rel='icon' href={Favicon.src} />
