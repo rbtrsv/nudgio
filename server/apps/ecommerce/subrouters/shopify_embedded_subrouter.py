@@ -1705,7 +1705,7 @@ async def billing_verify_charge(
         # Query Shopify API for the subscription status
         subscription = await get_shopify_subscription_status(
             store_domain=connection.store_url,
-            access_token=connection.access_token,
+            access_token=connection.api_secret,
             subscription_gid=subscription_gid,
         )
 
