@@ -112,7 +112,7 @@ def _generate_carousel_css(columns: int, gap_px: int) -> str:
     Breakpoints (inside iframe, so @media checks iframe width = container width):
     - Mobile (< 480px): 1 card at 85% width (peek at next card)
     - Tablet (480-767px): 2 cards visible
-    - Desktop (768px+): min(4, columns) cards visible — capped at 4 to keep carousel UX
+    - Desktop (768px+): merchant's configured columns — no cap
 
     columns=1 is a special case: 100% on all breakpoints.
     """
@@ -124,13 +124,11 @@ def _generate_carousel_css(columns: int, gap_px: int) -> str:
             }
         """
 
-    # Tablet: show 2 cards (or fewer if merchant chose less)
-    tablet_cols = min(2, columns)
-    tablet_basis = f"calc((100% - {gap_px * (tablet_cols - 1)}px) / {tablet_cols})"
+    # Tablet: 2 cards (or 1 if merchant chose 1 — already handled above)
+    tablet_basis = f"calc((100% - {gap_px}px) / 2)"
 
-    # Desktop: cap at 4 visible cards — more than 4 looks like grid, not carousel
-    desktop_cols = min(4, columns)
-    desktop_basis = f"calc((100% - {gap_px * (desktop_cols - 1)}px) / {desktop_cols})"
+    # Desktop: merchant's configured columns, no cap
+    desktop_basis = f"calc((100% - {gap_px * (columns - 1)}px) / {columns})"
 
     return f"""
         .nudgio-carousel-card {{
