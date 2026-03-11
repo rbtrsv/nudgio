@@ -98,22 +98,69 @@ BUTTON_SIZE_MAP = {
     "lg": {"padding": "px-6 py-3", "text": "text-base"},
 }
 
-# Carousel card width — scales with column count (higher columns = narrower cards)
-CAROUSEL_WIDTH_MAP = {
-    1: "w-full",
-    2: "w-48",
-    3: "w-56",
-    4: "w-64",
-    5: "w-72",
-    6: "w-80",
-}
-
 # Min card width per column count — used by CSS auto-fill grid
 # Lower values = more columns fit in narrow containers
 GRID_MIN_WIDTH_MAP = {1: 400, 2: 280, 3: 220, 4: 200, 5: 170, 6: 150}
 
 # Gap in pixels — for inline grid style (Tailwind gap classes don't work with inline grid)
 GAP_PX_MAP = {"sm": 8, "md": 16, "lg": 24}
+
+def _generate_carousel_css(columns: int, gap_px: int) -> str:
+    """
+    Generate responsive carousel CSS with @media breakpoints.
+
+    Breakpoints (inside iframe, so @media checks iframe width = container width):
+    - Mobile (< 480px): 1 card at 85% width (peek at next card)
+    - Tablet (480-767px): 2 cards visible
+    - Desktop (768px+): min(4, columns) cards visible — capped at 4 to keep carousel UX
+
+    columns=1 is a special case: 100% on all breakpoints.
+    """
+    if columns == 1:
+        return """
+            .nudgio-carousel-card {
+                flex: 0 0 100%;
+                scroll-snap-align: start;
+            }
+        """
+
+    # Tablet: show 2 cards (or fewer if merchant chose less)
+    tablet_cols = min(2, columns)
+    tablet_basis = f"calc((100% - {gap_px * (tablet_cols - 1)}px) / {tablet_cols})"
+
+    # Desktop: cap at 4 visible cards — more than 4 looks like grid, not carousel
+    desktop_cols = min(4, columns)
+    desktop_basis = f"calc((100% - {gap_px * (desktop_cols - 1)}px) / {desktop_cols})"
+
+    return f"""
+        .nudgio-carousel-card {{
+            flex: 0 0 85%;
+            scroll-snap-align: start;
+        }}
+        @media (min-width: 480px) {{
+            .nudgio-carousel-card {{
+                flex: 0 0 {tablet_basis};
+            }}
+        }}
+        @media (min-width: 768px) {{
+            .nudgio-carousel-card {{
+                flex: 0 0 {desktop_basis};
+            }}
+        }}
+    """
+
+
+def _generate_grid_style(columns: int, min_width: int, gap_px: int) -> str:
+    """
+    Generate inline CSS grid style.
+
+    columns=1: repeat(1, 1fr) — forces single column on any screen width.
+    columns>=2: auto-fill + minmax — responsive grid that collapses on narrow containers.
+    """
+    if columns == 1:
+        return f"display: grid; grid-template-columns: repeat(1, 1fr); gap: {gap_px}px;"
+    return f"display: grid; grid-template-columns: repeat(auto-fill, minmax(min({min_width}px, 100%), 1fr)); gap: {gap_px}px;"
+
 
 # NOTE: All widget endpoints accept a `device` query param ("desktop", "mobile") which is
 # currently unused in rendering logic — CSS responsiveness via @media queries inside the
@@ -819,14 +866,14 @@ def generate_recommendation_html(
     # Works correctly inside iframes (WordPress shortcode, Shopify App Proxy, standalone embed)
     min_width = GRID_MIN_WIDTH_MAP.get(columns, 200)
     gap_px = GAP_PX_MAP.get(vis["gap"], 16)
-    grid_style = f"display: grid; grid-template-columns: repeat(auto-fill, minmax(min({min_width}px, 100%), 1fr)); gap: {gap_px}px;"
+    grid_style = _generate_grid_style(columns, min_width, gap_px)
 
     # Generate product cards based on style
+    carousel_css = ""
     if style == "carousel":
-        cards_html = generate_carousel_cards(recommendations, vis, shop_urls, aspect_class, columns)
-        carousel_gap = GAP_MAP.get(vis["gap"], GAP_MAP["md"]).replace("gap-", "space-x-")
-        container_class = f"flex overflow-x-auto {carousel_gap} pb-4 scrollbar-hide"
-        container_attr = f'class="{container_class}"'
+        cards_html = generate_carousel_cards(recommendations, vis, shop_urls, aspect_class)
+        carousel_css = _generate_carousel_css(columns, gap_px)
+        container_attr = f'class="nudgio-carousel"'
     else:
         # "grid" or any other value — auto-fill responsive grid
         cards_html = generate_grid_cards(recommendations, vis, shop_urls, aspect_class)
@@ -846,13 +893,20 @@ def generate_recommendation_html(
                 -webkit-box-orient: vertical;
                 overflow: hidden;
             }}
-            .scrollbar-hide {{
+            .nudgio-carousel {{
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                gap: {gap_px}px;
+                padding-bottom: 16px;
                 -ms-overflow-style: none;
                 scrollbar-width: none;
             }}
-            .scrollbar-hide::-webkit-scrollbar {{
+            .nudgio-carousel::-webkit-scrollbar {{
                 display: none;
             }}
+            {carousel_css}
         </style>
     </head>
     <body style="background-color: {vis['widget_bg_color']}; margin: 0; overflow: hidden;">
@@ -1043,7 +1097,7 @@ def generate_grid_cards(recommendations: List[Dict], vis: Dict[str, any], shop_u
     return ''.join(cards)
 
 
-def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], shop_urls: Dict[str, str], aspect_class: str, columns: int) -> str:
+def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], shop_urls: Dict[str, str], aspect_class: str) -> str:
     """Generate carousel product cards using individual visual settings."""
     cards = []
 
@@ -1054,7 +1108,6 @@ def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], sh
     title_weight_class = PRODUCT_TITLE_WEIGHT_MAP.get(vis["product_title_weight"], PRODUCT_TITLE_WEIGHT_MAP["semibold"])
     title_align = "text-center" if vis["product_title_alignment"] == "center" else "text-left"
     price_size_class = PRICE_SIZE_MAP.get(vis["price_size"], PRICE_SIZE_MAP["md"])
-    carousel_width = CAROUSEL_WIDTH_MAP.get(columns, CAROUSEL_WIDTH_MAP[4])
 
     # Card border: only add border style if width > 0
     border_style = ""
@@ -1092,7 +1145,7 @@ def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], sh
                 </div>"""
 
         card = f"""
-        <div class="flex-none {carousel_width} flex flex-col {shadow_class} transition-all duration-300 overflow-hidden"
+        <div class="nudgio-carousel-card flex flex-col {shadow_class} transition-all duration-300 overflow-hidden"
              style="border-radius: {vis['card_border_radius']}; background-color: {vis['card_bg_color']}; {border_style}">
             <div class="{aspect_class} bg-gray-100 overflow-hidden" style="border-radius: {vis['image_radius']} {vis['image_radius']} 0 0;">
                 <img src="{image_url or 'https://via.placeholder.com/250x250?text=No+Image'}"
