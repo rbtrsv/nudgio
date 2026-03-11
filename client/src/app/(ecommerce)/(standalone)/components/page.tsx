@@ -38,7 +38,7 @@ export default function ComponentsPage() {
   // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
-  const [titleSize, setTitleSize] = useState('lg');
+  const [titleSize, setTitleSize] = useState(24);
   const [titleAlignment, setTitleAlignment] = useState('left');
   // Group 3: Layout
   const [widgetStyle, setWidgetStyle] = useState('grid');
@@ -61,20 +61,20 @@ export default function ComponentsPage() {
   const [imageRadius, setImageRadius] = useState(8);
   // Group 6: Product Title in Card
   const [productTitleColor, setProductTitleColor] = useState('#1F2937');
-  const [productTitleSize, setProductTitleSize] = useState('sm');
-  const [productTitleWeight, setProductTitleWeight] = useState('semibold');
+  const [productTitleSize, setProductTitleSize] = useState(14);
+  const [productTitleWeight, setProductTitleWeight] = useState(600);
   const [productTitleLines, setProductTitleLines] = useState(2);
   const [productTitleAlignment, setProductTitleAlignment] = useState('left');
   // Group 7: Price
   const [showPrice, setShowPrice] = useState(true);
   const [priceColor, setPriceColor] = useState('#111827');
-  const [priceSize, setPriceSize] = useState('md');
+  const [priceSize, setPriceSize] = useState(18);
   // Group 8: CTA Button
   const [buttonText, setButtonText] = useState('View');
   const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
   const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
   const [buttonRadius, setButtonRadius] = useState(6);
-  const [buttonSize, setButtonSize] = useState('md');
+  const [buttonSize, setButtonSize] = useState(14);
   const [buttonVariant, setButtonVariant] = useState('solid');
   const [buttonFullWidth, setButtonFullWidth] = useState(false);
 
@@ -509,15 +509,8 @@ export default function ComponentsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Title Size</Label>
-                  <Select value={titleSize} onValueChange={setTitleSize}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                      <SelectItem value="xl">Extra Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input type="number" min={8} max={48} step={1} value={titleSize} onChange={(e) => setTitleSize(parseInt(e.target.value) || 24)} />
+                  <p className="text-xs text-muted-foreground">Font size in pixels (8–48).</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Title Alignment</Label>
@@ -694,27 +687,13 @@ export default function ComponentsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Size</Label>
-                  <Select value={productTitleSize} onValueChange={setProductTitleSize}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="xs">Extra Small</SelectItem>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input type="number" min={8} max={36} step={1} value={productTitleSize} onChange={(e) => setProductTitleSize(parseInt(e.target.value) || 14)} />
+                  <p className="text-xs text-muted-foreground">Font size in pixels (8–36).</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Weight</Label>
-                  <Select value={productTitleWeight} onValueChange={setProductTitleWeight}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="semibold">Semibold</SelectItem>
-                      <SelectItem value="bold">Bold</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input type="number" min={100} max={900} step={100} value={productTitleWeight} onChange={(e) => setProductTitleWeight(parseInt(e.target.value) || 600)} />
+                  <p className="text-xs text-muted-foreground">CSS font-weight (100–900, step 100).</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Max Lines (1-3)</Label>
@@ -758,14 +737,8 @@ export default function ComponentsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Price Size</Label>
-                  <Select value={priceSize} onValueChange={setPriceSize}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input type="number" min={8} max={36} step={1} value={priceSize} onChange={(e) => setPriceSize(parseInt(e.target.value) || 18)} />
+                  <p className="text-xs text-muted-foreground">Font size in pixels (8–36).</p>
                 </div>
               </div>
             </CardContent>
@@ -804,14 +777,8 @@ export default function ComponentsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Size</Label>
-                  <Select value={buttonSize} onValueChange={setButtonSize}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input type="number" min={8} max={24} step={1} value={buttonSize} onChange={(e) => setButtonSize(parseInt(e.target.value) || 14)} />
+                  <p className="text-xs text-muted-foreground">Font size in pixels (8–24).</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Variant</Label>

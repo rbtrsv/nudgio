@@ -130,7 +130,7 @@ export interface EmbeddedSettingsDetail {
   // Group 2: Widget Title
   widget_title: string | null;
   title_color: string | null;
-  title_size: string | null;
+  title_size: number | null;
   title_alignment: string | null;
   // Group 3: Layout
   widget_style: string | null;
@@ -153,20 +153,20 @@ export interface EmbeddedSettingsDetail {
   image_radius: number | null;
   // Group 6: Product Title in Card
   product_title_color: string | null;
-  product_title_size: string | null;
-  product_title_weight: string | null;
+  product_title_size: number | null;
+  product_title_weight: number | null;
   product_title_lines: number | null;
   product_title_alignment: string | null;
   // Group 7: Price
   show_price: boolean | null;
   price_color: string | null;
-  price_size: string | null;
+  price_size: number | null;
   // Group 8: CTA Button
   button_text: string | null;
   button_bg_color: string | null;
   button_text_color: string | null;
   button_radius: number | null;
-  button_size: string | null;
+  button_size: number | null;
   button_variant: string | null;
   button_full_width: boolean | null;
   created_at: string;
@@ -195,7 +195,7 @@ export interface EmbeddedSettingsPayload {
   // Group 2: Widget Title
   widget_title?: string | null;
   title_color?: string | null;
-  title_size?: string | null;
+  title_size?: number | null;
   title_alignment?: string | null;
   // Group 3: Layout
   widget_style?: string | null;
@@ -218,20 +218,20 @@ export interface EmbeddedSettingsPayload {
   image_radius?: number | null;
   // Group 6: Product Title in Card
   product_title_color?: string | null;
-  product_title_size?: string | null;
-  product_title_weight?: string | null;
+  product_title_size?: number | null;
+  product_title_weight?: number | null;
   product_title_lines?: number | null;
   product_title_alignment?: string | null;
   // Group 7: Price
   show_price?: boolean | null;
   price_color?: string | null;
-  price_size?: string | null;
+  price_size?: number | null;
   // Group 8: CTA Button
   button_text?: string | null;
   button_bg_color?: string | null;
   button_text_color?: string | null;
   button_radius?: number | null;
-  button_size?: string | null;
+  button_size?: number | null;
   button_variant?: string | null;
   button_full_width?: boolean | null;
 }
@@ -326,7 +326,7 @@ export interface EmbeddedComponentParams {
   // Group 2: Widget Title
   widget_title?: string;
   title_color?: string;
-  title_size?: string;
+  title_size?: number;
   title_alignment?: string;
   // Group 3: Layout
   widget_style?: 'grid' | 'carousel';
@@ -349,20 +349,20 @@ export interface EmbeddedComponentParams {
   image_radius?: number;
   // Group 6: Product Title in Card
   product_title_color?: string;
-  product_title_size?: string;
-  product_title_weight?: string;
+  product_title_size?: number;
+  product_title_weight?: number;
   product_title_lines?: number;
   product_title_alignment?: string;
   // Group 7: Price
   show_price?: boolean;
   price_color?: string;
-  price_size?: string;
+  price_size?: number;
   // Group 8: CTA Button
   button_text?: string;
   button_bg_color?: string;
   button_text_color?: string;
   button_radius?: number;
-  button_size?: string;
+  button_size?: number;
   button_variant?: string;
   button_full_width?: boolean;
 }

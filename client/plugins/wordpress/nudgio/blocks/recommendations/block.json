@@ -60,9 +60,8 @@
             "default": "#111827"
         },
         "title_size": {
-            "type": "string",
-            "default": "lg",
-            "enum": [ "sm", "md", "lg", "xl" ]
+            "type": "number",
+            "default": 24
         },
         "title_alignment": {
             "type": "string",
@@ -142,14 +141,12 @@
             "default": "#1F2937"
         },
         "product_title_size": {
-            "type": "string",
-            "default": "sm",
-            "enum": [ "xs", "sm", "md", "lg" ]
+            "type": "number",
+            "default": 14
         },
         "product_title_weight": {
-            "type": "string",
-            "default": "semibold",
-            "enum": [ "normal", "medium", "semibold", "bold" ]
+            "type": "number",
+            "default": 600
         },
         "product_title_lines": {
             "type": "number",
@@ -169,9 +166,8 @@
             "default": "#111827"
         },
         "price_size": {
-            "type": "string",
-            "default": "md",
-            "enum": [ "sm", "md", "lg" ]
+            "type": "number",
+            "default": 18
         },
         "button_text": {
             "type": "string",
@@ -190,9 +186,8 @@
             "default": 6
         },
         "button_size": {
-            "type": "string",
-            "default": "md",
-            "enum": [ "sm", "md", "lg" ]
+            "type": "number",
+            "default": 14
         },
         "button_variant": {
             "type": "string",

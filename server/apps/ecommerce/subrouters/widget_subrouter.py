@@ -193,7 +193,7 @@ async def get_bestsellers_widget(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
@@ -216,20 +216,20 @@ async def get_bestsellers_widget(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(500, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button stretches to full card width"),
     db: AsyncSession = Depends(get_session),
@@ -352,7 +352,7 @@ async def get_cross_sell_widget(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
@@ -375,20 +375,20 @@ async def get_cross_sell_widget(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(500, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button stretches to full card width"),
     db: AsyncSession = Depends(get_session),
@@ -515,7 +515,7 @@ async def get_upsell_widget(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
@@ -538,20 +538,20 @@ async def get_upsell_widget(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(500, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button stretches to full card width"),
     db: AsyncSession = Depends(get_session),
@@ -677,7 +677,7 @@ async def get_similar_widget(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default based on type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Widget layout style: grid, carousel"),
@@ -700,20 +700,20 @@ async def get_similar_widget(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("medium", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(500, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines before truncation (1-3)"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button style variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button stretches to full card width"),
     db: AsyncSession = Depends(get_session),

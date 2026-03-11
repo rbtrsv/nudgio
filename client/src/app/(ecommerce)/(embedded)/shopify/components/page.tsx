@@ -100,7 +100,7 @@ export default function ShopifyComponentsPage() {
   // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
-  const [titleSize, setTitleSize] = useState('lg');
+  const [titleSize, setTitleSize] = useState(24);
   const [titleAlignment, setTitleAlignment] = useState('left');
   // Group 3: Layout
   const [widgetStyle, setWidgetStyle] = useState<'grid' | 'carousel'>('grid');
@@ -123,20 +123,20 @@ export default function ShopifyComponentsPage() {
   const [imageRadius, setImageRadius] = useState(8);
   // Group 6: Product Title in Card
   const [productTitleColor, setProductTitleColor] = useState('#1F2937');
-  const [productTitleSize, setProductTitleSize] = useState('sm');
-  const [productTitleWeight, setProductTitleWeight] = useState('medium');
+  const [productTitleSize, setProductTitleSize] = useState(14);
+  const [productTitleWeight, setProductTitleWeight] = useState(500);
   const [productTitleLines, setProductTitleLines] = useState(2);
   const [productTitleAlignment, setProductTitleAlignment] = useState('left');
   // Group 7: Price
   const [showPrice, setShowPrice] = useState(true);
   const [priceColor, setPriceColor] = useState('#111827');
-  const [priceSize, setPriceSize] = useState('md');
+  const [priceSize, setPriceSize] = useState(18);
   // Group 8: CTA Button
   const [buttonText, setButtonText] = useState('View');
   const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
   const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
   const [buttonRadius, setButtonRadius] = useState(6);
-  const [buttonSize, setButtonSize] = useState('md');
+  const [buttonSize, setButtonSize] = useState(14);
   const [buttonVariant, setButtonVariant] = useState('solid');
   const [buttonFullWidth, setButtonFullWidth] = useState(false);
 
@@ -492,12 +492,7 @@ export default function ShopifyComponentsPage() {
           <s-stack direction="block" gap="base">
             <s-text-field label="Title Text" value={widgetTitle} onChange={(e) => setWidgetTitle(e.currentTarget.value)} details="Leave empty for auto-default based on widget type." />
             <ColorField label="Title Color" value={titleColor} onChange={setTitleColor} details="Hex color (e.g. #111827)" />
-            <s-select label="Title Size" value={titleSize} onChange={(e) => setTitleSize(e.currentTarget.value)}>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-              <s-option value="xl">Extra Large</s-option>
-            </s-select>
+            <s-number-field label="Title Size (px)" value={String(titleSize)} min="8" max="48" step="1" onChange={(e) => setTitleSize(Number(e.currentTarget.value))} />
             <s-select label="Title Alignment" value={titleAlignment} onChange={(e) => setTitleAlignment(e.currentTarget.value)}>
               <s-option value="left">Left</s-option>
               <s-option value="center">Center</s-option>
@@ -567,18 +562,8 @@ export default function ShopifyComponentsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <ColorField label="Title Color" value={productTitleColor} onChange={setProductTitleColor} details="Hex color (e.g. #1F2937)" />
-            <s-select label="Title Size" value={productTitleSize} onChange={(e) => setProductTitleSize(e.currentTarget.value)}>
-              <s-option value="xs">Extra Small</s-option>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-            </s-select>
-            <s-select label="Title Weight" value={productTitleWeight} onChange={(e) => setProductTitleWeight(e.currentTarget.value)}>
-              <s-option value="normal">Normal</s-option>
-              <s-option value="medium">Medium</s-option>
-              <s-option value="semibold">Semibold</s-option>
-              <s-option value="bold">Bold</s-option>
-            </s-select>
+            <s-number-field label="Title Size (px)" value={String(productTitleSize)} min="8" max="36" step="1" onChange={(e) => setProductTitleSize(Number(e.currentTarget.value))} />
+            <s-number-field label="Title Weight" value={String(productTitleWeight)} min="100" max="900" step="100" onChange={(e) => setProductTitleWeight(Number(e.currentTarget.value))} />
             <s-number-field label="Max Lines" min={1} max={3} step={1} value={String(productTitleLines)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setProductTitleLines(val); }} details="Product title truncation after N lines." />
             <s-select label="Title Alignment" value={productTitleAlignment} onChange={(e) => setProductTitleAlignment(e.currentTarget.value)}>
               <s-option value="left">Left</s-option>
@@ -594,11 +579,7 @@ export default function ShopifyComponentsPage() {
           <s-stack direction="block" gap="base">
             <s-checkbox label="Show Price" checked={showPrice || undefined} onChange={(e) => setShowPrice(e.currentTarget.checked)} />
             <ColorField label="Price Color" value={priceColor} onChange={setPriceColor} details="Hex color (e.g. #111827)" />
-            <s-select label="Price Size" value={priceSize} onChange={(e) => setPriceSize(e.currentTarget.value)}>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-            </s-select>
+            <s-number-field label="Price Size (px)" value={String(priceSize)} min="8" max="36" step="1" onChange={(e) => setPriceSize(Number(e.currentTarget.value))} />
           </s-stack>
         </s-box>
       </s-section>
@@ -611,11 +592,7 @@ export default function ShopifyComponentsPage() {
             <ColorField label="Button Color" value={buttonBgColor} onChange={setButtonBgColor} details="Hex color (e.g. #3B82F6)" />
             <ColorField label="Button Text Color" value={buttonTextColor} onChange={setButtonTextColor} details="Hex color (e.g. #FFFFFF)" />
             <s-number-field label="Button Border Radius (px)" min={0} max={50} step={1} value={String(buttonRadius)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setButtonRadius(val); }} details="Button border radius in pixels." />
-            <s-select label="Button Size" value={buttonSize} onChange={(e) => setButtonSize(e.currentTarget.value)}>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-            </s-select>
+            <s-number-field label="Button Size (px)" value={String(buttonSize)} min="8" max="24" step="1" onChange={(e) => setButtonSize(Number(e.currentTarget.value))} />
             <s-select label="Button Style" value={buttonVariant} onChange={(e) => setButtonVariant(e.currentTarget.value)}>
               <s-option value="solid">Solid (filled)</s-option>
               <s-option value="outline">Outline (border)</s-option>

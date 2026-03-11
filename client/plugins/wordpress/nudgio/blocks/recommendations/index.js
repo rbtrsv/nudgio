@@ -203,17 +203,17 @@
             // ------------------------------------------
             // Panel 3: Widget Container (Group 1)
             // ------------------------------------------
-            var containerPanel = el( PanelColorSettings, {
-                title: __( 'Widget Container', 'nudgio' ),
-                initialOpen: false,
-                colorSettings: [
-                    {
-                        value: attributes.widget_bg_color,
-                        onChange: function ( val ) { setAttributes( { widget_bg_color: val || '#FFFFFF' } ); },
-                        label: __( 'Background Color', 'nudgio' ),
-                    },
-                ],
-            } );
+            var containerPanel = el( PanelBody, { title: __( 'Widget Container', 'nudgio' ), initialOpen: false },
+                el( RangeControl, {
+                    label: __( 'Padding (px)', 'nudgio' ),
+                    help: __( 'Widget container padding in pixels.', 'nudgio' ),
+                    value: attributes.widget_padding,
+                    onChange: function ( val ) { setAttributes( { widget_padding: val } ); },
+                    min: 0,
+                    max: 48,
+                    step: 2,
+                } )
+            );
 
             // ------------------------------------------
             // Panel 4: Widget Title (Group 2)
@@ -225,16 +225,13 @@
                     value: attributes.widget_title,
                     onChange: function ( val ) { setAttributes( { widget_title: val } ); },
                 } ),
-                el( SelectControl, {
-                    label: __( 'Title Size', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Title Size (px)', 'nudgio' ),
+                    help: __( 'Widget heading font-size in pixels.', 'nudgio' ),
                     value: attributes.title_size,
-                    options: [
-                        { label: 'Small',       value: 'sm' },
-                        { label: 'Medium',      value: 'md' },
-                        { label: 'Large',       value: 'lg' },
-                        { label: 'Extra Large', value: 'xl' },
-                    ],
                     onChange: function ( val ) { setAttributes( { title_size: val } ); },
+                    min: 8,
+                    max: 48,
                 } ),
                 el( SelectControl, {
                     label: __( 'Title Alignment', 'nudgio' ),
@@ -391,27 +388,22 @@
             // Panel 8: Product Title (Group 6)
             // ------------------------------------------
             var productTitlePanel = el( PanelBody, { title: __( 'Product Title', 'nudgio' ), initialOpen: false },
-                el( SelectControl, {
-                    label: __( 'Size', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Size (px)', 'nudgio' ),
+                    help: __( 'Product title font-size in pixels.', 'nudgio' ),
                     value: attributes.product_title_size,
-                    options: [
-                        { label: 'Extra Small', value: 'xs' },
-                        { label: 'Small',       value: 'sm' },
-                        { label: 'Medium',      value: 'md' },
-                        { label: 'Large',       value: 'lg' },
-                    ],
                     onChange: function ( val ) { setAttributes( { product_title_size: val } ); },
+                    min: 8,
+                    max: 36,
                 } ),
-                el( SelectControl, {
+                el( RangeControl, {
                     label: __( 'Weight', 'nudgio' ),
+                    help: __( 'CSS font-weight (100–900, step 100).', 'nudgio' ),
                     value: attributes.product_title_weight,
-                    options: [
-                        { label: 'Normal',   value: 'normal' },
-                        { label: 'Medium',   value: 'medium' },
-                        { label: 'Semibold', value: 'semibold' },
-                        { label: 'Bold',     value: 'bold' },
-                    ],
                     onChange: function ( val ) { setAttributes( { product_title_weight: val } ); },
+                    min: 100,
+                    max: 900,
+                    step: 100,
                 } ),
                 el( RangeControl, {
                     label: __( 'Max Lines', 'nudgio' ),
@@ -440,15 +432,13 @@
                     checked: attributes.show_price,
                     onChange: function ( val ) { setAttributes( { show_price: val } ); },
                 } ),
-                el( SelectControl, {
-                    label: __( 'Price Size', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Price Size (px)', 'nudgio' ),
+                    help: __( 'Price font-size in pixels.', 'nudgio' ),
                     value: attributes.price_size,
-                    options: [
-                        { label: 'Small',  value: 'sm' },
-                        { label: 'Medium', value: 'md' },
-                        { label: 'Large',  value: 'lg' },
-                    ],
                     onChange: function ( val ) { setAttributes( { price_size: val } ); },
+                    min: 8,
+                    max: 36,
                 } )
             );
 
@@ -470,15 +460,13 @@
                     min: 0,
                     max: 50,
                 } ),
-                el( SelectControl, {
-                    label: __( 'Size', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Size (px)', 'nudgio' ),
+                    help: __( 'Button font-size in pixels.', 'nudgio' ),
                     value: attributes.button_size,
-                    options: [
-                        { label: 'Small',  value: 'sm' },
-                        { label: 'Medium', value: 'md' },
-                        { label: 'Large',  value: 'lg' },
-                    ],
                     onChange: function ( val ) { setAttributes( { button_size: val } ); },
+                    min: 8,
+                    max: 24,
                 } ),
                 el( SelectControl, {
                     label: __( 'Variant', 'nudgio' ),
@@ -521,6 +509,8 @@
             var sidebar = el( InspectorControls, {},
                 widgetSettingsPanel,
                 typeSpecificPanel,
+                containerPanel,
+                titlePanel,
                 layoutPanel,
                 cardPanel,
                 imagePanel,

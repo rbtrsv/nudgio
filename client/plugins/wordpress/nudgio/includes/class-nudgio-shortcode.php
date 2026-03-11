@@ -66,7 +66,7 @@ class Nudgio_Shortcode {
                 // Group 2: Widget Title
                 'widget_title'               => get_option( 'nudgio_default_widget_title', '' ),
                 'title_color'                => get_option( 'nudgio_default_title_color', '#111827' ),
-                'title_size'                 => get_option( 'nudgio_default_title_size', 'lg' ),
+                'title_size'                 => get_option( 'nudgio_default_title_size', 24 ),
                 'title_alignment'            => get_option( 'nudgio_default_title_alignment', 'left' ),
                 // Group 3: Layout
                 'widget_style'               => get_option( 'nudgio_default_widget_style', 'grid' ),
@@ -89,20 +89,20 @@ class Nudgio_Shortcode {
                 'image_radius'               => get_option( 'nudgio_default_image_radius', 8 ),
                 // Group 6: Product Title in Card
                 'product_title_color'        => get_option( 'nudgio_default_product_title_color', '#1F2937' ),
-                'product_title_size'         => get_option( 'nudgio_default_product_title_size', 'sm' ),
-                'product_title_weight'       => get_option( 'nudgio_default_product_title_weight', 'semibold' ),
+                'product_title_size'         => get_option( 'nudgio_default_product_title_size', 14 ),
+                'product_title_weight'       => get_option( 'nudgio_default_product_title_weight', 600 ),
                 'product_title_lines'        => get_option( 'nudgio_default_product_title_lines', 2 ),
                 'product_title_alignment'    => get_option( 'nudgio_default_product_title_alignment', 'left' ),
                 // Group 7: Price
                 'show_price'                 => get_option( 'nudgio_default_show_price', true ) ? 'true' : 'false',
                 'price_color'                => get_option( 'nudgio_default_price_color', '#111827' ),
-                'price_size'                 => get_option( 'nudgio_default_price_size', 'md' ),
+                'price_size'                 => get_option( 'nudgio_default_price_size', 18 ),
                 // Group 8: CTA Button
                 'button_text'                => get_option( 'nudgio_default_button_text', 'View' ),
                 'button_bg_color'            => get_option( 'nudgio_default_button_bg_color', '#3B82F6' ),
                 'button_text_color'          => get_option( 'nudgio_default_button_text_color', '#FFFFFF' ),
                 'button_radius'              => get_option( 'nudgio_default_button_radius', 6 ),
-                'button_size'                => get_option( 'nudgio_default_button_size', 'md' ),
+                'button_size'                => get_option( 'nudgio_default_button_size', 14 ),
                 'button_variant'             => get_option( 'nudgio_default_button_variant', 'solid' ),
                 'button_full_width'          => get_option( 'nudgio_default_button_full_width', false ) ? 'true' : 'false',
             ),
@@ -165,7 +165,7 @@ class Nudgio_Shortcode {
             'widget_padding'          => absint( $atts['widget_padding'] ),
             // Group 2: Widget Title
             'title_color'             => sanitize_hex_color( $atts['title_color'] ),
-            'title_size'              => sanitize_text_field( $atts['title_size'] ),
+            'title_size'              => absint( $atts['title_size'] ),
             'title_alignment'         => sanitize_text_field( $atts['title_alignment'] ),
             // Group 3: Layout
             'widget_style'            => sanitize_text_field( $atts['widget_style'] ),
@@ -188,21 +188,21 @@ class Nudgio_Shortcode {
             'image_radius'            => absint( $atts['image_radius'] ),
             // Group 6: Product Title in Card
             'product_title_color'     => sanitize_hex_color( $atts['product_title_color'] ),
-            'product_title_size'      => sanitize_text_field( $atts['product_title_size'] ),
-            'product_title_weight'    => sanitize_text_field( $atts['product_title_weight'] ),
+            'product_title_size'      => absint( $atts['product_title_size'] ),
+            'product_title_weight'    => intval( $atts['product_title_weight'] ),
             'product_title_lines'     => absint( $atts['product_title_lines'] ),
             'product_title_alignment' => sanitize_text_field( $atts['product_title_alignment'] ),
             // Group 7: Price
             // Boolean → 'true'/'false' string (sanitize_text_field(false) returns '' which FastAPI rejects)
             'show_price'              => filter_var( $atts['show_price'], FILTER_VALIDATE_BOOLEAN ) ? 'true' : 'false',
             'price_color'             => sanitize_hex_color( $atts['price_color'] ),
-            'price_size'              => sanitize_text_field( $atts['price_size'] ),
+            'price_size'              => absint( $atts['price_size'] ),
             // Group 8: CTA Button
             'button_text'             => sanitize_text_field( $atts['button_text'] ),
             'button_bg_color'         => sanitize_hex_color( $atts['button_bg_color'] ),
             'button_text_color'       => sanitize_hex_color( $atts['button_text_color'] ),
             'button_radius'           => absint( $atts['button_radius'] ),
-            'button_size'             => sanitize_text_field( $atts['button_size'] ),
+            'button_size'             => absint( $atts['button_size'] ),
             'button_variant'          => sanitize_text_field( $atts['button_variant'] ),
             // Boolean → 'true'/'false' string (sanitize_text_field(false) returns '' which FastAPI rejects)
             'button_full_width'       => filter_var( $atts['button_full_width'], FILTER_VALIDATE_BOOLEAN ) ? 'true' : 'false',

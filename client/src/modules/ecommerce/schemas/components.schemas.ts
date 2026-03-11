@@ -35,7 +35,7 @@ export const WidgetParamsSchema = z.object({
   // Group 2: Widget Title
   widget_title: z.string().default(''),
   title_color: z.string().default('#111827'),
-  title_size: z.string().default('lg'),
+  title_size: z.number().default(24),
   title_alignment: z.string().default('left'),
   // Group 3: Layout
   widget_style: z.string().default('grid'),
@@ -58,20 +58,20 @@ export const WidgetParamsSchema = z.object({
   image_radius: z.number().default(8),
   // Group 6: Product Title in Card
   product_title_color: z.string().default('#1F2937'),
-  product_title_size: z.string().default('sm'),
-  product_title_weight: z.string().default('semibold'),
+  product_title_size: z.number().default(14),
+  product_title_weight: z.number().default(600),
   product_title_lines: z.number().min(1).max(3).default(2),
   product_title_alignment: z.string().default('left'),
   // Group 7: Price
   show_price: z.boolean().default(true),
   price_color: z.string().default('#111827'),
-  price_size: z.string().default('md'),
+  price_size: z.number().default(18),
   // Group 8: CTA Button
   button_text: z.string().default('View'),
   button_bg_color: z.string().default('#3B82F6'),
   button_text_color: z.string().default('#FFFFFF'),
   button_radius: z.number().default(6),
-  button_size: z.string().default('md'),
+  button_size: z.number().default(14),
   button_variant: z.string().default('solid'),
   button_full_width: z.boolean().default(false),
 });

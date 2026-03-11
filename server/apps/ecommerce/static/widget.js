@@ -61,7 +61,7 @@
     'widget-padding': '16',
     // Group 2: Widget Title
     'title-color': '#111827',
-    'title-size': 'lg',
+    'title-size': '24',
     'title-alignment': 'left',
     // Group 3: Layout
     'widget-style': 'grid',
@@ -84,20 +84,20 @@
     'image-radius': '8',
     // Group 6: Product Title in Card
     'product-title-color': '#1F2937',
-    'product-title-size': 'sm',
-    'product-title-weight': 'semibold',
+    'product-title-size': '14',
+    'product-title-weight': '600',
     'product-title-lines': '2',
     'product-title-alignment': 'left',
     // Group 7: Price
     'show-price': 'true',
     'price-color': '#111827',
-    'price-size': 'md',
+    'price-size': '18',
     // Group 8: CTA Button
     'button-text': 'View',
     'button-bg-color': '#3B82F6',
     'button-text-color': '#FFFFFF',
     'button-radius': '6',
-    'button-size': 'md',
+    'button-size': '14',
     'button-variant': 'solid',
     'button-full-width': 'false'
   };

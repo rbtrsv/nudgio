@@ -29,7 +29,7 @@ const EMBED_DEFAULTS: Record<string, string> = {
   'widget-padding': '16',
   // Group 2: Widget Title
   'title-color': '#111827',
-  'title-size': 'lg',
+  'title-size': '24',
   'title-alignment': 'left',
   // Group 3: Layout
   'widget-style': 'grid',
@@ -52,20 +52,20 @@ const EMBED_DEFAULTS: Record<string, string> = {
   'image-radius': '8',
   // Group 6: Product Title in Card
   'product-title-color': '#1F2937',
-  'product-title-size': 'sm',
-  'product-title-weight': 'semibold',
+  'product-title-size': '14',
+  'product-title-weight': '600',
   'product-title-lines': '2',
   'product-title-alignment': 'left',
   // Group 7: Price
   'show-price': 'true',
   'price-color': '#111827',
-  'price-size': 'md',
+  'price-size': '18',
   // Group 8: CTA Button
   'button-text': 'View',
   'button-bg-color': '#3B82F6',
   'button-text-color': '#FFFFFF',
   'button-radius': '6',
-  'button-size': 'md',
+  'button-size': '14',
   'button-variant': 'solid',
   'button-full-width': 'false',
 };
@@ -160,7 +160,7 @@ export function useComponents() {
       // Group 2: Widget Title
       widgetTitle?: string;
       titleColor?: string;
-      titleSize?: string;
+      titleSize?: number;
       titleAlignment?: string;
       // Group 3: Layout
       widgetStyle?: string;
@@ -183,20 +183,20 @@ export function useComponents() {
       imageRadius?: number;
       // Group 6: Product Title in Card
       productTitleColor?: string;
-      productTitleSize?: string;
-      productTitleWeight?: string;
+      productTitleSize?: number;
+      productTitleWeight?: number;
       productTitleLines?: number;
       productTitleAlignment?: string;
       // Group 7: Price
       showPrice?: boolean;
       priceColor?: string;
-      priceSize?: string;
+      priceSize?: number;
       // Group 8: CTA Button
       buttonText?: string;
       buttonBgColor?: string;
       buttonTextColor?: string;
       buttonRadius?: number;
-      buttonSize?: string;
+      buttonSize?: number;
       buttonVariant?: string;
       buttonFullWidth?: boolean;
     },
@@ -219,7 +219,7 @@ export function useComponents() {
       'widget-padding': String(config.widgetPadding ?? 16),
       // Group 2: Widget Title
       'title-color': config.titleColor ?? '#111827',
-      'title-size': config.titleSize ?? 'lg',
+      'title-size': String(config.titleSize ?? 24),
       'title-alignment': config.titleAlignment ?? 'left',
       // Group 3: Layout
       'widget-style': config.widgetStyle ?? 'grid',
@@ -242,20 +242,20 @@ export function useComponents() {
       'image-radius': String(config.imageRadius ?? 8),
       // Group 6: Product Title in Card
       'product-title-color': config.productTitleColor ?? '#1F2937',
-      'product-title-size': config.productTitleSize ?? 'sm',
-      'product-title-weight': config.productTitleWeight ?? 'semibold',
+      'product-title-size': String(config.productTitleSize ?? 14),
+      'product-title-weight': String(config.productTitleWeight ?? 600),
       'product-title-lines': String(config.productTitleLines ?? 2),
       'product-title-alignment': config.productTitleAlignment ?? 'left',
       // Group 7: Price
       'show-price': String(config.showPrice ?? true),
       'price-color': config.priceColor ?? '#111827',
-      'price-size': config.priceSize ?? 'md',
+      'price-size': String(config.priceSize ?? 18),
       // Group 8: CTA Button
       'button-text': config.buttonText ?? 'View',
       'button-bg-color': config.buttonBgColor ?? '#3B82F6',
       'button-text-color': config.buttonTextColor ?? '#FFFFFF',
       'button-radius': String(config.buttonRadius ?? 6),
-      'button-size': config.buttonSize ?? 'md',
+      'button-size': String(config.buttonSize ?? 14),
       'button-variant': config.buttonVariant ?? 'solid',
       'button-full-width': String(config.buttonFullWidth ?? false),
     };

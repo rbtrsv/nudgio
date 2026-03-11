@@ -158,7 +158,7 @@ class Nudgio_Settings {
         // --- Group 2: Widget Title ---
         $this->register_text_setting( 'widget_title', __( 'Widget Title', 'nudgio-technologies' ), '', __( 'Leave empty for auto-default based on widget type.', 'nudgio-technologies' ) );
         $this->register_color_setting( 'title_color', __( 'Title Color', 'nudgio-technologies' ), '#111827' );
-        $this->register_select_setting( 'title_size', __( 'Title Size', 'nudgio-technologies' ), 'lg', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large', 'xl' => 'Extra Large' ) );
+        $this->register_number_setting( 'title_size', __( 'Title Size (px)', 'nudgio-technologies' ), 24, 8, 48, __( 'Widget heading font-size in pixels.', 'nudgio-technologies' ) );
         $this->register_select_setting( 'title_alignment', __( 'Title Alignment', 'nudgio-technologies' ), 'left', array( 'left' => 'Left', 'center' => 'Center' ) );
 
         // --- Group 3: Layout ---
@@ -185,22 +185,22 @@ class Nudgio_Settings {
 
         // --- Group 6: Product Title in Card ---
         $this->register_color_setting( 'product_title_color', __( 'Product Title Color', 'nudgio-technologies' ), '#1F2937' );
-        $this->register_select_setting( 'product_title_size', __( 'Product Title Size', 'nudgio-technologies' ), 'sm', array( 'xs' => 'Extra Small', 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
-        $this->register_select_setting( 'product_title_weight', __( 'Product Title Weight', 'nudgio-technologies' ), 'semibold', array( 'normal' => 'Normal', 'medium' => 'Medium', 'semibold' => 'Semibold', 'bold' => 'Bold' ) );
+        $this->register_number_setting( 'product_title_size', __( 'Product Title Size (px)', 'nudgio-technologies' ), 14, 8, 36, __( 'Product title font-size in pixels.', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'product_title_weight', __( 'Product Title Weight', 'nudgio-technologies' ), 600, 100, 900, __( 'CSS font-weight (100–900, step 100).', 'nudgio-technologies' ) );
         $this->register_number_setting( 'product_title_lines', __( 'Product Title Max Lines', 'nudgio-technologies' ), 2, 1, 3 );
         $this->register_select_setting( 'product_title_alignment', __( 'Product Title Alignment', 'nudgio-technologies' ), 'left', array( 'left' => 'Left', 'center' => 'Center' ) );
 
         // --- Group 7: Price ---
         $this->register_boolean_setting( 'show_price', __( 'Show Price', 'nudgio-technologies' ), true, __( 'Display product price on widget cards.', 'nudgio-technologies' ) );
         $this->register_color_setting( 'price_color', __( 'Price Color', 'nudgio-technologies' ), '#111827' );
-        $this->register_select_setting( 'price_size', __( 'Price Size', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_number_setting( 'price_size', __( 'Price Size (px)', 'nudgio-technologies' ), 18, 8, 36, __( 'Price font-size in pixels.', 'nudgio-technologies' ) );
 
         // --- Group 8: CTA Button ---
         $this->register_text_setting( 'button_text', __( 'Button Text', 'nudgio-technologies' ), 'View', __( 'Call-to-action text (e.g. View, Shop Now, Add to Cart).', 'nudgio-technologies' ) );
         $this->register_color_setting( 'button_bg_color', __( 'Button Color', 'nudgio-technologies' ), '#3B82F6' );
         $this->register_color_setting( 'button_text_color', __( 'Button Text Color', 'nudgio-technologies' ), '#FFFFFF' );
         $this->register_number_setting( 'button_radius', __( 'Button Border Radius (px)', 'nudgio-technologies' ), 6, 0, 50, __( 'Button corner radius in pixels.', 'nudgio-technologies' ) );
-        $this->register_select_setting( 'button_size', __( 'Button Size', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_number_setting( 'button_size', __( 'Button Size (px)', 'nudgio-technologies' ), 14, 8, 24, __( 'Button font-size in pixels.', 'nudgio-technologies' ) );
         $this->register_select_setting( 'button_variant', __( 'Button Variant', 'nudgio-technologies' ), 'solid', array( 'solid' => 'Solid', 'outline' => 'Outline', 'ghost' => 'Ghost' ) );
         $this->register_boolean_setting( 'button_full_width', __( 'Button Full Width', 'nudgio-technologies' ), false, __( 'Stretch button to full card width.', 'nudgio-technologies' ) );
     }

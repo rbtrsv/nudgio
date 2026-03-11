@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,7 +88,7 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 **Widget Title:**
 * `widget_title` — custom widget heading (leave empty for auto-default)
 * `title_color` — hex color for title (default: #111827)
-* `title_size` — sm, md, lg, xl (default: lg)
+* `title_size` — font-size in pixels (default: 24)
 * `title_alignment` — left, center (default: left)
 
 **Layout:**
@@ -115,22 +115,22 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 
 **Product Title:**
 * `product_title_color` — hex color for product title (default: #1F2937)
-* `product_title_size` — xs, sm, md, lg (default: sm)
-* `product_title_weight` — normal, medium, semibold, bold (default: semibold)
+* `product_title_size` — font-size in pixels (default: 14)
+* `product_title_weight` — CSS font-weight 100-900 (default: 600)
 * `product_title_lines` — max lines before truncation, 1-3 (default: 2)
 * `product_title_alignment` — left, center (default: left)
 
 **Price:**
 * `show_price` — show product price: true/false (default: true)
 * `price_color` — hex color for price (default: #111827)
-* `price_size` — sm, md, lg (default: md)
+* `price_size` — font-size in pixels (default: 18)
 
 **CTA Button:**
 * `button_text` — button text, e.g. View, Shop Now (default: View)
 * `button_bg_color` — hex color for button background (default: #3B82F6)
 * `button_text_color` — hex color for button text (default: #FFFFFF)
 * `button_radius` — button border radius in pixels (default: 6)
-* `button_size` — sm, md, lg (default: md)
+* `button_size` — font-size in pixels (default: 14)
 * `button_variant` — solid, outline, ghost (default: solid)
 * `button_full_width` — stretch button to full width: true/false (default: false)
 
@@ -139,6 +139,13 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 These types require a product context. On non-product pages, the shortcode outputs nothing unless you specify a `product_id` attribute explicitly.
 
 == Changelog ==
+
+= 1.3.4 =
+* Converted 5 size enum fields from string to integer: title_size, product_title_size, product_title_weight, price_size, button_size
+* Size fields now accept pixel values (e.g. title_size=24) instead of enum strings (sm/md/lg)
+* Font weight accepts CSS font-weight values (100-900) instead of named weights (normal/semibold/bold)
+* Gutenberg block uses RangeControl sliders for all size and weight fields
+* Admin settings page uses number inputs with min/max validation
 
 = 1.3.3 =
 * Converted border radius and width fields from string to integer (card_border_radius, card_border_width, image_radius, button_radius)
@@ -201,6 +208,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.3.4 =
+Size and weight fields now use integer pixel values instead of enum strings. Existing shortcodes using sm/md/lg values must be updated.
 
 = 1.3.3 =
 Border radius and width fields now use integer pixel values. Gutenberg block uses slider controls.

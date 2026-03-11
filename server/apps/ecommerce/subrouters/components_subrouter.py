@@ -22,16 +22,9 @@ router = APIRouter(
 
 
 # ==========================================
-# CSS Value Maps — individual Tailwind classes per setting value
-# Replaces the monolithic SIZE_MAP with per-element control.
+# CSS Value Maps — Tailwind classes for enum-based settings
+# Size fields (title_size, product_title_size, etc.) use inline px values directly.
 # ==========================================
-
-TITLE_SIZE_MAP = {
-    "sm": "text-base",
-    "md": "text-xl",
-    "lg": "text-2xl",
-    "xl": "text-3xl",
-}
 
 CARD_SHADOW_MAP = {
     "none": "",
@@ -45,32 +38,6 @@ CARD_HOVER_MAP = {
     "lift": "hover:-translate-y-1",
     "shadow": "hover:shadow-xl",
     "glow": "hover:shadow-lg hover:shadow-blue-200/50",
-}
-
-PRODUCT_TITLE_SIZE_MAP = {
-    "xs": "text-xs",
-    "sm": "text-sm",
-    "md": "text-base",
-    "lg": "text-lg",
-}
-
-PRODUCT_TITLE_WEIGHT_MAP = {
-    "normal": "font-normal",
-    "medium": "font-medium",
-    "semibold": "font-semibold",
-    "bold": "font-bold",
-}
-
-PRICE_SIZE_MAP = {
-    "sm": "text-sm",
-    "md": "text-lg",
-    "lg": "text-xl",
-}
-
-BUTTON_SIZE_MAP = {
-    "sm": {"padding": "px-2 py-1", "text": "text-xs"},
-    "md": {"padding": "px-4 py-2", "text": "text-sm"},
-    "lg": {"padding": "px-6 py-3", "text": "text-base"},
 }
 
 def _generate_carousel_css(columns: int, gap_px: int, min_width: int, max_width: int) -> str:
@@ -133,7 +100,7 @@ VISUAL_DEFAULTS = {
     # Group 2: Widget Title
     "widget_title": "",
     "title_color": "#111827",
-    "title_size": "lg",
+    "title_size": 24,
     "title_alignment": "left",
     # Group 3: Layout
     "widget_style": "grid",
@@ -156,20 +123,20 @@ VISUAL_DEFAULTS = {
     "image_radius": 8,
     # Group 6: Product Title in Card
     "product_title_color": "#1F2937",
-    "product_title_size": "sm",
-    "product_title_weight": "semibold",
+    "product_title_size": 14,
+    "product_title_weight": 600,
     "product_title_lines": 2,
     "product_title_alignment": "left",
     # Group 7: Price
     "show_price": True,
     "price_color": "#111827",
-    "price_size": "md",
+    "price_size": 18,
     # Group 8: CTA Button
     "button_text": "View",
     "button_bg_color": "#3B82F6",
     "button_text_color": "#FFFFFF",
     "button_radius": 6,
-    "button_size": "md",
+    "button_size": 14,
     "button_variant": "solid",
     "button_full_width": False,
 }
@@ -292,7 +259,7 @@ async def get_bestsellers_component(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Layout style: grid, carousel"),
@@ -315,20 +282,20 @@ async def get_bestsellers_component(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(600, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
@@ -419,7 +386,7 @@ async def get_cross_sell_component(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Layout style: grid, carousel"),
@@ -442,20 +409,20 @@ async def get_cross_sell_component(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(600, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
@@ -545,7 +512,7 @@ async def get_upsell_component(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Layout style: grid, carousel"),
@@ -568,20 +535,20 @@ async def get_upsell_component(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(600, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
@@ -670,7 +637,7 @@ async def get_similar_component(
     # Group 2: Widget Title
     widget_title: str = Query("", description="Custom widget title (empty = auto-default by widget type)"),
     title_color: str = Query("#111827", description="Widget title color hex"),
-    title_size: str = Query("lg", description="Widget title size: sm, md, lg, xl"),
+    title_size: int = Query(24, description="Widget title font-size in pixels"),
     title_alignment: str = Query("left", description="Widget title alignment: left, center"),
     # Group 3: Layout
     widget_style: str = Query("grid", description="Layout style: grid, carousel"),
@@ -693,20 +660,20 @@ async def get_similar_component(
     image_radius: int = Query(8, description="Image border radius in pixels"),
     # Group 6: Product Title in Card
     product_title_color: str = Query("#1F2937", description="Product title color hex"),
-    product_title_size: str = Query("sm", description="Product title size: xs, sm, md, lg"),
-    product_title_weight: str = Query("semibold", description="Product title weight: normal, medium, semibold, bold"),
+    product_title_size: int = Query(14, description="Product title font-size in pixels"),
+    product_title_weight: int = Query(600, description="CSS font-weight (100-900)"),
     product_title_lines: int = Query(2, description="Product title max lines: 1-3"),
     product_title_alignment: str = Query("left", description="Product title alignment: left, center"),
     # Group 7: Price
     show_price: bool = Query(True, description="Show product price"),
     price_color: str = Query("#111827", description="Price text color hex"),
-    price_size: str = Query("md", description="Price text size: sm, md, lg"),
+    price_size: int = Query(18, description="Price font-size in pixels"),
     # Group 8: CTA Button
     button_text: str = Query("View", description="CTA button text"),
     button_bg_color: str = Query("#3B82F6", description="Button background color hex"),
     button_text_color: str = Query("#FFFFFF", description="Button text color hex"),
     button_radius: int = Query(6, description="Button border radius in pixels"),
-    button_size: str = Query("md", description="Button size: sm, md, lg"),
+    button_size: int = Query(14, description="Button font-size in pixels"),
     button_variant: str = Query("solid", description="Button variant: solid, outline, ghost"),
     button_full_width: bool = Query(False, description="Button full width"),
     current_user: User = Depends(get_current_user),
@@ -820,7 +787,6 @@ def generate_recommendation_html(
 
     # Resolve CSS values (with safe fallbacks)
     widget_padding_px = int(vis["widget_padding"])
-    title_size_class = TITLE_SIZE_MAP.get(vis["title_size"], TITLE_SIZE_MAP["lg"])
     title_align = "text-center" if vis["title_alignment"] == "center" else "text-left"
     gap_px = int(vis["gap"])
     aspect_w = int(vis["image_aspect_w"])
@@ -878,7 +844,7 @@ def generate_recommendation_html(
     </head>
     <body style="background-color: {vis['widget_bg_color']}; margin: 0; overflow: hidden;">
         <div class="w-full" style="padding: {widget_padding_px}px;">
-            <h3 class="{title_size_class} font-bold mb-4 {title_align}" style="color: {vis['title_color']}">{title}</h3>
+            <h3 class="mb-4 {title_align}" style="font-size: {vis['title_size']}px; font-weight: 700; color: {vis['title_color']}">{title}</h3>
             <div {container_attr}>
                 {cards_html}
             </div>
@@ -980,18 +946,20 @@ def _build_button_html(vis: Dict[str, any], product_id: str, position, handle: s
     - outline: transparent bg, colored border + text
     - ghost: transparent bg, colored text, no border
     """
-    btn_size = BUTTON_SIZE_MAP.get(vis["button_size"], BUTTON_SIZE_MAP["md"])
+    # Derive button padding from font-size: padding-y = round(fontSize / 2), padding-x = fontSize
+    btn_py = round(vis["button_size"] / 2)
+    btn_px = vis["button_size"]
     width_class = "w-full" if vis["button_full_width"] else ""
     variant = vis["button_variant"]
 
     # Variant-specific inline styles
     if variant == "outline":
-        style = f"color: {vis['button_bg_color']}; border: 2px solid {vis['button_bg_color']}; background: transparent; border-radius: {vis['button_radius']}px"
+        style = f"color: {vis['button_bg_color']}; border: 2px solid {vis['button_bg_color']}; background: transparent; border-radius: {vis['button_radius']}px; font-size: {vis['button_size']}px; padding: {btn_py}px {btn_px}px"
     elif variant == "ghost":
-        style = f"color: {vis['button_bg_color']}; background: transparent; border: none; border-radius: {vis['button_radius']}px"
+        style = f"color: {vis['button_bg_color']}; background: transparent; border: none; border-radius: {vis['button_radius']}px; font-size: {vis['button_size']}px; padding: {btn_py}px {btn_px}px"
     else:
         # solid (default)
-        style = f"background-color: {vis['button_bg_color']}; color: {vis['button_text_color']}; border-radius: {vis['button_radius']}px"
+        style = f"background-color: {vis['button_bg_color']}; color: {vis['button_text_color']}; border-radius: {vis['button_radius']}px; font-size: {vis['button_size']}px; padding: {btn_py}px {btn_px}px"
 
     return f"""
                     <button data-rec-click
@@ -999,7 +967,7 @@ def _build_button_html(vis: Dict[str, any], product_id: str, position, handle: s
                             data-position="{position}"
                             data-handle="{handle}"
                             data-product-url="{product_url}"
-                            class="{btn_size['padding']} {btn_size['text']} {width_class} font-medium hover:opacity-90 transition-opacity"
+                            class="{width_class} font-medium hover:opacity-90 transition-opacity"
                             style="{style}">
                         {vis['button_text']}
                     </button>"""
@@ -1015,10 +983,7 @@ def generate_grid_cards(recommendations: List[Dict], vis: Dict[str, any], shop_u
     hover_class = CARD_HOVER_MAP.get(vis["card_hover"], CARD_HOVER_MAP["lift"])
     aspect_w = int(vis["image_aspect_w"])
     aspect_h = int(vis["image_aspect_h"])
-    title_size_class = PRODUCT_TITLE_SIZE_MAP.get(vis["product_title_size"], PRODUCT_TITLE_SIZE_MAP["sm"])
-    title_weight_class = PRODUCT_TITLE_WEIGHT_MAP.get(vis["product_title_weight"], PRODUCT_TITLE_WEIGHT_MAP["semibold"])
     title_align = "text-center" if vis["product_title_alignment"] == "center" else "text-left"
-    price_size_class = PRICE_SIZE_MAP.get(vis["price_size"], PRICE_SIZE_MAP["md"])
 
     # Card border: only add border style if width > 0
     border_style = ""
@@ -1037,7 +1002,7 @@ def generate_grid_cards(recommendations: List[Dict], vis: Dict[str, any], shop_u
         product_url = _build_product_url(shop_urls, handle, product_id)
 
         # Conditionally render price span
-        price_html = f'<span class="font-bold {price_size_class}" style="color: {vis["price_color"]}">${float(price):.2f}</span>' if vis["show_price"] else ''
+        price_html = f'<span style="font-size: {vis["price_size"]}px; font-weight: 700; color: {vis["price_color"]}">${float(price):.2f}</span>' if vis["show_price"] else ''
 
         # Build button HTML with variant support
         button_html = _build_button_html(vis, product_id, position, handle, product_url)
@@ -1066,7 +1031,7 @@ def generate_grid_cards(recommendations: List[Dict], vis: Dict[str, any], shop_u
                      loading="lazy">
             </div>
             <div class="flex flex-col flex-1" style="padding: {card_padding_px}px;">
-                <h4 class="{title_weight_class} {title_size_class} {title_align} mb-2 line-clamp-custom" style="color: {vis['product_title_color']}">
+                <h4 style="font-size: {vis['product_title_size']}px; font-weight: {vis['product_title_weight']}; color: {vis['product_title_color']}" class="{title_align} mb-2 line-clamp-custom">
                     {title}
                 </h4>
                 {footer_html}
@@ -1087,10 +1052,7 @@ def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], sh
     card_padding_px = int(vis["card_padding"])
     aspect_w = int(vis["image_aspect_w"])
     aspect_h = int(vis["image_aspect_h"])
-    title_size_class = PRODUCT_TITLE_SIZE_MAP.get(vis["product_title_size"], PRODUCT_TITLE_SIZE_MAP["sm"])
-    title_weight_class = PRODUCT_TITLE_WEIGHT_MAP.get(vis["product_title_weight"], PRODUCT_TITLE_WEIGHT_MAP["semibold"])
     title_align = "text-center" if vis["product_title_alignment"] == "center" else "text-left"
-    price_size_class = PRICE_SIZE_MAP.get(vis["price_size"], PRICE_SIZE_MAP["md"])
 
     # Card border: only add border style if width > 0
     border_style = ""
@@ -1108,7 +1070,7 @@ def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], sh
         product_url = _build_product_url(shop_urls, handle, product_id)
 
         # Conditionally render price span
-        price_html = f'<span class="font-bold {price_size_class}" style="color: {vis["price_color"]}">${float(price):.2f}</span>' if vis["show_price"] else ''
+        price_html = f'<span style="font-size: {vis["price_size"]}px; font-weight: 700; color: {vis["price_color"]}">${float(price):.2f}</span>' if vis["show_price"] else ''
 
         # Build button HTML with variant support
         button_html = _build_button_html(vis, product_id, position, handle, product_url)
@@ -1136,7 +1098,7 @@ def generate_carousel_cards(recommendations: List[Dict], vis: Dict[str, any], sh
                      class="w-full h-full object-{vis['image_fit']} hover:scale-105 transition-transform duration-300">
             </div>
             <div class="flex flex-col flex-1" style="padding: {card_padding_px}px;">
-                <h4 class="{title_weight_class} {title_size_class} {title_align} mb-2 line-clamp-custom" style="color: {vis['product_title_color']}">
+                <h4 style="font-size: {vis['product_title_size']}px; font-weight: {vis['product_title_weight']}; color: {vis['product_title_color']}" class="{title_align} mb-2 line-clamp-custom">
                     {title}
                 </h4>
                 {footer_html}

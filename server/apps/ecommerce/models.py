@@ -129,7 +129,7 @@ class RecommendationSettings(BaseMixin, Base):
     # Group 2: Widget Title
     widget_title: Mapped[str | None] = mapped_column(String(200), nullable=True)  # "Our Picks", "" (empty = auto)
     title_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#111827"
-    title_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg", "xl"
+    title_size: Mapped[int | None] = mapped_column(Integer, nullable=True)  # widget heading font-size in pixels
     title_alignment: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "left", "center"
 
     # Group 3: Layout
@@ -156,22 +156,22 @@ class RecommendationSettings(BaseMixin, Base):
 
     # Group 6: Product Title in Card
     product_title_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#1F2937"
-    product_title_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "xs", "sm", "md", "lg"
-    product_title_weight: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "normal", "medium", "semibold", "bold"
+    product_title_size: Mapped[int | None] = mapped_column(Integer, nullable=True)  # card title font-size in pixels
+    product_title_weight: Mapped[int | None] = mapped_column(Integer, nullable=True)  # CSS font-weight (400-700)
     product_title_lines: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-3
     product_title_alignment: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "left", "center"
 
     # Group 7: Price
     show_price: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False
     price_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#111827"
-    price_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+    price_size: Mapped[int | None] = mapped_column(Integer, nullable=True)  # price font-size in pixels
 
     # Group 8: CTA Button
     button_text: Mapped[str | None] = mapped_column(String(100), nullable=True)  # "View", "Shop Now"
     button_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#3B82F6"
     button_text_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
     button_radius: Mapped[int | None] = mapped_column(Integer, nullable=True)  # border radius in pixels
-    button_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+    button_size: Mapped[int | None] = mapped_column(Integer, nullable=True)  # button font-size in pixels
     button_variant: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "solid", "outline", "ghost"
     button_full_width: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False
 

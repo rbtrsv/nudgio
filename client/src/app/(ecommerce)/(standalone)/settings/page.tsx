@@ -40,7 +40,7 @@ export default function SettingsPage() {
   // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
-  const [titleSize, setTitleSize] = useState('lg');
+  const [titleSize, setTitleSize] = useState(24);
   const [titleAlignment, setTitleAlignment] = useState('left');
   // Group 3: Layout
   const [widgetStyle, setWidgetStyle] = useState('grid');
@@ -63,20 +63,20 @@ export default function SettingsPage() {
   const [imageRadius, setImageRadius] = useState(8);
   // Group 6: Product Title in Card
   const [productTitleColor, setProductTitleColor] = useState('#1F2937');
-  const [productTitleSize, setProductTitleSize] = useState('sm');
-  const [productTitleWeight, setProductTitleWeight] = useState('semibold');
+  const [productTitleSize, setProductTitleSize] = useState(14);
+  const [productTitleWeight, setProductTitleWeight] = useState(600);
   const [productTitleLines, setProductTitleLines] = useState(2);
   const [productTitleAlignment, setProductTitleAlignment] = useState('left');
   // Group 7: Price
   const [showPrice, setShowPrice] = useState(true);
   const [priceColor, setPriceColor] = useState('#111827');
-  const [priceSize, setPriceSize] = useState('md');
+  const [priceSize, setPriceSize] = useState(18);
   // Group 8: CTA Button
   const [buttonText, setButtonText] = useState('View');
   const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
   const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
   const [buttonRadius, setButtonRadius] = useState(6);
-  const [buttonSize, setButtonSize] = useState('md');
+  const [buttonSize, setButtonSize] = useState(14);
   const [buttonVariant, setButtonVariant] = useState('solid');
   const [buttonFullWidth, setButtonFullWidth] = useState(false);
 
@@ -102,7 +102,7 @@ export default function SettingsPage() {
       // Group 2: Widget Title
       if (currentSettings.widget_title != null) setWidgetTitle(currentSettings.widget_title);
       if (currentSettings.title_color) setTitleColor(currentSettings.title_color);
-      if (currentSettings.title_size) setTitleSize(currentSettings.title_size);
+      if (currentSettings.title_size != null) setTitleSize(currentSettings.title_size);
       if (currentSettings.title_alignment) setTitleAlignment(currentSettings.title_alignment);
       // Group 3: Layout
       if (currentSettings.widget_style) setWidgetStyle(currentSettings.widget_style);
@@ -125,20 +125,20 @@ export default function SettingsPage() {
       if (currentSettings.image_radius != null) setImageRadius(currentSettings.image_radius);
       // Group 6: Product Title in Card
       if (currentSettings.product_title_color) setProductTitleColor(currentSettings.product_title_color);
-      if (currentSettings.product_title_size) setProductTitleSize(currentSettings.product_title_size);
-      if (currentSettings.product_title_weight) setProductTitleWeight(currentSettings.product_title_weight);
+      if (currentSettings.product_title_size != null) setProductTitleSize(currentSettings.product_title_size);
+      if (currentSettings.product_title_weight != null) setProductTitleWeight(currentSettings.product_title_weight);
       if (currentSettings.product_title_lines != null) setProductTitleLines(currentSettings.product_title_lines);
       if (currentSettings.product_title_alignment) setProductTitleAlignment(currentSettings.product_title_alignment);
       // Group 7: Price
       if (currentSettings.show_price != null) setShowPrice(currentSettings.show_price);
       if (currentSettings.price_color) setPriceColor(currentSettings.price_color);
-      if (currentSettings.price_size) setPriceSize(currentSettings.price_size);
+      if (currentSettings.price_size != null) setPriceSize(currentSettings.price_size);
       // Group 8: CTA Button
       if (currentSettings.button_text) setButtonText(currentSettings.button_text);
       if (currentSettings.button_bg_color) setButtonBgColor(currentSettings.button_bg_color);
       if (currentSettings.button_text_color) setButtonTextColor(currentSettings.button_text_color);
       if (currentSettings.button_radius != null) setButtonRadius(currentSettings.button_radius);
-      if (currentSettings.button_size) setButtonSize(currentSettings.button_size);
+      if (currentSettings.button_size != null) setButtonSize(currentSettings.button_size);
       if (currentSettings.button_variant) setButtonVariant(currentSettings.button_variant);
       if (currentSettings.button_full_width != null) setButtonFullWidth(currentSettings.button_full_width);
     }
@@ -445,16 +445,8 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="title-size">Title Size</Label>
-                  <Select value={titleSize} onValueChange={setTitleSize}>
-                    <SelectTrigger id="title-size"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                      <SelectItem value="xl">Extra Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="title-size">Title Size (px)</Label>
+                  <Input id="title-size" type="number" min={8} max={48} step={1} value={titleSize} onChange={(e) => setTitleSize(Number(e.target.value))} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="title-alignment">Title Alignment</Label>
@@ -627,28 +619,12 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="product-title-size">Size</Label>
-                  <Select value={productTitleSize} onValueChange={setProductTitleSize}>
-                    <SelectTrigger id="product-title-size"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="xs">Extra Small</SelectItem>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="product-title-size">Size (px)</Label>
+                  <Input id="product-title-size" type="number" min={8} max={36} step={1} value={productTitleSize} onChange={(e) => setProductTitleSize(Number(e.target.value))} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="product-title-weight">Weight</Label>
-                  <Select value={productTitleWeight} onValueChange={setProductTitleWeight}>
-                    <SelectTrigger id="product-title-weight"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="semibold">Semibold</SelectItem>
-                      <SelectItem value="bold">Bold</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Input id="product-title-weight" type="number" min={100} max={900} step={100} value={productTitleWeight} onChange={(e) => setProductTitleWeight(Number(e.target.value))} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="product-title-lines">Max Lines (1-3)</Label>
@@ -691,15 +667,8 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="price-size">Price Size</Label>
-                  <Select value={priceSize} onValueChange={setPriceSize}>
-                    <SelectTrigger id="price-size"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="price-size">Price Size (px)</Label>
+                  <Input id="price-size" type="number" min={8} max={36} step={1} value={priceSize} onChange={(e) => setPriceSize(Number(e.target.value))} />
                 </div>
               </div>
             </CardContent>
@@ -736,15 +705,8 @@ export default function SettingsPage() {
                   <Input id="button-radius" type="number" min={0} max={50} step={1} value={buttonRadius} onChange={(e) => { const val = parseInt(e.target.value, 10); if (!isNaN(val)) setButtonRadius(val); }} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="button-size">Size</Label>
-                  <Select value={buttonSize} onValueChange={setButtonSize}>
-                    <SelectTrigger id="button-size"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="button-size">Size (px)</Label>
+                  <Input id="button-size" type="number" min={8} max={24} step={1} value={buttonSize} onChange={(e) => setButtonSize(Number(e.target.value))} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="button-variant">Variant</Label>

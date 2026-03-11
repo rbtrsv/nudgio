@@ -3,7 +3,7 @@
  * Plugin Name: Nudgio Technologies
  * Plugin URI: https://www.nudgio.tech
  * Description: Display AI-powered product recommendations on your WooCommerce store using Nudgio's recommendation engine. Supports bestsellers, cross-sell, upsell, and similar products via simple shortcodes.
- * Version: 1.3.3
+ * Version: 1.3.4
  * Requires at least: 6.1
  * Requires PHP: 8.0
  * Author: Buraro Technologies
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'NUDGIO_VERSION', '1.3.3' );
+define( 'NUDGIO_VERSION', '1.3.4' );
 define( 'NUDGIO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NUDGIO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -70,7 +70,7 @@ function nudgio_activate() {
         add_option( 'nudgio_default_title_color', '#111827' );
     }
     if ( false === get_option( 'nudgio_default_title_size' ) ) {
-        add_option( 'nudgio_default_title_size', 'lg' );
+        add_option( 'nudgio_default_title_size', 24 );
     }
     if ( false === get_option( 'nudgio_default_title_alignment' ) ) {
         add_option( 'nudgio_default_title_alignment', 'left' );
@@ -131,10 +131,10 @@ function nudgio_activate() {
         add_option( 'nudgio_default_product_title_color', '#1F2937' );
     }
     if ( false === get_option( 'nudgio_default_product_title_size' ) ) {
-        add_option( 'nudgio_default_product_title_size', 'sm' );
+        add_option( 'nudgio_default_product_title_size', 14 );
     }
     if ( false === get_option( 'nudgio_default_product_title_weight' ) ) {
-        add_option( 'nudgio_default_product_title_weight', 'semibold' );
+        add_option( 'nudgio_default_product_title_weight', 600 );
     }
     if ( false === get_option( 'nudgio_default_product_title_lines' ) ) {
         add_option( 'nudgio_default_product_title_lines', '2' );
@@ -150,7 +150,7 @@ function nudgio_activate() {
         add_option( 'nudgio_default_price_color', '#111827' );
     }
     if ( false === get_option( 'nudgio_default_price_size' ) ) {
-        add_option( 'nudgio_default_price_size', 'md' );
+        add_option( 'nudgio_default_price_size', 18 );
     }
     // Group 8: CTA Button
     if ( false === get_option( 'nudgio_default_button_text' ) ) {
@@ -166,7 +166,7 @@ function nudgio_activate() {
         add_option( 'nudgio_default_button_radius', 6 );
     }
     if ( false === get_option( 'nudgio_default_button_size' ) ) {
-        add_option( 'nudgio_default_button_size', 'md' );
+        add_option( 'nudgio_default_button_size', 14 );
     }
     if ( false === get_option( 'nudgio_default_button_variant' ) ) {
         add_option( 'nudgio_default_button_variant', 'solid' );

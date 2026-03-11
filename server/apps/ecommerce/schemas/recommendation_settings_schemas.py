@@ -30,7 +30,7 @@ class RecommendationSettingsCreate(BaseModel):
     # Group 2: Widget Title
     widget_title: str | None = Field(default=None, description="Custom widget heading (empty string = auto-default by type)")
     title_color: str | None = Field(default=None, description="Widget title color hex, e.g. #111827")
-    title_size: str | None = Field(default=None, description="Widget title size: sm, md, lg, xl")
+    title_size: int | None = Field(default=None, description="Widget title font-size in pixels")
     title_alignment: str | None = Field(default=None, description="Widget title alignment: left, center")
     # Group 3: Layout
     widget_style: str | None = Field(default=None, description="Widget layout style: grid, carousel")
@@ -53,20 +53,20 @@ class RecommendationSettingsCreate(BaseModel):
     image_radius: int | None = Field(default=None, description="Image border radius in pixels")
     # Group 6: Product Title in Card
     product_title_color: str | None = Field(default=None, description="Product title color hex, e.g. #1F2937")
-    product_title_size: str | None = Field(default=None, description="Product title size: xs, sm, md, lg")
-    product_title_weight: str | None = Field(default=None, description="Product title weight: normal, medium, semibold, bold")
+    product_title_size: int | None = Field(default=None, description="Product title font-size in pixels")
+    product_title_weight: int | None = Field(default=None, description="CSS font-weight (100-900)")
     product_title_lines: int | None = Field(default=None, description="Product title max lines before truncation (1-3)")
     product_title_alignment: str | None = Field(default=None, description="Product title alignment: left, center")
     # Group 7: Price
     show_price: bool | None = Field(default=None, description="Whether to display product prices")
     price_color: str | None = Field(default=None, description="Price text color hex, e.g. #111827")
-    price_size: str | None = Field(default=None, description="Price text size: sm, md, lg")
+    price_size: int | None = Field(default=None, description="Price font-size in pixels")
     # Group 8: CTA Button
     button_text: str | None = Field(default=None, description="CTA button text, e.g. View, Shop Now")
     button_bg_color: str | None = Field(default=None, description="Button background color hex, e.g. #3B82F6")
     button_text_color: str | None = Field(default=None, description="Button text color hex, e.g. #FFFFFF")
     button_radius: int | None = Field(default=None, description="Button border radius in pixels")
-    button_size: str | None = Field(default=None, description="Button size: sm, md, lg")
+    button_size: int | None = Field(default=None, description="Button font-size in pixels")
     button_variant: str | None = Field(default=None, description="Button style variant: solid, outline, ghost")
     button_full_width: bool | None = Field(default=None, description="Whether button stretches to full card width")
 
@@ -109,7 +109,7 @@ class RecommendationSettingsUpdate(BaseModel):
     # Group 2: Widget Title
     widget_title: str | None = Field(default=None, description="Custom widget heading (empty string = auto-default by type)")
     title_color: str | None = Field(default=None, description="Widget title color hex, e.g. #111827")
-    title_size: str | None = Field(default=None, description="Widget title size: sm, md, lg, xl")
+    title_size: int | None = Field(default=None, description="Widget title font-size in pixels")
     title_alignment: str | None = Field(default=None, description="Widget title alignment: left, center")
     # Group 3: Layout
     widget_style: str | None = Field(default=None, description="Widget layout style: grid, carousel")
@@ -132,20 +132,20 @@ class RecommendationSettingsUpdate(BaseModel):
     image_radius: int | None = Field(default=None, description="Image border radius in pixels")
     # Group 6: Product Title in Card
     product_title_color: str | None = Field(default=None, description="Product title color hex, e.g. #1F2937")
-    product_title_size: str | None = Field(default=None, description="Product title size: xs, sm, md, lg")
-    product_title_weight: str | None = Field(default=None, description="Product title weight: normal, medium, semibold, bold")
+    product_title_size: int | None = Field(default=None, description="Product title font-size in pixels")
+    product_title_weight: int | None = Field(default=None, description="CSS font-weight (100-900)")
     product_title_lines: int | None = Field(default=None, description="Product title max lines before truncation (1-3)")
     product_title_alignment: str | None = Field(default=None, description="Product title alignment: left, center")
     # Group 7: Price
     show_price: bool | None = Field(default=None, description="Whether to display product prices")
     price_color: str | None = Field(default=None, description="Price text color hex, e.g. #111827")
-    price_size: str | None = Field(default=None, description="Price text size: sm, md, lg")
+    price_size: int | None = Field(default=None, description="Price font-size in pixels")
     # Group 8: CTA Button
     button_text: str | None = Field(default=None, description="CTA button text, e.g. View, Shop Now")
     button_bg_color: str | None = Field(default=None, description="Button background color hex, e.g. #3B82F6")
     button_text_color: str | None = Field(default=None, description="Button text color hex, e.g. #FFFFFF")
     button_radius: int | None = Field(default=None, description="Button border radius in pixels")
-    button_size: str | None = Field(default=None, description="Button size: sm, md, lg")
+    button_size: int | None = Field(default=None, description="Button font-size in pixels")
     button_variant: str | None = Field(default=None, description="Button style variant: solid, outline, ghost")
     button_full_width: bool | None = Field(default=None, description="Whether button stretches to full card width")
 
@@ -172,7 +172,7 @@ class RecommendationSettingsDetail(BaseModel):
     # Group 2: Widget Title
     widget_title: str | None = Field(default=None, description="Custom widget heading")
     title_color: str | None = Field(default=None, description="Widget title color hex")
-    title_size: str | None = Field(default=None, description="Widget title size")
+    title_size: int | None = Field(default=None, description="Widget title font-size in pixels")
     title_alignment: str | None = Field(default=None, description="Widget title alignment")
     # Group 3: Layout
     widget_style: str | None = Field(default=None, description="Widget layout style")
@@ -195,20 +195,20 @@ class RecommendationSettingsDetail(BaseModel):
     image_radius: int | None = Field(default=None, description="Image border radius in pixels")
     # Group 6: Product Title in Card
     product_title_color: str | None = Field(default=None, description="Product title color hex")
-    product_title_size: str | None = Field(default=None, description="Product title size")
-    product_title_weight: str | None = Field(default=None, description="Product title weight")
+    product_title_size: int | None = Field(default=None, description="Product title font-size in pixels")
+    product_title_weight: int | None = Field(default=None, description="CSS font-weight (100-900)")
     product_title_lines: int | None = Field(default=None, description="Product title max lines")
     product_title_alignment: str | None = Field(default=None, description="Product title alignment")
     # Group 7: Price
     show_price: bool | None = Field(default=None, description="Whether to display product prices")
     price_color: str | None = Field(default=None, description="Price text color hex")
-    price_size: str | None = Field(default=None, description="Price text size")
+    price_size: int | None = Field(default=None, description="Price font-size in pixels")
     # Group 8: CTA Button
     button_text: str | None = Field(default=None, description="CTA button text")
     button_bg_color: str | None = Field(default=None, description="Button background color hex")
     button_text_color: str | None = Field(default=None, description="Button text color hex")
     button_radius: int | None = Field(default=None, description="Button border radius in pixels")
-    button_size: str | None = Field(default=None, description="Button size")
+    button_size: int | None = Field(default=None, description="Button font-size in pixels")
     button_variant: str | None = Field(default=None, description="Button style variant")
     button_full_width: bool | None = Field(default=None, description="Button full width")
     created_at: datetime = Field(description="When the settings were created")
