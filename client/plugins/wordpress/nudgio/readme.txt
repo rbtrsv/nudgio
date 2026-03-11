@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -140,6 +140,12 @@ These types require a product context. On non-product pages, the shortcode outpu
 
 == Changelog ==
 
+= 1.3.3 =
+* Converted border radius and width fields from string to integer (card_border_radius, card_border_width, image_radius, button_radius)
+* Settings now use number inputs with pixel values instead of CSS strings
+* Gutenberg block uses RangeControl sliders for all border/radius fields
+* Fixed stale activation defaults for widget_padding, gap, card_padding, image_aspect
+
 = 1.3.2 =
 * Allow single-column layout (widget_columns minimum lowered from 2 to 1)
 
@@ -195,6 +201,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.3.3 =
+Border radius and width fields now use integer pixel values. Gutenberg block uses slider controls.
 
 = 1.3.2 =
 Single-column layout support for grid and carousel widgets.
