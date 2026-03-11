@@ -126,7 +126,7 @@ export interface EmbeddedSettingsDetail {
   // Brand identity defaults — visual settings for widget rendering
   // Group 1: Widget Container
   widget_bg_color: string | null;
-  widget_padding: string | null;
+  widget_padding: number | null;
   // Group 2: Widget Title
   widget_title: string | null;
   title_color: string | null;
@@ -135,19 +135,22 @@ export interface EmbeddedSettingsDetail {
   // Group 3: Layout
   widget_style: string | null;
   widget_columns: number | null;
-  gap: string | null;
+  gap: number | null;
+  card_min_width: number | null;
+  card_max_width: number | null;
   // Group 4: Product Card
   card_bg_color: string | null;
-  card_border_radius: string | null;
-  card_border_width: string | null;
+  card_border_radius: number | null;
+  card_border_width: number | null;
   card_border_color: string | null;
   card_shadow: string | null;
-  card_padding: string | null;
+  card_padding: number | null;
   card_hover: string | null;
   // Group 5: Product Image
-  image_aspect: string | null;
+  image_aspect_w: number | null;
+  image_aspect_h: number | null;
   image_fit: string | null;
-  image_radius: string | null;
+  image_radius: number | null;
   // Group 6: Product Title in Card
   product_title_color: string | null;
   product_title_size: string | null;
@@ -162,7 +165,7 @@ export interface EmbeddedSettingsDetail {
   button_text: string | null;
   button_bg_color: string | null;
   button_text_color: string | null;
-  button_radius: string | null;
+  button_radius: number | null;
   button_size: string | null;
   button_variant: string | null;
   button_full_width: boolean | null;
@@ -188,7 +191,7 @@ export interface EmbeddedSettingsPayload {
   // Brand identity defaults — visual settings for widget rendering (all optional)
   // Group 1: Widget Container
   widget_bg_color?: string | null;
-  widget_padding?: string | null;
+  widget_padding?: number | null;
   // Group 2: Widget Title
   widget_title?: string | null;
   title_color?: string | null;
@@ -197,19 +200,22 @@ export interface EmbeddedSettingsPayload {
   // Group 3: Layout
   widget_style?: string | null;
   widget_columns?: number | null;
-  gap?: string | null;
+  gap?: number | null;
+  card_min_width?: number | null;
+  card_max_width?: number | null;
   // Group 4: Product Card
   card_bg_color?: string | null;
-  card_border_radius?: string | null;
-  card_border_width?: string | null;
+  card_border_radius?: number | null;
+  card_border_width?: number | null;
   card_border_color?: string | null;
   card_shadow?: string | null;
-  card_padding?: string | null;
+  card_padding?: number | null;
   card_hover?: string | null;
   // Group 5: Product Image
-  image_aspect?: string | null;
+  image_aspect_w?: number | null;
+  image_aspect_h?: number | null;
   image_fit?: string | null;
-  image_radius?: string | null;
+  image_radius?: number | null;
   // Group 6: Product Title in Card
   product_title_color?: string | null;
   product_title_size?: string | null;
@@ -224,7 +230,7 @@ export interface EmbeddedSettingsPayload {
   button_text?: string | null;
   button_bg_color?: string | null;
   button_text_color?: string | null;
-  button_radius?: string | null;
+  button_radius?: number | null;
   button_size?: string | null;
   button_variant?: string | null;
   button_full_width?: boolean | null;
@@ -316,7 +322,7 @@ export interface EmbeddedComponentParams {
   device?: 'desktop' | 'mobile';
   // Group 1: Widget Container
   widget_bg_color?: string;
-  widget_padding?: string;
+  widget_padding?: number;
   // Group 2: Widget Title
   widget_title?: string;
   title_color?: string;
@@ -325,19 +331,22 @@ export interface EmbeddedComponentParams {
   // Group 3: Layout
   widget_style?: 'grid' | 'carousel';
   widget_columns?: number;
-  gap?: string;
+  gap?: number;
+  card_min_width?: number;
+  card_max_width?: number;
   // Group 4: Product Card
   card_bg_color?: string;
-  card_border_radius?: string;
-  card_border_width?: string;
+  card_border_radius?: number;
+  card_border_width?: number;
   card_border_color?: string;
   card_shadow?: string;
-  card_padding?: string;
+  card_padding?: number;
   card_hover?: string;
   // Group 5: Product Image
-  image_aspect?: 'square' | 'portrait' | 'landscape';
+  image_aspect_w?: number;
+  image_aspect_h?: number;
   image_fit?: string;
-  image_radius?: string;
+  image_radius?: number;
   // Group 6: Product Title in Card
   product_title_color?: string;
   product_title_size?: string;
@@ -352,7 +361,7 @@ export interface EmbeddedComponentParams {
   button_text?: string;
   button_bg_color?: string;
   button_text_color?: string;
-  button_radius?: string;
+  button_radius?: number;
   button_size?: string;
   button_variant?: string;
   button_full_width?: boolean;

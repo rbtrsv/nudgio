@@ -145,7 +145,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <td><?php esc_html_e( 'Custom button text, hide prices.', 'nudgio-technologies' ); ?></td>
             </tr>
             <tr>
-                <td><code>[nudgio image_aspect="portrait" widget_title="Our Picks"]</code></td>
+                <td><code>[nudgio image_aspect_w="3" image_aspect_h="4" widget_title="Our Picks"]</code></td>
                 <td><?php esc_html_e( 'Portrait images (3:4) with custom title.', 'nudgio-technologies' ); ?></td>
             </tr>
             <tr>
@@ -156,7 +156,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     </table>
     <p class="description" style="margin-top: 8px;">
         <?php esc_html_e(
-            'Available attributes: type, count, device, product_id, lookback_days, method, min_price_increase_percent, widget_bg_color, widget_padding, widget_title, title_color, title_size, title_alignment, widget_style, widget_columns, gap, card_bg_color, card_border_radius, card_border_width, card_border_color, card_shadow, card_padding, card_hover, image_aspect, image_fit, image_radius, product_title_color, product_title_size, product_title_weight, product_title_lines, product_title_alignment, show_price, price_color, price_size, button_text, button_bg_color, button_text_color, button_radius, button_size, button_variant, button_full_width.',
+            'Available attributes: type, count, device, product_id, lookback_days, method, min_price_increase_percent, widget_bg_color, widget_padding, widget_title, title_color, title_size, title_alignment, widget_style, widget_columns, gap, card_min_width, card_max_width, card_bg_color, card_border_radius, card_border_width, card_border_color, card_shadow, card_padding, card_hover, image_aspect_w, image_aspect_h, image_fit, image_radius, product_title_color, product_title_size, product_title_weight, product_title_lines, product_title_alignment, show_price, price_color, price_size, button_text, button_bg_color, button_text_color, button_radius, button_size, button_variant, button_full_width.',
             'nudgio-technologies'
         ); ?>
     </p>

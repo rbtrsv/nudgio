@@ -83,7 +83,7 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 
 **Widget Container:**
 * `widget_bg_color` — hex color for widget background (default: #FFFFFF)
-* `widget_padding` — none, sm, md, lg (default: md)
+* `widget_padding` — padding in pixels (default: 16)
 
 **Widget Title:**
 * `widget_title` — custom widget heading (leave empty for auto-default)
@@ -94,21 +94,24 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 **Layout:**
 * `widget_style` — grid, carousel (default: grid)
 * `widget_columns` — max columns at full width, 1-6 (default: 4)
-* `gap` — sm, md, lg (default: md)
+* `gap` — gap between cards in pixels (default: 16)
+* `card_min_width` — minimum card width in pixels (default: 200)
+* `card_max_width` — maximum card width in pixels, 0 = no limit (default: 0)
 
 **Product Card:**
 * `card_bg_color` — hex color for card background (default: #FFFFFF)
-* `card_border_radius` — CSS border-radius value (default: 8px)
-* `card_border_width` — 0, 1, 2 (default: 0)
+* `card_border_radius` — border radius in pixels (default: 8)
+* `card_border_width` — border width in pixels (default: 0)
 * `card_border_color` — hex color for card border (default: #E5E7EB)
 * `card_shadow` — none, sm, md, lg (default: md)
-* `card_padding` — sm, md, lg (default: md)
+* `card_padding` — card content padding in pixels (default: 16)
 * `card_hover` — none, lift, shadow, glow (default: lift)
 
 **Product Image:**
-* `image_aspect` — square, portrait, landscape (default: square)
+* `image_aspect_w` — image aspect ratio width, 1-20 (default: 1)
+* `image_aspect_h` — image aspect ratio height, 1-20 (default: 1)
 * `image_fit` — cover, contain (default: cover)
-* `image_radius` — CSS border-radius value (default: 8px)
+* `image_radius` — image border radius in pixels (default: 8)
 
 **Product Title:**
 * `product_title_color` — hex color for product title (default: #1F2937)
@@ -126,7 +129,7 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 * `button_text` — button text, e.g. View, Shop Now (default: View)
 * `button_bg_color` — hex color for button background (default: #3B82F6)
 * `button_text_color` — hex color for button text (default: #FFFFFF)
-* `button_radius` — CSS border-radius value (default: 6px)
+* `button_radius` — button border radius in pixels (default: 6)
 * `button_size` — sm, md, lg (default: md)
 * `button_variant` — solid, outline, ghost (default: solid)
 * `button_full_width` — stretch button to full width: true/false (default: false)

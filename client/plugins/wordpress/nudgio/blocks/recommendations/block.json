@@ -48,9 +48,8 @@
             "default": "#FFFFFF"
         },
         "widget_padding": {
-            "type": "string",
-            "default": "md",
-            "enum": [ "none", "sm", "md", "lg" ]
+            "type": "number",
+            "default": 16
         },
         "widget_title": {
             "type": "string",
@@ -80,22 +79,28 @@
             "default": 4
         },
         "gap": {
-            "type": "string",
-            "default": "md",
-            "enum": [ "sm", "md", "lg" ]
+            "type": "number",
+            "default": 16
+        },
+        "card_min_width": {
+            "type": "number",
+            "default": 200
+        },
+        "card_max_width": {
+            "type": "number",
+            "default": 0
         },
         "card_bg_color": {
             "type": "string",
             "default": "#FFFFFF"
         },
         "card_border_radius": {
-            "type": "string",
-            "default": "8px"
+            "type": "number",
+            "default": 8
         },
         "card_border_width": {
-            "type": "string",
-            "default": "0",
-            "enum": [ "0", "1", "2" ]
+            "type": "number",
+            "default": 0
         },
         "card_border_color": {
             "type": "string",
@@ -107,19 +112,21 @@
             "enum": [ "none", "sm", "md", "lg" ]
         },
         "card_padding": {
-            "type": "string",
-            "default": "md",
-            "enum": [ "sm", "md", "lg" ]
+            "type": "number",
+            "default": 16
         },
         "card_hover": {
             "type": "string",
             "default": "lift",
             "enum": [ "none", "lift", "shadow", "glow" ]
         },
-        "image_aspect": {
-            "type": "string",
-            "default": "square",
-            "enum": [ "square", "portrait", "landscape" ]
+        "image_aspect_w": {
+            "type": "number",
+            "default": 1
+        },
+        "image_aspect_h": {
+            "type": "number",
+            "default": 1
         },
         "image_fit": {
             "type": "string",
@@ -127,8 +134,8 @@
             "enum": [ "cover", "contain" ]
         },
         "image_radius": {
-            "type": "string",
-            "default": "8px"
+            "type": "number",
+            "default": 8
         },
         "product_title_color": {
             "type": "string",
@@ -179,8 +186,8 @@
             "default": "#FFFFFF"
         },
         "button_radius": {
-            "type": "string",
-            "default": "6px"
+            "type": "number",
+            "default": 6
         },
         "button_size": {
             "type": "string",

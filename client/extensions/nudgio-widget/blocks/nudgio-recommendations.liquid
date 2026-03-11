@@ -23,23 +23,15 @@
 {% assign widget_bg_color_enc = block.settings.widget_bg_color | url_encode %}
 {% assign title_color_enc = block.settings.title_color | url_encode %}
 {% assign card_bg_color_enc = block.settings.card_bg_color | url_encode %}
-{% assign card_border_color_enc = block.settings.card_border_color | url_encode %}
 {% assign product_title_color_enc = block.settings.product_title_color | url_encode %}
 {% assign price_color_enc = block.settings.price_color | url_encode %}
 {% assign button_bg_color_enc = block.settings.button_bg_color | url_encode %}
 {% assign button_text_color_enc = block.settings.button_text_color | url_encode %}
 
-{% comment %} URL-encode CSS values that may contain special characters {% endcomment %}
-{% assign card_border_radius_enc = block.settings.card_border_radius | url_encode %}
-{% assign image_radius_enc = block.settings.image_radius | url_encode %}
-{% assign button_radius_enc = block.settings.button_radius | url_encode %}
-
-{% comment %} Build query string — one param per visual setting {% endcomment %}
+{% comment %} Build query string — one param per visual setting (25 interactive settings from Theme Editor) {% endcomment %}
 {% assign params = "?top=" | append: block.settings.product_count %}
 {% comment %} Algorithm settings {% endcomment %}
 {% assign params = params | append: "&lookback_days=" | append: block.settings.lookback_days %}
-{% assign params = params | append: "&method=" | append: block.settings.method %}
-{% assign params = params | append: "&min_price_increase_percent=" | append: block.settings.min_price_increase_percent %}
 {% comment %} Group 1: Widget Container {% endcomment %}
 {% assign params = params | append: "&widget_bg_color=" | append: widget_bg_color_enc %}
 {% assign params = params | append: "&widget_padding=" | append: block.settings.widget_padding %}
@@ -49,36 +41,27 @@
   {% assign params = params | append: "&widget_title=" | append: widget_title_enc %}
 {% endif %}
 {% assign params = params | append: "&title_color=" | append: title_color_enc %}
-{% assign params = params | append: "&title_size=" | append: block.settings.title_size %}
-{% assign params = params | append: "&title_alignment=" | append: block.settings.title_alignment %}
 {% comment %} Group 3: Layout {% endcomment %}
 {% assign params = params | append: "&widget_style=" | append: block.settings.widget_style %}
 {% assign params = params | append: "&widget_columns=" | append: block.settings.widget_columns %}
 {% assign params = params | append: "&gap=" | append: block.settings.gap %}
+{% assign params = params | append: "&card_min_width=" | append: block.settings.card_min_width %}
+{% assign params = params | append: "&card_max_width=" | append: block.settings.card_max_width %}
 {% comment %} Group 4: Product Card {% endcomment %}
 {% assign params = params | append: "&card_bg_color=" | append: card_bg_color_enc %}
-{% assign params = params | append: "&card_border_radius=" | append: card_border_radius_enc %}
-{% assign params = params | append: "&card_border_width=" | append: block.settings.card_border_width %}
-{% assign params = params | append: "&card_border_color=" | append: card_border_color_enc %}
 {% assign params = params | append: "&card_shadow=" | append: block.settings.card_shadow %}
 {% assign params = params | append: "&card_padding=" | append: block.settings.card_padding %}
-{% assign params = params | append: "&card_hover=" | append: block.settings.card_hover %}
 {% comment %} Group 5: Product Image {% endcomment %}
-{% assign params = params | append: "&image_aspect=" | append: block.settings.image_aspect %}
+{% assign params = params | append: "&image_aspect_w=" | append: block.settings.image_aspect_w %}
+{% assign params = params | append: "&image_aspect_h=" | append: block.settings.image_aspect_h %}
 {% assign params = params | append: "&image_fit=" | append: block.settings.image_fit %}
-{% assign params = params | append: "&image_radius=" | append: image_radius_enc %}
 {% comment %} Group 6: Product Title in Card {% endcomment %}
 {% assign params = params | append: "&product_title_color=" | append: product_title_color_enc %}
-{% assign params = params | append: "&product_title_size=" | append: block.settings.product_title_size %}
-{% assign params = params | append: "&product_title_weight=" | append: block.settings.product_title_weight %}
-{% assign params = params | append: "&product_title_lines=" | append: block.settings.product_title_lines %}
-{% assign params = params | append: "&product_title_alignment=" | append: block.settings.product_title_alignment %}
 {% comment %} Group 7: Price {% endcomment %}
 {% unless block.settings.show_price %}
   {% assign params = params | append: "&show_price=false" %}
 {% endunless %}
 {% assign params = params | append: "&price_color=" | append: price_color_enc %}
-{% assign params = params | append: "&price_size=" | append: block.settings.price_size %}
 {% comment %} Group 8: CTA Button {% endcomment %}
 {% if block.settings.button_text != blank %}
   {% assign button_text_enc = block.settings.button_text | url_encode %}
@@ -86,12 +69,6 @@
 {% endif %}
 {% assign params = params | append: "&button_bg_color=" | append: button_bg_color_enc %}
 {% assign params = params | append: "&button_text_color=" | append: button_text_color_enc %}
-{% assign params = params | append: "&button_radius=" | append: button_radius_enc %}
-{% assign params = params | append: "&button_size=" | append: block.settings.button_size %}
-{% assign params = params | append: "&button_variant=" | append: block.settings.button_variant %}
-{% if block.settings.button_full_width %}
-  {% assign params = params | append: "&button_full_width=true" %}
-{% endif %}
 
 {% comment %} Product ID: use manual value if set, otherwise auto-detect from Liquid product context {% endcomment %}
 {% if block.settings.product_id != blank %}
@@ -129,6 +106,14 @@
   <script src="{{ 'nudgio-widget.js' | asset_url }}" defer></script>
 {% endif %}
 
+{% comment %}
+  SHOPIFY LIMIT: Max 25 interactive settings per block (enforced at deploy by theme-check).
+  Max 6 non-interactive settings (header/paragraph) per block.
+  Error at deploy: "settings: must have a maximum of 25 for interactive settings"
+  Source: https://community.shopify.com/c/shopify-apps/theme-app-extension-limitation-of-block-settings/m-p/2957006
+  Current count: 25 interactive / 6 non-interactive — at the limit.
+  Settings not in Theme Editor (18) are served from DB brand defaults via apply_visual_defaults().
+{% endcomment %}
 {% schema %}
 {
   "name": "Nudgio Technologies",
@@ -152,7 +137,7 @@
       "id": "product_count",
       "label": "Number of Products",
       "min": 1,
-      "max": 20,
+      "max": 12,
       "step": 1,
       "default": 4
     },
@@ -166,37 +151,15 @@
       "type": "range",
       "id": "lookback_days",
       "label": "Lookback Days",
-      "min": 5,
-      "max": 365,
-      "step": 5,
+      "min": 7,
+      "max": 90,
+      "step": 1,
       "default": 30,
       "info": "Number of days to analyze for recommendations. Used by Bestsellers and Cross-sell."
     },
     {
-      "type": "select",
-      "id": "method",
-      "label": "Ranking Method",
-      "default": "volume",
-      "options": [
-        { "value": "volume", "label": "Volume (units sold)" },
-        { "value": "value", "label": "Value (revenue)" },
-        { "value": "balanced", "label": "Balanced (volume + value)" }
-      ],
-      "info": "Bestseller ranking method. Only affects the Bestsellers widget type."
-    },
-    {
-      "type": "range",
-      "id": "min_price_increase_percent",
-      "label": "Min Price Increase %",
-      "min": 1,
-      "max": 100,
-      "step": 1,
-      "default": 10,
-      "info": "Only show products at least this % more expensive. Only affects the Upsell widget type."
-    },
-    {
       "type": "header",
-      "content": "Widget"
+      "content": "Widget Container"
     },
     {
       "type": "color",
@@ -205,16 +168,14 @@
       "default": "#FFFFFF"
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "widget_padding",
-      "label": "Padding",
-      "default": "md",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" }
-      ]
+      "label": "Padding (px)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
     },
     {
       "type": "text",
@@ -227,28 +188,6 @@
       "id": "title_color",
       "label": "Title Color",
       "default": "#111827"
-    },
-    {
-      "type": "select",
-      "id": "title_size",
-      "label": "Title Size",
-      "default": "lg",
-      "options": [
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" },
-        { "value": "xl", "label": "Extra Large" }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "title_alignment",
-      "label": "Title Alignment",
-      "default": "left",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" }
-      ]
     },
     {
       "type": "header",
@@ -275,49 +214,44 @@
       "info": "Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop."
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "gap",
-      "label": "Card Gap",
-      "default": "md",
-      "options": [
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" }
-      ]
+      "label": "Card Gap (px)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "card_min_width",
+      "label": "Card Min Width (px)",
+      "min": 100,
+      "max": 500,
+      "step": 10,
+      "default": 200,
+      "info": "Minimum card width in pixels. Cards won't shrink below this — overflow scrolls instead."
+    },
+    {
+      "type": "range",
+      "id": "card_max_width",
+      "label": "Card Max Width (px)",
+      "min": 0,
+      "max": 800,
+      "step": 10,
+      "default": 0,
+      "info": "Maximum card width in pixels. 0 = no limit (cards fill available space)."
     },
     {
       "type": "header",
-      "content": "Product Card"
+      "content": "Card"
     },
     {
       "type": "color",
       "id": "card_bg_color",
       "label": "Card Background",
       "default": "#FFFFFF"
-    },
-    {
-      "type": "text",
-      "id": "card_border_radius",
-      "label": "Card Border Radius",
-      "default": "8px",
-      "info": "CSS border-radius (e.g., 8px, 0.5rem)."
-    },
-    {
-      "type": "select",
-      "id": "card_border_width",
-      "label": "Card Border Width",
-      "default": "0",
-      "options": [
-        { "value": "0", "label": "None" },
-        { "value": "1", "label": "1px" },
-        { "value": "2", "label": "2px" }
-      ]
-    },
-    {
-      "type": "color",
-      "id": "card_border_color",
-      "label": "Card Border Color",
-      "default": "#E5E7EB"
     },
     {
       "type": "select",
@@ -332,42 +266,38 @@
       ]
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "card_padding",
-      "label": "Card Padding",
-      "default": "md",
-      "options": [
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "card_hover",
-      "label": "Card Hover Effect",
-      "default": "lift",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "lift", "label": "Lift" },
-        { "value": "shadow", "label": "Shadow" },
-        { "value": "glow", "label": "Glow" }
-      ]
+      "label": "Card Padding (px)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "default": 16,
+      "unit": "px"
     },
     {
       "type": "header",
-      "content": "Product Image"
+      "content": "Image"
     },
     {
-      "type": "select",
-      "id": "image_aspect",
-      "label": "Image Aspect Ratio",
-      "default": "square",
-      "options": [
-        { "value": "square", "label": "Square (1:1)" },
-        { "value": "portrait", "label": "Portrait (3:4)" },
-        { "value": "landscape", "label": "Landscape (16:9)" }
-      ]
+      "type": "range",
+      "id": "image_aspect_w",
+      "label": "Aspect Ratio Width",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 1,
+      "info": "Image aspect ratio width (e.g., 1 for square, 16 for widescreen)."
+    },
+    {
+      "type": "range",
+      "id": "image_aspect_h",
+      "label": "Aspect Ratio Height",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 1,
+      "info": "Image aspect ratio height (e.g., 1 for square, 9 for widescreen)."
     },
     {
       "type": "select",
@@ -380,13 +310,6 @@
       ]
     },
     {
-      "type": "text",
-      "id": "image_radius",
-      "label": "Image Border Radius",
-      "default": "8px",
-      "info": "CSS border-radius (e.g., 8px, 0)."
-    },
-    {
       "type": "header",
       "content": "Product Title"
     },
@@ -395,50 +318,6 @@
       "id": "product_title_color",
       "label": "Title Color",
       "default": "#1F2937"
-    },
-    {
-      "type": "select",
-      "id": "product_title_size",
-      "label": "Title Size",
-      "default": "sm",
-      "options": [
-        { "value": "xs", "label": "Extra Small" },
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "product_title_weight",
-      "label": "Title Weight",
-      "default": "semibold",
-      "options": [
-        { "value": "normal", "label": "Normal" },
-        { "value": "medium", "label": "Medium" },
-        { "value": "semibold", "label": "Semibold" },
-        { "value": "bold", "label": "Bold" }
-      ]
-    },
-    {
-      "type": "range",
-      "id": "product_title_lines",
-      "label": "Max Lines",
-      "min": 1,
-      "max": 3,
-      "step": 1,
-      "default": 2,
-      "info": "Product title truncation after N lines."
-    },
-    {
-      "type": "select",
-      "id": "product_title_alignment",
-      "label": "Title Alignment",
-      "default": "left",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" }
-      ]
     },
     {
       "type": "header",
@@ -457,17 +336,6 @@
       "default": "#111827"
     },
     {
-      "type": "select",
-      "id": "price_size",
-      "label": "Price Size",
-      "default": "md",
-      "options": [
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" }
-      ]
-    },
-    {
       "type": "text",
       "id": "button_text",
       "label": "Button Text",
@@ -484,41 +352,6 @@
       "id": "button_text_color",
       "label": "Button Text Color",
       "default": "#FFFFFF"
-    },
-    {
-      "type": "text",
-      "id": "button_radius",
-      "label": "Button Border Radius",
-      "default": "6px",
-      "info": "CSS border-radius (e.g., 6px, 9999px for pill)."
-    },
-    {
-      "type": "select",
-      "id": "button_size",
-      "label": "Button Size",
-      "default": "md",
-      "options": [
-        { "value": "sm", "label": "Small" },
-        { "value": "md", "label": "Medium" },
-        { "value": "lg", "label": "Large" }
-      ]
-    },
-    {
-      "type": "select",
-      "id": "button_variant",
-      "label": "Button Style",
-      "default": "solid",
-      "options": [
-        { "value": "solid", "label": "Solid (filled)" },
-        { "value": "outline", "label": "Outline (border)" },
-        { "value": "ghost", "label": "Ghost (transparent)" }
-      ]
-    },
-    {
-      "type": "checkbox",
-      "id": "button_full_width",
-      "label": "Full Width Button",
-      "default": false
     }
   ]
 }

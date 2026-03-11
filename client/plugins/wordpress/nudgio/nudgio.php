@@ -60,7 +60,7 @@ function nudgio_activate() {
         add_option( 'nudgio_default_widget_bg_color', '#FFFFFF' );
     }
     if ( false === get_option( 'nudgio_default_widget_padding' ) ) {
-        add_option( 'nudgio_default_widget_padding', 'md' );
+        add_option( 'nudgio_default_widget_padding', 16 );
     }
     // Group 2: Widget Title
     if ( false === get_option( 'nudgio_default_widget_title' ) ) {
@@ -83,17 +83,23 @@ function nudgio_activate() {
         add_option( 'nudgio_default_widget_columns', '4' );
     }
     if ( false === get_option( 'nudgio_default_gap' ) ) {
-        add_option( 'nudgio_default_gap', 'md' );
+        add_option( 'nudgio_default_gap', 16 );
+    }
+    if ( false === get_option( 'nudgio_default_card_min_width' ) ) {
+        add_option( 'nudgio_default_card_min_width', 200 );
+    }
+    if ( false === get_option( 'nudgio_default_card_max_width' ) ) {
+        add_option( 'nudgio_default_card_max_width', 0 );
     }
     // Group 4: Product Card
     if ( false === get_option( 'nudgio_default_card_bg_color' ) ) {
         add_option( 'nudgio_default_card_bg_color', '#FFFFFF' );
     }
     if ( false === get_option( 'nudgio_default_card_border_radius' ) ) {
-        add_option( 'nudgio_default_card_border_radius', '8px' );
+        add_option( 'nudgio_default_card_border_radius', 8 );
     }
     if ( false === get_option( 'nudgio_default_card_border_width' ) ) {
-        add_option( 'nudgio_default_card_border_width', '0' );
+        add_option( 'nudgio_default_card_border_width', 0 );
     }
     if ( false === get_option( 'nudgio_default_card_border_color' ) ) {
         add_option( 'nudgio_default_card_border_color', '#E5E7EB' );
@@ -102,20 +108,23 @@ function nudgio_activate() {
         add_option( 'nudgio_default_card_shadow', 'md' );
     }
     if ( false === get_option( 'nudgio_default_card_padding' ) ) {
-        add_option( 'nudgio_default_card_padding', 'md' );
+        add_option( 'nudgio_default_card_padding', 16 );
     }
     if ( false === get_option( 'nudgio_default_card_hover' ) ) {
         add_option( 'nudgio_default_card_hover', 'lift' );
     }
     // Group 5: Product Image
-    if ( false === get_option( 'nudgio_default_image_aspect' ) ) {
-        add_option( 'nudgio_default_image_aspect', 'square' );
+    if ( false === get_option( 'nudgio_default_image_aspect_w' ) ) {
+        add_option( 'nudgio_default_image_aspect_w', 1 );
+    }
+    if ( false === get_option( 'nudgio_default_image_aspect_h' ) ) {
+        add_option( 'nudgio_default_image_aspect_h', 1 );
     }
     if ( false === get_option( 'nudgio_default_image_fit' ) ) {
         add_option( 'nudgio_default_image_fit', 'cover' );
     }
     if ( false === get_option( 'nudgio_default_image_radius' ) ) {
-        add_option( 'nudgio_default_image_radius', '8px' );
+        add_option( 'nudgio_default_image_radius', 8 );
     }
     // Group 6: Product Title in Card
     if ( false === get_option( 'nudgio_default_product_title_color' ) ) {
@@ -154,7 +163,7 @@ function nudgio_activate() {
         add_option( 'nudgio_default_button_text_color', '#FFFFFF' );
     }
     if ( false === get_option( 'nudgio_default_button_radius' ) ) {
-        add_option( 'nudgio_default_button_radius', '6px' );
+        add_option( 'nudgio_default_button_radius', 6 );
     }
     if ( false === get_option( 'nudgio_default_button_size' ) ) {
         add_option( 'nudgio_default_button_size', 'md' );

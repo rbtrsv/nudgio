@@ -26,7 +26,7 @@ class RecommendationSettingsCreate(BaseModel):
     # 35 settings across 8 groups — each independently configurable.
     # Group 1: Widget Container
     widget_bg_color: str | None = Field(default=None, description="Widget background color hex, e.g. #FFFFFF")
-    widget_padding: str | None = Field(default=None, description="Widget padding: none, sm, md, lg")
+    widget_padding: int | None = Field(default=None, description="Widget padding in pixels")
     # Group 2: Widget Title
     widget_title: str | None = Field(default=None, description="Custom widget heading (empty string = auto-default by type)")
     title_color: str | None = Field(default=None, description="Widget title color hex, e.g. #111827")
@@ -34,20 +34,23 @@ class RecommendationSettingsCreate(BaseModel):
     title_alignment: str | None = Field(default=None, description="Widget title alignment: left, center")
     # Group 3: Layout
     widget_style: str | None = Field(default=None, description="Widget layout style: grid, carousel")
-    widget_columns: int | None = Field(default=None, description="Max grid columns at full width (2-6)")
-    gap: str | None = Field(default=None, description="Gap between cards: sm, md, lg")
+    widget_columns: int | None = Field(default=None, description="Max grid columns at full width (1-6)")
+    gap: int | None = Field(default=None, description="Gap between cards in pixels")
+    card_min_width: int | None = Field(default=None, description="Min card width in pixels (grid minmax, carousel floor)")
+    card_max_width: int | None = Field(default=None, description="Max card width in pixels (0 = no limit)")
     # Group 4: Product Card
     card_bg_color: str | None = Field(default=None, description="Card background color hex, e.g. #FFFFFF")
-    card_border_radius: str | None = Field(default=None, description="Card border radius CSS, e.g. 8px")
-    card_border_width: str | None = Field(default=None, description="Card border width: 0, 1, 2")
+    card_border_radius: int | None = Field(default=None, description="Card border radius in pixels")
+    card_border_width: int | None = Field(default=None, description="Card border width in pixels")
     card_border_color: str | None = Field(default=None, description="Card border color hex, e.g. #E5E7EB")
     card_shadow: str | None = Field(default=None, description="Card shadow: none, sm, md, lg")
-    card_padding: str | None = Field(default=None, description="Card content padding: sm, md, lg")
+    card_padding: int | None = Field(default=None, description="Card content padding in pixels")
     card_hover: str | None = Field(default=None, description="Card hover effect: none, lift, shadow, glow")
     # Group 5: Product Image
-    image_aspect: str | None = Field(default=None, description="Image aspect ratio: square, portrait, landscape")
+    image_aspect_w: int | None = Field(default=None, description="Image aspect ratio width (e.g. 1, 3, 4, 16)")
+    image_aspect_h: int | None = Field(default=None, description="Image aspect ratio height (e.g. 1, 4, 5, 9)")
     image_fit: str | None = Field(default=None, description="Image object-fit: cover, contain")
-    image_radius: str | None = Field(default=None, description="Image border radius CSS, e.g. 8px")
+    image_radius: int | None = Field(default=None, description="Image border radius in pixels")
     # Group 6: Product Title in Card
     product_title_color: str | None = Field(default=None, description="Product title color hex, e.g. #1F2937")
     product_title_size: str | None = Field(default=None, description="Product title size: xs, sm, md, lg")
@@ -62,7 +65,7 @@ class RecommendationSettingsCreate(BaseModel):
     button_text: str | None = Field(default=None, description="CTA button text, e.g. View, Shop Now")
     button_bg_color: str | None = Field(default=None, description="Button background color hex, e.g. #3B82F6")
     button_text_color: str | None = Field(default=None, description="Button text color hex, e.g. #FFFFFF")
-    button_radius: str | None = Field(default=None, description="Button border radius CSS, e.g. 6px")
+    button_radius: int | None = Field(default=None, description="Button border radius in pixels")
     button_size: str | None = Field(default=None, description="Button size: sm, md, lg")
     button_variant: str | None = Field(default=None, description="Button style variant: solid, outline, ghost")
     button_full_width: bool | None = Field(default=None, description="Whether button stretches to full card width")
@@ -102,7 +105,7 @@ class RecommendationSettingsUpdate(BaseModel):
     # 35 settings across 8 groups — each independently configurable.
     # Group 1: Widget Container
     widget_bg_color: str | None = Field(default=None, description="Widget background color hex, e.g. #FFFFFF")
-    widget_padding: str | None = Field(default=None, description="Widget padding: none, sm, md, lg")
+    widget_padding: int | None = Field(default=None, description="Widget padding in pixels")
     # Group 2: Widget Title
     widget_title: str | None = Field(default=None, description="Custom widget heading (empty string = auto-default by type)")
     title_color: str | None = Field(default=None, description="Widget title color hex, e.g. #111827")
@@ -110,20 +113,23 @@ class RecommendationSettingsUpdate(BaseModel):
     title_alignment: str | None = Field(default=None, description="Widget title alignment: left, center")
     # Group 3: Layout
     widget_style: str | None = Field(default=None, description="Widget layout style: grid, carousel")
-    widget_columns: int | None = Field(default=None, description="Max grid columns at full width (2-6)")
-    gap: str | None = Field(default=None, description="Gap between cards: sm, md, lg")
+    widget_columns: int | None = Field(default=None, description="Max grid columns at full width (1-6)")
+    gap: int | None = Field(default=None, description="Gap between cards in pixels")
+    card_min_width: int | None = Field(default=None, description="Min card width in pixels (grid minmax, carousel floor)")
+    card_max_width: int | None = Field(default=None, description="Max card width in pixels (0 = no limit)")
     # Group 4: Product Card
     card_bg_color: str | None = Field(default=None, description="Card background color hex, e.g. #FFFFFF")
-    card_border_radius: str | None = Field(default=None, description="Card border radius CSS, e.g. 8px")
-    card_border_width: str | None = Field(default=None, description="Card border width: 0, 1, 2")
+    card_border_radius: int | None = Field(default=None, description="Card border radius in pixels")
+    card_border_width: int | None = Field(default=None, description="Card border width in pixels")
     card_border_color: str | None = Field(default=None, description="Card border color hex, e.g. #E5E7EB")
     card_shadow: str | None = Field(default=None, description="Card shadow: none, sm, md, lg")
-    card_padding: str | None = Field(default=None, description="Card content padding: sm, md, lg")
+    card_padding: int | None = Field(default=None, description="Card content padding in pixels")
     card_hover: str | None = Field(default=None, description="Card hover effect: none, lift, shadow, glow")
     # Group 5: Product Image
-    image_aspect: str | None = Field(default=None, description="Image aspect ratio: square, portrait, landscape")
+    image_aspect_w: int | None = Field(default=None, description="Image aspect ratio width (e.g. 1, 3, 4, 16)")
+    image_aspect_h: int | None = Field(default=None, description="Image aspect ratio height (e.g. 1, 4, 5, 9)")
     image_fit: str | None = Field(default=None, description="Image object-fit: cover, contain")
-    image_radius: str | None = Field(default=None, description="Image border radius CSS, e.g. 8px")
+    image_radius: int | None = Field(default=None, description="Image border radius in pixels")
     # Group 6: Product Title in Card
     product_title_color: str | None = Field(default=None, description="Product title color hex, e.g. #1F2937")
     product_title_size: str | None = Field(default=None, description="Product title size: xs, sm, md, lg")
@@ -138,7 +144,7 @@ class RecommendationSettingsUpdate(BaseModel):
     button_text: str | None = Field(default=None, description="CTA button text, e.g. View, Shop Now")
     button_bg_color: str | None = Field(default=None, description="Button background color hex, e.g. #3B82F6")
     button_text_color: str | None = Field(default=None, description="Button text color hex, e.g. #FFFFFF")
-    button_radius: str | None = Field(default=None, description="Button border radius CSS, e.g. 6px")
+    button_radius: int | None = Field(default=None, description="Button border radius in pixels")
     button_size: str | None = Field(default=None, description="Button size: sm, md, lg")
     button_variant: str | None = Field(default=None, description="Button style variant: solid, outline, ghost")
     button_full_width: bool | None = Field(default=None, description="Whether button stretches to full card width")
@@ -162,7 +168,7 @@ class RecommendationSettingsDetail(BaseModel):
     # Brand identity defaults — visual settings for widget rendering
     # Group 1: Widget Container
     widget_bg_color: str | None = Field(default=None, description="Widget background color hex")
-    widget_padding: str | None = Field(default=None, description="Widget padding")
+    widget_padding: int | None = Field(default=None, description="Widget padding in pixels")
     # Group 2: Widget Title
     widget_title: str | None = Field(default=None, description="Custom widget heading")
     title_color: str | None = Field(default=None, description="Widget title color hex")
@@ -171,19 +177,22 @@ class RecommendationSettingsDetail(BaseModel):
     # Group 3: Layout
     widget_style: str | None = Field(default=None, description="Widget layout style")
     widget_columns: int | None = Field(default=None, description="Max grid columns at full width")
-    gap: str | None = Field(default=None, description="Gap between cards")
+    gap: int | None = Field(default=None, description="Gap between cards in pixels")
+    card_min_width: int | None = Field(default=None, description="Min card width in pixels")
+    card_max_width: int | None = Field(default=None, description="Max card width in pixels")
     # Group 4: Product Card
     card_bg_color: str | None = Field(default=None, description="Card background color hex")
-    card_border_radius: str | None = Field(default=None, description="Card border radius CSS")
-    card_border_width: str | None = Field(default=None, description="Card border width")
+    card_border_radius: int | None = Field(default=None, description="Card border radius in pixels")
+    card_border_width: int | None = Field(default=None, description="Card border width in pixels")
     card_border_color: str | None = Field(default=None, description="Card border color hex")
     card_shadow: str | None = Field(default=None, description="Card shadow")
-    card_padding: str | None = Field(default=None, description="Card content padding")
+    card_padding: int | None = Field(default=None, description="Card content padding in pixels")
     card_hover: str | None = Field(default=None, description="Card hover effect")
     # Group 5: Product Image
-    image_aspect: str | None = Field(default=None, description="Image aspect ratio")
+    image_aspect_w: int | None = Field(default=None, description="Image aspect ratio width")
+    image_aspect_h: int | None = Field(default=None, description="Image aspect ratio height")
     image_fit: str | None = Field(default=None, description="Image object-fit")
-    image_radius: str | None = Field(default=None, description="Image border radius CSS")
+    image_radius: int | None = Field(default=None, description="Image border radius in pixels")
     # Group 6: Product Title in Card
     product_title_color: str | None = Field(default=None, description="Product title color hex")
     product_title_size: str | None = Field(default=None, description="Product title size")
@@ -198,7 +207,7 @@ class RecommendationSettingsDetail(BaseModel):
     button_text: str | None = Field(default=None, description="CTA button text")
     button_bg_color: str | None = Field(default=None, description="Button background color hex")
     button_text_color: str | None = Field(default=None, description="Button text color hex")
-    button_radius: str | None = Field(default=None, description="Button border radius CSS")
+    button_radius: int | None = Field(default=None, description="Button border radius in pixels")
     button_size: str | None = Field(default=None, description="Button size")
     button_variant: str | None = Field(default=None, description="Button style variant")
     button_full_width: bool | None = Field(default=None, description="Button full width")

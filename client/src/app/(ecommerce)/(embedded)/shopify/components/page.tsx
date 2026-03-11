@@ -96,7 +96,7 @@ export default function ShopifyComponentsPage() {
   const [minPriceIncrease, setMinPriceIncrease] = useState(10);
   // Group 1: Widget Container
   const [widgetBgColor, setWidgetBgColor] = useState('#FFFFFF');
-  const [widgetPadding, setWidgetPadding] = useState('md');
+  const [widgetPadding, setWidgetPadding] = useState(16);
   // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
@@ -105,19 +105,22 @@ export default function ShopifyComponentsPage() {
   // Group 3: Layout
   const [widgetStyle, setWidgetStyle] = useState<'grid' | 'carousel'>('grid');
   const [widgetColumns, setWidgetColumns] = useState(4);
-  const [gap, setGap] = useState('md');
+  const [gap, setGap] = useState(16);
+  const [cardMinWidth, setCardMinWidth] = useState(200);
+  const [cardMaxWidth, setCardMaxWidth] = useState(0);
   // Group 4: Product Card
   const [cardBgColor, setCardBgColor] = useState('#FFFFFF');
-  const [cardBorderRadius, setCardBorderRadius] = useState('8px');
-  const [cardBorderWidth, setCardBorderWidth] = useState('1');
+  const [cardBorderRadius, setCardBorderRadius] = useState(8);
+  const [cardBorderWidth, setCardBorderWidth] = useState(1);
   const [cardBorderColor, setCardBorderColor] = useState('#E5E7EB');
   const [cardShadow, setCardShadow] = useState('sm');
-  const [cardPadding, setCardPadding] = useState('md');
+  const [cardPadding, setCardPadding] = useState(16);
   const [cardHover, setCardHover] = useState('lift');
   // Group 5: Product Image
-  const [imageAspect, setImageAspect] = useState<'square' | 'portrait' | 'landscape'>('square');
+  const [imageAspectW, setImageAspectW] = useState(1);
+  const [imageAspectH, setImageAspectH] = useState(1);
   const [imageFit, setImageFit] = useState('cover');
-  const [imageRadius, setImageRadius] = useState('8px');
+  const [imageRadius, setImageRadius] = useState(8);
   // Group 6: Product Title in Card
   const [productTitleColor, setProductTitleColor] = useState('#1F2937');
   const [productTitleSize, setProductTitleSize] = useState('sm');
@@ -132,7 +135,7 @@ export default function ShopifyComponentsPage() {
   const [buttonText, setButtonText] = useState('View');
   const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
   const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
-  const [buttonRadius, setButtonRadius] = useState('6px');
+  const [buttonRadius, setButtonRadius] = useState(6);
   const [buttonSize, setButtonSize] = useState('md');
   const [buttonVariant, setButtonVariant] = useState('solid');
   const [buttonFullWidth, setButtonFullWidth] = useState(false);
@@ -221,6 +224,8 @@ export default function ShopifyComponentsPage() {
         widget_style: widgetStyle,
         widget_columns: widgetColumns,
         gap,
+        card_min_width: cardMinWidth,
+        card_max_width: cardMaxWidth,
         // Group 4: Product Card
         card_bg_color: cardBgColor,
         card_border_radius: cardBorderRadius,
@@ -230,7 +235,8 @@ export default function ShopifyComponentsPage() {
         card_padding: cardPadding,
         card_hover: cardHover,
         // Group 5: Product Image
-        image_aspect: imageAspect,
+        image_aspect_w: imageAspectW,
+        image_aspect_h: imageAspectH,
         image_fit: imageFit,
         image_radius: imageRadius,
         // Group 6: Product Title in Card
@@ -291,6 +297,8 @@ export default function ShopifyComponentsPage() {
         widget_style: widgetStyle,
         widget_columns: widgetColumns,
         gap,
+        card_min_width: cardMinWidth,
+        card_max_width: cardMaxWidth,
         // Group 4: Product Card
         card_bg_color: cardBgColor,
         card_border_radius: cardBorderRadius,
@@ -300,7 +308,8 @@ export default function ShopifyComponentsPage() {
         card_padding: cardPadding,
         card_hover: cardHover,
         // Group 5: Product Image
-        image_aspect: imageAspect,
+        image_aspect_w: imageAspectW,
+        image_aspect_h: imageAspectH,
         image_fit: imageFit,
         image_radius: imageRadius,
         // Group 6: Product Title in Card
@@ -472,12 +481,7 @@ export default function ShopifyComponentsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <ColorField label="Background Color" value={widgetBgColor} onChange={setWidgetBgColor} details="Hex color (e.g. #FFFFFF)" />
-            <s-select label="Padding" value={widgetPadding} onChange={(e) => setWidgetPadding(e.currentTarget.value)}>
-              <s-option value="none">None</s-option>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-            </s-select>
+            <s-number-field label="Padding (px)" min={0} max={48} step={2} value={String(widgetPadding)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setWidgetPadding(val); }} details="Widget container padding in pixels." />
           </s-stack>
         </s-box>
       </s-section>
@@ -510,12 +514,10 @@ export default function ShopifyComponentsPage() {
               <s-option value="grid">Grid Cards</s-option>
               <s-option value="carousel">Carousel</s-option>
             </s-select>
-            <s-number-field label="Columns" min={2} max={6} step={1} value={String(widgetColumns)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setWidgetColumns(val); }} details="Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop." />
-            <s-select label="Card Gap" value={gap} onChange={(e) => setGap(e.currentTarget.value)}>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-            </s-select>
+            <s-number-field label="Columns" min={1} max={6} step={1} value={String(widgetColumns)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setWidgetColumns(val); }} details="Max columns at full width. Responsive: 1 col mobile → 2 col tablet → N col desktop." />
+            <s-number-field label="Card Gap (px)" min={0} max={48} step={2} value={String(gap)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setGap(val); }} details="Gap between cards in pixels." />
+            <s-number-field label="Card Min Width (px)" min={100} max={500} step={10} value={String(cardMinWidth)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setCardMinWidth(val); }} details="Cards won't shrink below this — overflow scrolls instead." />
+            <s-number-field label="Card Max Width (px)" min={0} max={800} step={10} value={String(cardMaxWidth)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setCardMaxWidth(val); }} details="0 = no limit. Cards fill available space." />
           </s-stack>
         </s-box>
       </s-section>
@@ -525,12 +527,8 @@ export default function ShopifyComponentsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <ColorField label="Card Background" value={cardBgColor} onChange={setCardBgColor} details="Hex color (e.g. #FFFFFF)" />
-            <s-text-field label="Card Border Radius" value={cardBorderRadius} onChange={(e) => setCardBorderRadius(e.currentTarget.value)} details="CSS value (e.g. 8px)" />
-            <s-select label="Card Border Width" value={cardBorderWidth} onChange={(e) => setCardBorderWidth(e.currentTarget.value)}>
-              <s-option value="0">None</s-option>
-              <s-option value="1">1px</s-option>
-              <s-option value="2">2px</s-option>
-            </s-select>
+            <s-number-field label="Card Border Radius (px)" min={0} max={50} step={1} value={String(cardBorderRadius)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setCardBorderRadius(val); }} details="Border radius in pixels." />
+            <s-number-field label="Card Border Width (px)" min={0} max={10} step={1} value={String(cardBorderWidth)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setCardBorderWidth(val); }} details="Border width in pixels. 0 = no border." />
             <ColorField label="Card Border Color" value={cardBorderColor} onChange={setCardBorderColor} details="Hex color (e.g. #E5E7EB)" />
             <s-select label="Card Shadow" value={cardShadow} onChange={(e) => setCardShadow(e.currentTarget.value)}>
               <s-option value="none">None</s-option>
@@ -538,11 +536,7 @@ export default function ShopifyComponentsPage() {
               <s-option value="md">Medium</s-option>
               <s-option value="lg">Large</s-option>
             </s-select>
-            <s-select label="Card Padding" value={cardPadding} onChange={(e) => setCardPadding(e.currentTarget.value)}>
-              <s-option value="sm">Small</s-option>
-              <s-option value="md">Medium</s-option>
-              <s-option value="lg">Large</s-option>
-            </s-select>
+            <s-number-field label="Card Padding (px)" min={0} max={48} step={2} value={String(cardPadding)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setCardPadding(val); }} details="Card content padding in pixels." />
             <s-select label="Card Hover Effect" value={cardHover} onChange={(e) => setCardHover(e.currentTarget.value)}>
               <s-option value="none">None</s-option>
               <s-option value="lift">Lift</s-option>
@@ -557,16 +551,13 @@ export default function ShopifyComponentsPage() {
       <s-section heading="Product Image">
         <s-box padding="base">
           <s-stack direction="block" gap="base">
-            <s-select label="Aspect Ratio" value={imageAspect} onChange={(e) => setImageAspect(e.currentTarget.value as 'square' | 'portrait' | 'landscape')}>
-              <s-option value="square">Square (1:1)</s-option>
-              <s-option value="portrait">Portrait (3:4)</s-option>
-              <s-option value="landscape">Landscape (16:9)</s-option>
-            </s-select>
+            <s-number-field label="Aspect Ratio Width" min={1} max={20} step={1} value={String(imageAspectW)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setImageAspectW(val); }} details="e.g. 1 for square, 16 for widescreen." />
+            <s-number-field label="Aspect Ratio Height" min={1} max={20} step={1} value={String(imageAspectH)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setImageAspectH(val); }} details="e.g. 1 for square, 9 for widescreen." />
             <s-select label="Image Fit" value={imageFit} onChange={(e) => setImageFit(e.currentTarget.value)}>
               <s-option value="cover">Cover (crop)</s-option>
               <s-option value="contain">Contain (fit)</s-option>
             </s-select>
-            <s-text-field label="Image Border Radius" value={imageRadius} onChange={(e) => setImageRadius(e.currentTarget.value)} details="CSS value (e.g. 8px, 0)" />
+            <s-number-field label="Image Border Radius (px)" min={0} max={50} step={1} value={String(imageRadius)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setImageRadius(val); }} details="Image border radius in pixels." />
           </s-stack>
         </s-box>
       </s-section>
@@ -619,7 +610,7 @@ export default function ShopifyComponentsPage() {
             <s-text-field label="Button Text" value={buttonText} onChange={(e) => setButtonText(e.currentTarget.value)} details="e.g. View, Shop Now, Add to Cart" />
             <ColorField label="Button Color" value={buttonBgColor} onChange={setButtonBgColor} details="Hex color (e.g. #3B82F6)" />
             <ColorField label="Button Text Color" value={buttonTextColor} onChange={setButtonTextColor} details="Hex color (e.g. #FFFFFF)" />
-            <s-text-field label="Button Border Radius" value={buttonRadius} onChange={(e) => setButtonRadius(e.currentTarget.value)} details="CSS value (e.g. 6px, 9999px for pill)" />
+            <s-number-field label="Button Border Radius (px)" min={0} max={50} step={1} value={String(buttonRadius)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setButtonRadius(val); }} details="Button border radius in pixels." />
             <s-select label="Button Size" value={buttonSize} onChange={(e) => setButtonSize(e.currentTarget.value)}>
               <s-option value="sm">Small</s-option>
               <s-option value="md">Medium</s-option>

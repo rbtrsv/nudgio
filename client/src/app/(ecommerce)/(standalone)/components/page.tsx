@@ -34,7 +34,7 @@ export default function ComponentsPage() {
   // Widget config state — visual fields (35 settings in 8 groups)
   // Group 1: Widget Container
   const [widgetBgColor, setWidgetBgColor] = useState('#FFFFFF');
-  const [widgetPadding, setWidgetPadding] = useState('md');
+  const [widgetPadding, setWidgetPadding] = useState(16);
   // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
@@ -43,19 +43,22 @@ export default function ComponentsPage() {
   // Group 3: Layout
   const [widgetStyle, setWidgetStyle] = useState('grid');
   const [widgetColumns, setWidgetColumns] = useState(4);
-  const [gap, setGap] = useState('md');
+  const [gap, setGap] = useState(16);
+  const [cardMinWidth, setCardMinWidth] = useState(200);
+  const [cardMaxWidth, setCardMaxWidth] = useState(0);
   // Group 4: Product Card
   const [cardBgColor, setCardBgColor] = useState('#FFFFFF');
-  const [cardBorderRadius, setCardBorderRadius] = useState('8px');
-  const [cardBorderWidth, setCardBorderWidth] = useState('0');
+  const [cardBorderRadius, setCardBorderRadius] = useState(8);
+  const [cardBorderWidth, setCardBorderWidth] = useState(0);
   const [cardBorderColor, setCardBorderColor] = useState('#E5E7EB');
   const [cardShadow, setCardShadow] = useState('md');
-  const [cardPadding, setCardPadding] = useState('md');
+  const [cardPadding, setCardPadding] = useState(16);
   const [cardHover, setCardHover] = useState('lift');
   // Group 5: Product Image
-  const [imageAspect, setImageAspect] = useState('square');
+  const [imageAspectW, setImageAspectW] = useState(1);
+  const [imageAspectH, setImageAspectH] = useState(1);
   const [imageFit, setImageFit] = useState('cover');
-  const [imageRadius, setImageRadius] = useState('8px');
+  const [imageRadius, setImageRadius] = useState(8);
   // Group 6: Product Title in Card
   const [productTitleColor, setProductTitleColor] = useState('#1F2937');
   const [productTitleSize, setProductTitleSize] = useState('sm');
@@ -70,7 +73,7 @@ export default function ComponentsPage() {
   const [buttonText, setButtonText] = useState('View');
   const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
   const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
-  const [buttonRadius, setButtonRadius] = useState('6px');
+  const [buttonRadius, setButtonRadius] = useState(6);
   const [buttonSize, setButtonSize] = useState('md');
   const [buttonVariant, setButtonVariant] = useState('solid');
   const [buttonFullWidth, setButtonFullWidth] = useState(false);
@@ -161,6 +164,8 @@ export default function ComponentsPage() {
       widget_style: widgetStyle,
       widget_columns: widgetColumns,
       gap: gap,
+      card_min_width: cardMinWidth,
+      card_max_width: cardMaxWidth,
       // Group 4: Product Card
       card_bg_color: cardBgColor,
       card_border_radius: cardBorderRadius,
@@ -170,7 +175,8 @@ export default function ComponentsPage() {
       card_padding: cardPadding,
       card_hover: cardHover,
       // Group 5: Product Image
-      image_aspect: imageAspect,
+      image_aspect_w: imageAspectW,
+      image_aspect_h: imageAspectH,
       image_fit: imageFit,
       image_radius: imageRadius,
       // Group 6: Product Title in Card
@@ -214,6 +220,8 @@ export default function ComponentsPage() {
       widget_style: widgetStyle,
       widget_columns: widgetColumns,
       gap: gap,
+      card_min_width: cardMinWidth,
+      card_max_width: cardMaxWidth,
       // Group 4: Product Card
       card_bg_color: cardBgColor,
       card_border_radius: cardBorderRadius,
@@ -223,7 +231,8 @@ export default function ComponentsPage() {
       card_padding: cardPadding,
       card_hover: cardHover,
       // Group 5: Product Image
-      image_aspect: imageAspect,
+      image_aspect_w: imageAspectW,
+      image_aspect_h: imageAspectH,
       image_fit: imageFit,
       image_radius: imageRadius,
       // Group 6: Product Title in Card
@@ -280,6 +289,8 @@ export default function ComponentsPage() {
       widgetStyle,
       widgetColumns,
       gap,
+      cardMinWidth,
+      cardMaxWidth,
       // Group 4: Product Card
       cardBgColor,
       cardBorderRadius,
@@ -289,7 +300,8 @@ export default function ComponentsPage() {
       cardPadding,
       cardHover,
       // Group 5: Product Image
-      imageAspect,
+      imageAspectW,
+      imageAspectH,
       imageFit,
       imageRadius,
       // Group 6: Product Title in Card
@@ -311,7 +323,7 @@ export default function ComponentsPage() {
       buttonVariant,
       buttonFullWidth,
     });
-  }, [apiKeys, widgetType, top, lookbackDays, method, minPriceIncrease, widgetBgColor, widgetPadding, widgetTitle, titleColor, titleSize, titleAlignment, widgetStyle, widgetColumns, gap, cardBgColor, cardBorderRadius, cardBorderWidth, cardBorderColor, cardShadow, cardPadding, cardHover, imageAspect, imageFit, imageRadius, productTitleColor, productTitleSize, productTitleWeight, productTitleLines, productTitleAlignment, showPrice, priceColor, priceSize, buttonText, buttonBgColor, buttonTextColor, buttonRadius, buttonSize, buttonVariant, buttonFullWidth, needsLookback, needsMethod, needsMinPriceIncrease, generateEmbedCode]);
+  }, [apiKeys, widgetType, top, lookbackDays, method, minPriceIncrease, widgetBgColor, widgetPadding, widgetTitle, titleColor, titleSize, titleAlignment, widgetStyle, widgetColumns, gap, cardMinWidth, cardMaxWidth, cardBgColor, cardBorderRadius, cardBorderWidth, cardBorderColor, cardShadow, cardPadding, cardHover, imageAspectW, imageAspectH, imageFit, imageRadius, productTitleColor, productTitleSize, productTitleWeight, productTitleLines, productTitleAlignment, showPrice, priceColor, priceSize, buttonText, buttonBgColor, buttonTextColor, buttonRadius, buttonSize, buttonVariant, buttonFullWidth, needsLookback, needsMethod, needsMinPriceIncrease, generateEmbedCode]);
 
   const handleCopy = useCallback(() => {
     const code = getEmbedSnippet();
@@ -468,16 +480,9 @@ export default function ComponentsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Padding</Label>
-                  <Select value={widgetPadding} onValueChange={setWidgetPadding}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Padding (px)</Label>
+                  <Input type="number" min={0} max={48} step={2} value={widgetPadding} onChange={(e) => setWidgetPadding(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Widget container padding in pixels.</p>
                 </div>
               </div>
             </CardContent>
@@ -547,20 +552,24 @@ export default function ComponentsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Columns (2-6)</Label>
-                  <Input type="number" min={2} max={6} value={widgetColumns} onChange={(e) => setWidgetColumns(parseInt(e.target.value) || 4)} />
+                  <Label>Columns (1-6)</Label>
+                  <Input type="number" min={1} max={6} value={widgetColumns} onChange={(e) => setWidgetColumns(parseInt(e.target.value) || 4)} />
                   <p className="text-xs text-muted-foreground">Max columns at full width. Responsive: 1→2→N.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Gap</Label>
-                  <Select value={gap} onValueChange={setGap}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Gap (px)</Label>
+                  <Input type="number" min={0} max={48} step={2} value={gap} onChange={(e) => setGap(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Gap between cards in pixels.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Card Min Width (px)</Label>
+                  <Input type="number" min={100} max={500} step={10} value={cardMinWidth} onChange={(e) => setCardMinWidth(parseInt(e.target.value) || 200)} />
+                  <p className="text-xs text-muted-foreground">Cards won&apos;t shrink below this — overflow scrolls instead.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Card Max Width (px)</Label>
+                  <Input type="number" min={0} max={800} step={10} value={cardMaxWidth} onChange={(e) => setCardMaxWidth(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">0 = no limit. Cards fill available space.</p>
                 </div>
               </div>
             </CardContent>
@@ -582,19 +591,14 @@ export default function ComponentsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Border Radius</Label>
-                  <Input value={cardBorderRadius} onChange={(e) => setCardBorderRadius(e.target.value)} placeholder="8px" />
+                  <Label>Border Radius (px)</Label>
+                  <Input type="number" min={0} max={50} step={1} value={cardBorderRadius} onChange={(e) => setCardBorderRadius(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Card corner radius in pixels.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Border Width</Label>
-                  <Select value={cardBorderWidth} onValueChange={setCardBorderWidth}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">None</SelectItem>
-                      <SelectItem value="1">1px</SelectItem>
-                      <SelectItem value="2">2px</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Border Width (px)</Label>
+                  <Input type="number" min={0} max={10} step={1} value={cardBorderWidth} onChange={(e) => setCardBorderWidth(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Card border width in pixels.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Border Color</Label>
@@ -616,15 +620,9 @@ export default function ComponentsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Padding</Label>
-                  <Select value={cardPadding} onValueChange={setCardPadding}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Padding (px)</Label>
+                  <Input type="number" min={0} max={48} step={2} value={cardPadding} onChange={(e) => setCardPadding(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Card content padding in pixels.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Hover Effect</Label>
@@ -651,15 +649,14 @@ export default function ComponentsPage() {
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Aspect Ratio</Label>
-                  <Select value={imageAspect} onValueChange={setImageAspect}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="square">Square (1:1)</SelectItem>
-                      <SelectItem value="portrait">Portrait (3:4)</SelectItem>
-                      <SelectItem value="landscape">Landscape (16:9)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Aspect Ratio Width</Label>
+                  <Input type="number" min={1} max={20} value={imageAspectW} onChange={(e) => setImageAspectW(parseInt(e.target.value) || 1)} />
+                  <p className="text-xs text-muted-foreground">e.g. 1 for square, 16 for widescreen.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Aspect Ratio Height</Label>
+                  <Input type="number" min={1} max={20} value={imageAspectH} onChange={(e) => setImageAspectH(parseInt(e.target.value) || 1)} />
+                  <p className="text-xs text-muted-foreground">e.g. 1 for square, 9 for widescreen.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Image Fit</Label>
@@ -672,8 +669,9 @@ export default function ComponentsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Border Radius</Label>
-                  <Input value={imageRadius} onChange={(e) => setImageRadius(e.target.value)} placeholder="8px" />
+                  <Label>Border Radius (px)</Label>
+                  <Input type="number" min={0} max={50} step={1} value={imageRadius} onChange={(e) => setImageRadius(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Image corner radius in pixels.</p>
                 </div>
               </div>
             </CardContent>
@@ -800,8 +798,9 @@ export default function ComponentsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Border Radius</Label>
-                  <Input value={buttonRadius} onChange={(e) => setButtonRadius(e.target.value)} placeholder="6px" />
+                  <Label>Border Radius (px)</Label>
+                  <Input type="number" min={0} max={50} step={1} value={buttonRadius} onChange={(e) => setButtonRadius(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Button corner radius in pixels.</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Size</Label>

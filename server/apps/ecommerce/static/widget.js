@@ -58,7 +58,7 @@
     device: 'desktop',
     // Group 1: Widget Container
     'widget-bg-color': '#FFFFFF',
-    'widget-padding': 'md',
+    'widget-padding': '16',
     // Group 2: Widget Title
     'title-color': '#111827',
     'title-size': 'lg',
@@ -66,19 +66,22 @@
     // Group 3: Layout
     'widget-style': 'grid',
     'widget-columns': '4',
-    gap: 'md',
+    gap: '16',
+    'card-min-width': '200',
+    'card-max-width': '0',
     // Group 4: Product Card
     'card-bg-color': '#FFFFFF',
-    'card-border-radius': '8px',
+    'card-border-radius': '8',
     'card-border-width': '0',
     'card-border-color': '#E5E7EB',
     'card-shadow': 'md',
-    'card-padding': 'md',
+    'card-padding': '16',
     'card-hover': 'lift',
     // Group 5: Product Image
-    'image-aspect': 'square',
+    'image-aspect-w': '1',
+    'image-aspect-h': '1',
     'image-fit': 'cover',
-    'image-radius': '8px',
+    'image-radius': '8',
     // Group 6: Product Title in Card
     'product-title-color': '#1F2937',
     'product-title-size': 'sm',
@@ -93,7 +96,7 @@
     'button-text': 'View',
     'button-bg-color': '#3B82F6',
     'button-text-color': '#FFFFFF',
-    'button-radius': '6px',
+    'button-radius': '6',
     'button-size': 'md',
     'button-variant': 'solid',
     'button-full-width': 'false'
@@ -123,6 +126,8 @@
     'widget-style': 'widget_style',
     'widget-columns': 'widget_columns',
     'gap': 'gap',
+    'card-min-width': 'card_min_width',
+    'card-max-width': 'card_max_width',
     // Group 4: Product Card
     'card-bg-color': 'card_bg_color',
     'card-border-radius': 'card_border_radius',
@@ -132,7 +137,8 @@
     'card-padding': 'card_padding',
     'card-hover': 'card_hover',
     // Group 5: Product Image
-    'image-aspect': 'image_aspect',
+    'image-aspect-w': 'image_aspect_w',
+    'image-aspect-h': 'image_aspect_h',
     'image-fit': 'image_fit',
     'image-radius': 'image_radius',
     // Group 6: Product Title in Card

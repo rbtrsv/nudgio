@@ -124,7 +124,7 @@ class RecommendationSettings(BaseMixin, Base):
 
     # Group 1: Widget Container
     widget_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
-    widget_padding: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "none", "sm", "md", "lg"
+    widget_padding: Mapped[int | None] = mapped_column(Integer, nullable=True)  # padding in pixels
 
     # Group 2: Widget Title
     widget_title: Mapped[str | None] = mapped_column(String(200), nullable=True)  # "Our Picks", "" (empty = auto)
@@ -134,22 +134,25 @@ class RecommendationSettings(BaseMixin, Base):
 
     # Group 3: Layout
     widget_style: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "grid", "carousel"
-    widget_columns: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 2-6
-    gap: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+    widget_columns: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-6
+    gap: Mapped[int | None] = mapped_column(Integer, nullable=True)  # gap in pixels
+    card_min_width: Mapped[int | None] = mapped_column(Integer, nullable=True)  # Min card width in px (grid minmax, carousel floor)
+    card_max_width: Mapped[int | None] = mapped_column(Integer, nullable=True)  # Max card width in px (0 = no limit)
 
     # Group 4: Product Card
     card_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
-    card_border_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "8px"
-    card_border_width: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "0", "1", "2"
+    card_border_radius: Mapped[int | None] = mapped_column(Integer, nullable=True)  # border radius in pixels
+    card_border_width: Mapped[int | None] = mapped_column(Integer, nullable=True)  # border width in pixels
     card_border_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#E5E7EB"
     card_shadow: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "none", "sm", "md", "lg"
-    card_padding: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
+    card_padding: Mapped[int | None] = mapped_column(Integer, nullable=True)  # padding in pixels
     card_hover: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "none", "lift", "shadow", "glow"
 
     # Group 5: Product Image
-    image_aspect: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "square", "portrait", "landscape"
+    image_aspect_w: Mapped[int | None] = mapped_column(Integer, nullable=True)  # aspect ratio width (e.g. 1, 3, 4, 16)
+    image_aspect_h: Mapped[int | None] = mapped_column(Integer, nullable=True)  # aspect ratio height (e.g. 1, 4, 5, 9)
     image_fit: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "cover", "contain"
-    image_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "8px"
+    image_radius: Mapped[int | None] = mapped_column(Integer, nullable=True)  # border radius in pixels
 
     # Group 6: Product Title in Card
     product_title_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#1F2937"
@@ -167,7 +170,7 @@ class RecommendationSettings(BaseMixin, Base):
     button_text: Mapped[str | None] = mapped_column(String(100), nullable=True)  # "View", "Shop Now"
     button_bg_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#3B82F6"
     button_text_color: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "#FFFFFF"
-    button_radius: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "6px"
+    button_radius: Mapped[int | None] = mapped_column(Integer, nullable=True)  # border radius in pixels
     button_size: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "sm", "md", "lg"
     button_variant: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "solid", "outline", "ghost"
     button_full_width: Mapped[bool | None] = mapped_column(Boolean, nullable=True)  # True/False

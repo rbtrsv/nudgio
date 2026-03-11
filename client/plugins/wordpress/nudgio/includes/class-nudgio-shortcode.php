@@ -62,7 +62,7 @@ class Nudgio_Shortcode {
                 'min_price_increase_percent' => '10',
                 // Group 1: Widget Container
                 'widget_bg_color'            => get_option( 'nudgio_default_widget_bg_color', '#FFFFFF' ),
-                'widget_padding'             => get_option( 'nudgio_default_widget_padding', 'md' ),
+                'widget_padding'             => get_option( 'nudgio_default_widget_padding', 16 ),
                 // Group 2: Widget Title
                 'widget_title'               => get_option( 'nudgio_default_widget_title', '' ),
                 'title_color'                => get_option( 'nudgio_default_title_color', '#111827' ),
@@ -71,19 +71,22 @@ class Nudgio_Shortcode {
                 // Group 3: Layout
                 'widget_style'               => get_option( 'nudgio_default_widget_style', 'grid' ),
                 'widget_columns'             => get_option( 'nudgio_default_widget_columns', 4 ),
-                'gap'                        => get_option( 'nudgio_default_gap', 'md' ),
+                'gap'                        => get_option( 'nudgio_default_gap', 16 ),
+                'card_min_width'             => get_option( 'nudgio_default_card_min_width', 200 ),
+                'card_max_width'             => get_option( 'nudgio_default_card_max_width', 0 ),
                 // Group 4: Product Card
                 'card_bg_color'              => get_option( 'nudgio_default_card_bg_color', '#FFFFFF' ),
-                'card_border_radius'         => get_option( 'nudgio_default_card_border_radius', '8px' ),
-                'card_border_width'          => get_option( 'nudgio_default_card_border_width', '0' ),
+                'card_border_radius'         => get_option( 'nudgio_default_card_border_radius', 8 ),
+                'card_border_width'          => get_option( 'nudgio_default_card_border_width', 0 ),
                 'card_border_color'          => get_option( 'nudgio_default_card_border_color', '#E5E7EB' ),
                 'card_shadow'                => get_option( 'nudgio_default_card_shadow', 'md' ),
-                'card_padding'               => get_option( 'nudgio_default_card_padding', 'md' ),
+                'card_padding'               => get_option( 'nudgio_default_card_padding', 16 ),
                 'card_hover'                 => get_option( 'nudgio_default_card_hover', 'lift' ),
                 // Group 5: Product Image
-                'image_aspect'               => get_option( 'nudgio_default_image_aspect', 'square' ),
+                'image_aspect_w'             => get_option( 'nudgio_default_image_aspect_w', 1 ),
+                'image_aspect_h'             => get_option( 'nudgio_default_image_aspect_h', 1 ),
                 'image_fit'                  => get_option( 'nudgio_default_image_fit', 'cover' ),
-                'image_radius'               => get_option( 'nudgio_default_image_radius', '8px' ),
+                'image_radius'               => get_option( 'nudgio_default_image_radius', 8 ),
                 // Group 6: Product Title in Card
                 'product_title_color'        => get_option( 'nudgio_default_product_title_color', '#1F2937' ),
                 'product_title_size'         => get_option( 'nudgio_default_product_title_size', 'sm' ),
@@ -98,7 +101,7 @@ class Nudgio_Shortcode {
                 'button_text'                => get_option( 'nudgio_default_button_text', 'View' ),
                 'button_bg_color'            => get_option( 'nudgio_default_button_bg_color', '#3B82F6' ),
                 'button_text_color'          => get_option( 'nudgio_default_button_text_color', '#FFFFFF' ),
-                'button_radius'              => get_option( 'nudgio_default_button_radius', '6px' ),
+                'button_radius'              => get_option( 'nudgio_default_button_radius', 6 ),
                 'button_size'                => get_option( 'nudgio_default_button_size', 'md' ),
                 'button_variant'             => get_option( 'nudgio_default_button_variant', 'solid' ),
                 'button_full_width'          => get_option( 'nudgio_default_button_full_width', false ) ? 'true' : 'false',
@@ -159,7 +162,7 @@ class Nudgio_Shortcode {
             'device'                  => sanitize_text_field( $atts['device'] ),
             // Group 1: Widget Container
             'widget_bg_color'         => sanitize_hex_color( $atts['widget_bg_color'] ),
-            'widget_padding'          => sanitize_text_field( $atts['widget_padding'] ),
+            'widget_padding'          => absint( $atts['widget_padding'] ),
             // Group 2: Widget Title
             'title_color'             => sanitize_hex_color( $atts['title_color'] ),
             'title_size'              => sanitize_text_field( $atts['title_size'] ),
@@ -167,19 +170,22 @@ class Nudgio_Shortcode {
             // Group 3: Layout
             'widget_style'            => sanitize_text_field( $atts['widget_style'] ),
             'widget_columns'          => absint( $atts['widget_columns'] ),
-            'gap'                     => sanitize_text_field( $atts['gap'] ),
+            'gap'                     => absint( $atts['gap'] ),
+            'card_min_width'          => absint( $atts['card_min_width'] ),
+            'card_max_width'          => absint( $atts['card_max_width'] ),
             // Group 4: Product Card
             'card_bg_color'           => sanitize_hex_color( $atts['card_bg_color'] ),
-            'card_border_radius'      => sanitize_text_field( $atts['card_border_radius'] ),
-            'card_border_width'       => sanitize_text_field( $atts['card_border_width'] ),
+            'card_border_radius'      => absint( $atts['card_border_radius'] ),
+            'card_border_width'       => absint( $atts['card_border_width'] ),
             'card_border_color'       => sanitize_hex_color( $atts['card_border_color'] ),
             'card_shadow'             => sanitize_text_field( $atts['card_shadow'] ),
-            'card_padding'            => sanitize_text_field( $atts['card_padding'] ),
+            'card_padding'            => absint( $atts['card_padding'] ),
             'card_hover'              => sanitize_text_field( $atts['card_hover'] ),
             // Group 5: Product Image
-            'image_aspect'            => sanitize_text_field( $atts['image_aspect'] ),
+            'image_aspect_w'          => absint( $atts['image_aspect_w'] ),
+            'image_aspect_h'          => absint( $atts['image_aspect_h'] ),
             'image_fit'               => sanitize_text_field( $atts['image_fit'] ),
-            'image_radius'            => sanitize_text_field( $atts['image_radius'] ),
+            'image_radius'            => absint( $atts['image_radius'] ),
             // Group 6: Product Title in Card
             'product_title_color'     => sanitize_hex_color( $atts['product_title_color'] ),
             'product_title_size'      => sanitize_text_field( $atts['product_title_size'] ),
@@ -195,7 +201,7 @@ class Nudgio_Shortcode {
             'button_text'             => sanitize_text_field( $atts['button_text'] ),
             'button_bg_color'         => sanitize_hex_color( $atts['button_bg_color'] ),
             'button_text_color'       => sanitize_hex_color( $atts['button_text_color'] ),
-            'button_radius'           => sanitize_text_field( $atts['button_radius'] ),
+            'button_radius'           => absint( $atts['button_radius'] ),
             'button_size'             => sanitize_text_field( $atts['button_size'] ),
             'button_variant'          => sanitize_text_field( $atts['button_variant'] ),
             // Boolean → 'true'/'false' string (sanitize_text_field(false) returns '' which FastAPI rejects)

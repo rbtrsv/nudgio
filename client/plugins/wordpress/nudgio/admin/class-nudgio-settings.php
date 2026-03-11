@@ -153,7 +153,7 @@ class Nudgio_Settings {
 
         // --- Group 1: Widget Container ---
         $this->register_color_setting( 'widget_bg_color', __( 'Widget Background', 'nudgio-technologies' ), '#FFFFFF' );
-        $this->register_select_setting( 'widget_padding', __( 'Widget Padding', 'nudgio-technologies' ), 'md', array( 'none' => 'None', 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_number_setting( 'widget_padding', __( 'Widget Padding (px)', 'nudgio-technologies' ), 16, 0, 48, __( 'Widget container padding in pixels.', 'nudgio-technologies' ) );
 
         // --- Group 2: Widget Title ---
         $this->register_text_setting( 'widget_title', __( 'Widget Title', 'nudgio-technologies' ), '', __( 'Leave empty for auto-default based on widget type.', 'nudgio-technologies' ) );
@@ -163,22 +163,25 @@ class Nudgio_Settings {
 
         // --- Group 3: Layout ---
         $this->register_select_setting( 'widget_style', __( 'Layout Style', 'nudgio-technologies' ), 'grid', array( 'grid' => 'Card Grid', 'carousel' => 'Carousel' ) );
-        $this->register_number_setting( 'widget_columns', __( 'Columns (2-6)', 'nudgio-technologies' ), 4, 2, 6, __( 'Max columns at full width. Responsive: 1→2→N.', 'nudgio-technologies' ) );
-        $this->register_select_setting( 'gap', __( 'Gap', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_number_setting( 'widget_columns', __( 'Columns (1-6)', 'nudgio-technologies' ), 4, 1, 6, __( 'Max columns at full width. Responsive: 1→2→N.', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'gap', __( 'Gap (px)', 'nudgio-technologies' ), 16, 0, 48, __( 'Gap between cards in pixels.', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'card_min_width', __( 'Card Min Width (px)', 'nudgio-technologies' ), 200, 100, 500, __( 'Minimum card width in pixels. Prevents cards from shrinking below usable size.', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'card_max_width', __( 'Card Max Width (px)', 'nudgio-technologies' ), 0, 0, 800, __( 'Maximum card width in pixels. 0 = no limit.', 'nudgio-technologies' ) );
 
         // --- Group 4: Product Card ---
         $this->register_color_setting( 'card_bg_color', __( 'Card Background', 'nudgio-technologies' ), '#FFFFFF' );
-        $this->register_text_setting( 'card_border_radius', __( 'Card Border Radius', 'nudgio-technologies' ), '8px', __( 'CSS value (e.g. 8px, 0.5rem).', 'nudgio-technologies' ) );
-        $this->register_select_setting( 'card_border_width', __( 'Card Border Width', 'nudgio-technologies' ), '0', array( '0' => 'None', '1' => '1px', '2' => '2px' ) );
+        $this->register_number_setting( 'card_border_radius', __( 'Card Border Radius (px)', 'nudgio-technologies' ), 8, 0, 50, __( 'Card corner radius in pixels.', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'card_border_width', __( 'Card Border Width (px)', 'nudgio-technologies' ), 0, 0, 10, __( 'Card border width in pixels.', 'nudgio-technologies' ) );
         $this->register_color_setting( 'card_border_color', __( 'Card Border Color', 'nudgio-technologies' ), '#E5E7EB' );
         $this->register_select_setting( 'card_shadow', __( 'Card Shadow', 'nudgio-technologies' ), 'md', array( 'none' => 'None', 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
-        $this->register_select_setting( 'card_padding', __( 'Card Padding', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
+        $this->register_number_setting( 'card_padding', __( 'Card Padding (px)', 'nudgio-technologies' ), 16, 0, 48, __( 'Card content padding in pixels.', 'nudgio-technologies' ) );
         $this->register_select_setting( 'card_hover', __( 'Card Hover', 'nudgio-technologies' ), 'lift', array( 'none' => 'None', 'lift' => 'Lift', 'shadow' => 'Shadow', 'glow' => 'Glow' ) );
 
         // --- Group 5: Product Image ---
-        $this->register_select_setting( 'image_aspect', __( 'Image Aspect Ratio', 'nudgio-technologies' ), 'square', array( 'square' => 'Square (1:1)', 'portrait' => 'Portrait (3:4)', 'landscape' => 'Landscape (16:9)' ) );
+        $this->register_number_setting( 'image_aspect_w', __( 'Image Aspect Width', 'nudgio-technologies' ), 1, 1, 20, __( 'Aspect ratio width (e.g. 1 for square, 16 for widescreen).', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'image_aspect_h', __( 'Image Aspect Height', 'nudgio-technologies' ), 1, 1, 20, __( 'Aspect ratio height (e.g. 1 for square, 9 for widescreen).', 'nudgio-technologies' ) );
         $this->register_select_setting( 'image_fit', __( 'Image Fit', 'nudgio-technologies' ), 'cover', array( 'cover' => 'Cover', 'contain' => 'Contain' ) );
-        $this->register_text_setting( 'image_radius', __( 'Image Border Radius', 'nudgio-technologies' ), '8px', __( 'CSS value (e.g. 8px, 0).', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'image_radius', __( 'Image Border Radius (px)', 'nudgio-technologies' ), 8, 0, 50, __( 'Image corner radius in pixels.', 'nudgio-technologies' ) );
 
         // --- Group 6: Product Title in Card ---
         $this->register_color_setting( 'product_title_color', __( 'Product Title Color', 'nudgio-technologies' ), '#1F2937' );
@@ -196,7 +199,7 @@ class Nudgio_Settings {
         $this->register_text_setting( 'button_text', __( 'Button Text', 'nudgio-technologies' ), 'View', __( 'Call-to-action text (e.g. View, Shop Now, Add to Cart).', 'nudgio-technologies' ) );
         $this->register_color_setting( 'button_bg_color', __( 'Button Color', 'nudgio-technologies' ), '#3B82F6' );
         $this->register_color_setting( 'button_text_color', __( 'Button Text Color', 'nudgio-technologies' ), '#FFFFFF' );
-        $this->register_text_setting( 'button_radius', __( 'Button Border Radius', 'nudgio-technologies' ), '6px', __( 'CSS value (e.g. 6px, 0).', 'nudgio-technologies' ) );
+        $this->register_number_setting( 'button_radius', __( 'Button Border Radius (px)', 'nudgio-technologies' ), 6, 0, 50, __( 'Button corner radius in pixels.', 'nudgio-technologies' ) );
         $this->register_select_setting( 'button_size', __( 'Button Size', 'nudgio-technologies' ), 'md', array( 'sm' => 'Small', 'md' => 'Medium', 'lg' => 'Large' ) );
         $this->register_select_setting( 'button_variant', __( 'Button Variant', 'nudgio-technologies' ), 'solid', array( 'solid' => 'Solid', 'outline' => 'Outline', 'ghost' => 'Ghost' ) );
         $this->register_boolean_setting( 'button_full_width', __( 'Button Full Width', 'nudgio-technologies' ), false, __( 'Stretch button to full card width.', 'nudgio-technologies' ) );

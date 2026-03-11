@@ -36,6 +36,8 @@ $nudgio_options = array(
     'nudgio_default_widget_style',
     'nudgio_default_widget_columns',
     'nudgio_default_gap',
+    'nudgio_default_card_min_width',
+    'nudgio_default_card_max_width',
     // Group 4: Product Card
     'nudgio_default_card_bg_color',
     'nudgio_default_card_border_radius',
@@ -45,7 +47,8 @@ $nudgio_options = array(
     'nudgio_default_card_padding',
     'nudgio_default_card_hover',
     // Group 5: Product Image
-    'nudgio_default_image_aspect',
+    'nudgio_default_image_aspect_w',
+    'nudgio_default_image_aspect_h',
     'nudgio_default_image_fit',
     'nudgio_default_image_radius',
     // Group 6: Product Title in Card
@@ -66,8 +69,9 @@ $nudgio_options = array(
     'nudgio_default_button_size',
     'nudgio_default_button_variant',
     'nudgio_default_button_full_width',
-    // Legacy options (from v1.0.0 / v1.1.0 — cleanup for upgrades)
+    // Legacy options (from v1.0.0 / v1.1.0 / v1.2.0 — cleanup for upgrades)
     'nudgio_default_style',
+    'nudgio_default_image_aspect',
     'nudgio_default_columns',
     'nudgio_default_size',
     'nudgio_default_primary_color',

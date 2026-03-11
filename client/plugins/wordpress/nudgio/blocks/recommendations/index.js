@@ -268,15 +268,31 @@
                     min: 1,
                     max: 6,
                 } ),
-                el( SelectControl, {
-                    label: __( 'Gap', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Gap (px)', 'nudgio' ),
                     value: attributes.gap,
-                    options: [
-                        { label: 'Small',  value: 'sm' },
-                        { label: 'Medium', value: 'md' },
-                        { label: 'Large',  value: 'lg' },
-                    ],
                     onChange: function ( val ) { setAttributes( { gap: val } ); },
+                    min: 0,
+                    max: 48,
+                    step: 2,
+                } ),
+                el( RangeControl, {
+                    label: __( 'Card Min Width (px)', 'nudgio' ),
+                    help: __( 'Minimum card width. Cards won\'t shrink below this.', 'nudgio' ),
+                    value: attributes.card_min_width,
+                    onChange: function ( val ) { setAttributes( { card_min_width: val } ); },
+                    min: 100,
+                    max: 500,
+                    step: 10,
+                } ),
+                el( RangeControl, {
+                    label: __( 'Card Max Width (px)', 'nudgio' ),
+                    help: __( '0 = no limit. Cards fill available space.', 'nudgio' ),
+                    value: attributes.card_max_width,
+                    onChange: function ( val ) { setAttributes( { card_max_width: val } ); },
+                    min: 0,
+                    max: 800,
+                    step: 10,
                 } )
             );
 
@@ -284,21 +300,21 @@
             // Panel 6: Product Card (Group 4)
             // ------------------------------------------
             var cardPanel = el( PanelBody, { title: __( 'Product Card', 'nudgio' ), initialOpen: false },
-                el( TextControl, {
-                    label: __( 'Border Radius', 'nudgio' ),
-                    help: __( 'CSS value (e.g. 8px, 0.5rem).', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Border Radius (px)', 'nudgio' ),
+                    help: __( 'Card corner radius in pixels.', 'nudgio' ),
                     value: attributes.card_border_radius,
                     onChange: function ( val ) { setAttributes( { card_border_radius: val } ); },
+                    min: 0,
+                    max: 50,
                 } ),
-                el( SelectControl, {
-                    label: __( 'Border Width', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Border Width (px)', 'nudgio' ),
+                    help: __( 'Card border width in pixels.', 'nudgio' ),
                     value: attributes.card_border_width,
-                    options: [
-                        { label: 'None', value: '0' },
-                        { label: '1px',  value: '1' },
-                        { label: '2px',  value: '2' },
-                    ],
                     onChange: function ( val ) { setAttributes( { card_border_width: val } ); },
+                    min: 0,
+                    max: 10,
                 } ),
                 el( SelectControl, {
                     label: __( 'Shadow', 'nudgio' ),
@@ -311,15 +327,13 @@
                     ],
                     onChange: function ( val ) { setAttributes( { card_shadow: val } ); },
                 } ),
-                el( SelectControl, {
-                    label: __( 'Padding', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Padding (px)', 'nudgio' ),
                     value: attributes.card_padding,
-                    options: [
-                        { label: 'Small',  value: 'sm' },
-                        { label: 'Medium', value: 'md' },
-                        { label: 'Large',  value: 'lg' },
-                    ],
                     onChange: function ( val ) { setAttributes( { card_padding: val } ); },
+                    min: 0,
+                    max: 48,
+                    step: 2,
                 } ),
                 el( SelectControl, {
                     label: __( 'Hover Effect', 'nudgio' ),
@@ -338,15 +352,21 @@
             // Panel 7: Product Image (Group 5)
             // ------------------------------------------
             var imagePanel = el( PanelBody, { title: __( 'Product Image', 'nudgio' ), initialOpen: false },
-                el( SelectControl, {
-                    label: __( 'Aspect Ratio', 'nudgio' ),
-                    value: attributes.image_aspect,
-                    options: [
-                        { label: 'Square (1:1)',      value: 'square' },
-                        { label: 'Portrait (3:4)',    value: 'portrait' },
-                        { label: 'Landscape (16:9)',  value: 'landscape' },
-                    ],
-                    onChange: function ( val ) { setAttributes( { image_aspect: val } ); },
+                el( RangeControl, {
+                    label: __( 'Aspect Ratio Width', 'nudgio' ),
+                    help: __( 'e.g. 1 for square, 16 for widescreen.', 'nudgio' ),
+                    value: attributes.image_aspect_w,
+                    onChange: function ( val ) { setAttributes( { image_aspect_w: val } ); },
+                    min: 1,
+                    max: 20,
+                } ),
+                el( RangeControl, {
+                    label: __( 'Aspect Ratio Height', 'nudgio' ),
+                    help: __( 'e.g. 1 for square, 9 for widescreen.', 'nudgio' ),
+                    value: attributes.image_aspect_h,
+                    onChange: function ( val ) { setAttributes( { image_aspect_h: val } ); },
+                    min: 1,
+                    max: 20,
                 } ),
                 el( SelectControl, {
                     label: __( 'Image Fit', 'nudgio' ),
@@ -357,10 +377,13 @@
                     ],
                     onChange: function ( val ) { setAttributes( { image_fit: val } ); },
                 } ),
-                el( TextControl, {
-                    label: __( 'Border Radius', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Border Radius (px)', 'nudgio' ),
+                    help: __( 'Image corner radius in pixels.', 'nudgio' ),
                     value: attributes.image_radius,
                     onChange: function ( val ) { setAttributes( { image_radius: val } ); },
+                    min: 0,
+                    max: 50,
                 } )
             );
 
@@ -439,10 +462,13 @@
                     value: attributes.button_text,
                     onChange: function ( val ) { setAttributes( { button_text: val } ); },
                 } ),
-                el( TextControl, {
-                    label: __( 'Border Radius', 'nudgio' ),
+                el( RangeControl, {
+                    label: __( 'Border Radius (px)', 'nudgio' ),
+                    help: __( 'Button corner radius in pixels.', 'nudgio' ),
                     value: attributes.button_radius,
                     onChange: function ( val ) { setAttributes( { button_radius: val } ); },
+                    min: 0,
+                    max: 50,
                 } ),
                 el( SelectControl, {
                     label: __( 'Size', 'nudgio' ),

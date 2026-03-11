@@ -26,7 +26,7 @@ const EMBED_DEFAULTS: Record<string, string> = {
   'min-price-increase': '10',
   // Group 1: Widget Container
   'widget-bg-color': '#FFFFFF',
-  'widget-padding': 'md',
+  'widget-padding': '16',
   // Group 2: Widget Title
   'title-color': '#111827',
   'title-size': 'lg',
@@ -34,19 +34,22 @@ const EMBED_DEFAULTS: Record<string, string> = {
   // Group 3: Layout
   'widget-style': 'grid',
   'widget-columns': '4',
-  gap: 'md',
+  gap: '16',
+  'card-min-width': '200',
+  'card-max-width': '0',
   // Group 4: Product Card
   'card-bg-color': '#FFFFFF',
-  'card-border-radius': '8px',
+  'card-border-radius': '8',
   'card-border-width': '0',
   'card-border-color': '#E5E7EB',
   'card-shadow': 'md',
-  'card-padding': 'md',
+  'card-padding': '16',
   'card-hover': 'lift',
   // Group 5: Product Image
-  'image-aspect': 'square',
+  'image-aspect-w': '1',
+  'image-aspect-h': '1',
   'image-fit': 'cover',
-  'image-radius': '8px',
+  'image-radius': '8',
   // Group 6: Product Title in Card
   'product-title-color': '#1F2937',
   'product-title-size': 'sm',
@@ -61,7 +64,7 @@ const EMBED_DEFAULTS: Record<string, string> = {
   'button-text': 'View',
   'button-bg-color': '#3B82F6',
   'button-text-color': '#FFFFFF',
-  'button-radius': '6px',
+  'button-radius': '6',
   'button-size': 'md',
   'button-variant': 'solid',
   'button-full-width': 'false',
@@ -153,7 +156,7 @@ export function useComponents() {
       minPriceIncrease?: number;
       // Group 1: Widget Container
       widgetBgColor?: string;
-      widgetPadding?: string;
+      widgetPadding?: number;
       // Group 2: Widget Title
       widgetTitle?: string;
       titleColor?: string;
@@ -162,19 +165,22 @@ export function useComponents() {
       // Group 3: Layout
       widgetStyle?: string;
       widgetColumns?: number;
-      gap?: string;
+      gap?: number;
+      cardMinWidth?: number;
+      cardMaxWidth?: number;
       // Group 4: Product Card
       cardBgColor?: string;
-      cardBorderRadius?: string;
-      cardBorderWidth?: string;
+      cardBorderRadius?: number;
+      cardBorderWidth?: number;
       cardBorderColor?: string;
       cardShadow?: string;
-      cardPadding?: string;
+      cardPadding?: number;
       cardHover?: string;
       // Group 5: Product Image
-      imageAspect?: string;
+      imageAspectW?: number;
+      imageAspectH?: number;
       imageFit?: string;
-      imageRadius?: string;
+      imageRadius?: number;
       // Group 6: Product Title in Card
       productTitleColor?: string;
       productTitleSize?: string;
@@ -189,7 +195,7 @@ export function useComponents() {
       buttonText?: string;
       buttonBgColor?: string;
       buttonTextColor?: string;
-      buttonRadius?: string;
+      buttonRadius?: number;
       buttonSize?: string;
       buttonVariant?: string;
       buttonFullWidth?: boolean;
@@ -210,7 +216,7 @@ export function useComponents() {
       'min-price-increase': String(config.minPriceIncrease ?? 10),
       // Group 1: Widget Container
       'widget-bg-color': config.widgetBgColor ?? '#FFFFFF',
-      'widget-padding': config.widgetPadding ?? 'md',
+      'widget-padding': String(config.widgetPadding ?? 16),
       // Group 2: Widget Title
       'title-color': config.titleColor ?? '#111827',
       'title-size': config.titleSize ?? 'lg',
@@ -218,19 +224,22 @@ export function useComponents() {
       // Group 3: Layout
       'widget-style': config.widgetStyle ?? 'grid',
       'widget-columns': String(config.widgetColumns ?? 4),
-      gap: config.gap ?? 'md',
+      gap: String(config.gap ?? 16),
+      'card-min-width': String(config.cardMinWidth ?? 200),
+      'card-max-width': String(config.cardMaxWidth ?? 0),
       // Group 4: Product Card
       'card-bg-color': config.cardBgColor ?? '#FFFFFF',
-      'card-border-radius': config.cardBorderRadius ?? '8px',
-      'card-border-width': config.cardBorderWidth ?? '0',
+      'card-border-radius': String(config.cardBorderRadius ?? 8),
+      'card-border-width': String(config.cardBorderWidth ?? 0),
       'card-border-color': config.cardBorderColor ?? '#E5E7EB',
       'card-shadow': config.cardShadow ?? 'md',
-      'card-padding': config.cardPadding ?? 'md',
+      'card-padding': String(config.cardPadding ?? 16),
       'card-hover': config.cardHover ?? 'lift',
       // Group 5: Product Image
-      'image-aspect': config.imageAspect ?? 'square',
+      'image-aspect-w': String(config.imageAspectW ?? 1),
+      'image-aspect-h': String(config.imageAspectH ?? 1),
       'image-fit': config.imageFit ?? 'cover',
-      'image-radius': config.imageRadius ?? '8px',
+      'image-radius': String(config.imageRadius ?? 8),
       // Group 6: Product Title in Card
       'product-title-color': config.productTitleColor ?? '#1F2937',
       'product-title-size': config.productTitleSize ?? 'sm',
@@ -245,7 +254,7 @@ export function useComponents() {
       'button-text': config.buttonText ?? 'View',
       'button-bg-color': config.buttonBgColor ?? '#3B82F6',
       'button-text-color': config.buttonTextColor ?? '#FFFFFF',
-      'button-radius': config.buttonRadius ?? '6px',
+      'button-radius': String(config.buttonRadius ?? 6),
       'button-size': config.buttonSize ?? 'md',
       'button-variant': config.buttonVariant ?? 'solid',
       'button-full-width': String(config.buttonFullWidth ?? false),

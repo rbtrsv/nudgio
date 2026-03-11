@@ -36,7 +36,7 @@ export default function SettingsPage() {
   // Local form state — brand identity visual fields (35 settings in 8 groups)
   // Group 1: Widget Container
   const [widgetBgColor, setWidgetBgColor] = useState('#FFFFFF');
-  const [widgetPadding, setWidgetPadding] = useState('md');
+  const [widgetPadding, setWidgetPadding] = useState(16);
   // Group 2: Widget Title
   const [widgetTitle, setWidgetTitle] = useState('');
   const [titleColor, setTitleColor] = useState('#111827');
@@ -45,19 +45,22 @@ export default function SettingsPage() {
   // Group 3: Layout
   const [widgetStyle, setWidgetStyle] = useState('grid');
   const [widgetColumns, setWidgetColumns] = useState(4);
-  const [gap, setGap] = useState('md');
+  const [gap, setGap] = useState(16);
+  const [cardMinWidth, setCardMinWidth] = useState(200);
+  const [cardMaxWidth, setCardMaxWidth] = useState(0);
   // Group 4: Product Card
   const [cardBgColor, setCardBgColor] = useState('#FFFFFF');
-  const [cardBorderRadius, setCardBorderRadius] = useState('8px');
-  const [cardBorderWidth, setCardBorderWidth] = useState('0');
+  const [cardBorderRadius, setCardBorderRadius] = useState(8);
+  const [cardBorderWidth, setCardBorderWidth] = useState(0);
   const [cardBorderColor, setCardBorderColor] = useState('#E5E7EB');
   const [cardShadow, setCardShadow] = useState('md');
-  const [cardPadding, setCardPadding] = useState('md');
+  const [cardPadding, setCardPadding] = useState(16);
   const [cardHover, setCardHover] = useState('lift');
   // Group 5: Product Image
-  const [imageAspect, setImageAspect] = useState('square');
+  const [imageAspectW, setImageAspectW] = useState(1);
+  const [imageAspectH, setImageAspectH] = useState(1);
   const [imageFit, setImageFit] = useState('cover');
-  const [imageRadius, setImageRadius] = useState('8px');
+  const [imageRadius, setImageRadius] = useState(8);
   // Group 6: Product Title in Card
   const [productTitleColor, setProductTitleColor] = useState('#1F2937');
   const [productTitleSize, setProductTitleSize] = useState('sm');
@@ -72,7 +75,7 @@ export default function SettingsPage() {
   const [buttonText, setButtonText] = useState('View');
   const [buttonBgColor, setButtonBgColor] = useState('#3B82F6');
   const [buttonTextColor, setButtonTextColor] = useState('#FFFFFF');
-  const [buttonRadius, setButtonRadius] = useState('6px');
+  const [buttonRadius, setButtonRadius] = useState(6);
   const [buttonSize, setButtonSize] = useState('md');
   const [buttonVariant, setButtonVariant] = useState('solid');
   const [buttonFullWidth, setButtonFullWidth] = useState(false);
@@ -95,7 +98,7 @@ export default function SettingsPage() {
       // Brand identity visual fields — use DB value if saved, else keep hardcoded default
       // Group 1: Widget Container
       if (currentSettings.widget_bg_color) setWidgetBgColor(currentSettings.widget_bg_color);
-      if (currentSettings.widget_padding) setWidgetPadding(currentSettings.widget_padding);
+      if (currentSettings.widget_padding != null) setWidgetPadding(currentSettings.widget_padding);
       // Group 2: Widget Title
       if (currentSettings.widget_title != null) setWidgetTitle(currentSettings.widget_title);
       if (currentSettings.title_color) setTitleColor(currentSettings.title_color);
@@ -104,19 +107,22 @@ export default function SettingsPage() {
       // Group 3: Layout
       if (currentSettings.widget_style) setWidgetStyle(currentSettings.widget_style);
       if (currentSettings.widget_columns != null) setWidgetColumns(currentSettings.widget_columns);
-      if (currentSettings.gap) setGap(currentSettings.gap);
+      if (currentSettings.gap != null) setGap(currentSettings.gap);
+      if (currentSettings.card_min_width != null) setCardMinWidth(currentSettings.card_min_width);
+      if (currentSettings.card_max_width != null) setCardMaxWidth(currentSettings.card_max_width);
       // Group 4: Product Card
       if (currentSettings.card_bg_color) setCardBgColor(currentSettings.card_bg_color);
-      if (currentSettings.card_border_radius) setCardBorderRadius(currentSettings.card_border_radius);
-      if (currentSettings.card_border_width) setCardBorderWidth(currentSettings.card_border_width);
+      if (currentSettings.card_border_radius != null) setCardBorderRadius(currentSettings.card_border_radius);
+      if (currentSettings.card_border_width != null) setCardBorderWidth(currentSettings.card_border_width);
       if (currentSettings.card_border_color) setCardBorderColor(currentSettings.card_border_color);
       if (currentSettings.card_shadow) setCardShadow(currentSettings.card_shadow);
-      if (currentSettings.card_padding) setCardPadding(currentSettings.card_padding);
+      if (currentSettings.card_padding != null) setCardPadding(currentSettings.card_padding);
       if (currentSettings.card_hover) setCardHover(currentSettings.card_hover);
       // Group 5: Product Image
-      if (currentSettings.image_aspect) setImageAspect(currentSettings.image_aspect);
+      if (currentSettings.image_aspect_w != null) setImageAspectW(currentSettings.image_aspect_w);
+      if (currentSettings.image_aspect_h != null) setImageAspectH(currentSettings.image_aspect_h);
       if (currentSettings.image_fit) setImageFit(currentSettings.image_fit);
-      if (currentSettings.image_radius) setImageRadius(currentSettings.image_radius);
+      if (currentSettings.image_radius != null) setImageRadius(currentSettings.image_radius);
       // Group 6: Product Title in Card
       if (currentSettings.product_title_color) setProductTitleColor(currentSettings.product_title_color);
       if (currentSettings.product_title_size) setProductTitleSize(currentSettings.product_title_size);
@@ -131,7 +137,7 @@ export default function SettingsPage() {
       if (currentSettings.button_text) setButtonText(currentSettings.button_text);
       if (currentSettings.button_bg_color) setButtonBgColor(currentSettings.button_bg_color);
       if (currentSettings.button_text_color) setButtonTextColor(currentSettings.button_text_color);
-      if (currentSettings.button_radius) setButtonRadius(currentSettings.button_radius);
+      if (currentSettings.button_radius != null) setButtonRadius(currentSettings.button_radius);
       if (currentSettings.button_size) setButtonSize(currentSettings.button_size);
       if (currentSettings.button_variant) setButtonVariant(currentSettings.button_variant);
       if (currentSettings.button_full_width != null) setButtonFullWidth(currentSettings.button_full_width);
@@ -175,6 +181,8 @@ export default function SettingsPage() {
         widget_style: widgetStyle,
         widget_columns: widgetColumns,
         gap: gap,
+        card_min_width: cardMinWidth,
+        card_max_width: cardMaxWidth,
         // Group 4: Product Card
         card_bg_color: cardBgColor,
         card_border_radius: cardBorderRadius,
@@ -184,7 +192,8 @@ export default function SettingsPage() {
         card_padding: cardPadding,
         card_hover: cardHover,
         // Group 5: Product Image
-        image_aspect: imageAspect,
+        image_aspect_w: imageAspectW,
+        image_aspect_h: imageAspectH,
         image_fit: imageFit,
         image_radius: imageRadius,
         // Group 6: Product Title in Card
@@ -407,16 +416,9 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="widget-padding">Padding</Label>
-                  <Select value={widgetPadding} onValueChange={setWidgetPadding}>
-                    <SelectTrigger id="widget-padding"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="widget-padding">Padding (px)</Label>
+                  <Input id="widget-padding" type="number" min={0} max={48} step={2} value={widgetPadding} onChange={(e) => setWidgetPadding(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Widget container padding in pixels.</p>
                 </div>
               </div>
             </CardContent>
@@ -487,20 +489,24 @@ export default function SettingsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="widget-columns">Columns (2-6)</Label>
-                  <Input id="widget-columns" type="number" min={2} max={6} value={widgetColumns} onChange={(e) => setWidgetColumns(parseInt(e.target.value) || 4)} />
+                  <Label htmlFor="widget-columns">Columns (1-6)</Label>
+                  <Input id="widget-columns" type="number" min={1} max={6} value={widgetColumns} onChange={(e) => setWidgetColumns(parseInt(e.target.value) || 4)} />
                   <p className="text-xs text-muted-foreground">Max columns at full width. Responsive: 1→2→N.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gap">Gap</Label>
-                  <Select value={gap} onValueChange={setGap}>
-                    <SelectTrigger id="gap"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="gap">Gap (px)</Label>
+                  <Input id="gap" type="number" min={0} max={48} step={2} value={gap} onChange={(e) => setGap(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Gap between cards in pixels.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="card-min-width">Card Min Width (px)</Label>
+                  <Input id="card-min-width" type="number" min={100} max={500} step={10} value={cardMinWidth} onChange={(e) => setCardMinWidth(parseInt(e.target.value) || 200)} />
+                  <p className="text-xs text-muted-foreground">Minimum card width in pixels. Prevents cards from shrinking below usable size.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="card-max-width">Card Max Width (px)</Label>
+                  <Input id="card-max-width" type="number" min={0} max={800} step={10} value={cardMaxWidth} onChange={(e) => setCardMaxWidth(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Maximum card width in pixels. 0 = no limit.</p>
                 </div>
               </div>
             </CardContent>
@@ -522,19 +528,12 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="card-border-radius">Border Radius</Label>
-                  <Input id="card-border-radius" value={cardBorderRadius} onChange={(e) => setCardBorderRadius(e.target.value)} placeholder="8px" />
+                  <Label htmlFor="card-border-radius">Border Radius (px)</Label>
+                  <Input id="card-border-radius" type="number" min={0} max={50} step={1} value={cardBorderRadius} onChange={(e) => { const val = parseInt(e.target.value, 10); if (!isNaN(val)) setCardBorderRadius(val); }} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="card-border-width">Border Width</Label>
-                  <Select value={cardBorderWidth} onValueChange={setCardBorderWidth}>
-                    <SelectTrigger id="card-border-width"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">None</SelectItem>
-                      <SelectItem value="1">1px</SelectItem>
-                      <SelectItem value="2">2px</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="card-border-width">Border Width (px)</Label>
+                  <Input id="card-border-width" type="number" min={0} max={10} step={1} value={cardBorderWidth} onChange={(e) => { const val = parseInt(e.target.value, 10); if (!isNaN(val)) setCardBorderWidth(val); }} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="card-border-color">Border Color</Label>
@@ -556,15 +555,9 @@ export default function SettingsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="card-padding">Padding</Label>
-                  <Select value={cardPadding} onValueChange={setCardPadding}>
-                    <SelectTrigger id="card-padding"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sm">Small</SelectItem>
-                      <SelectItem value="md">Medium</SelectItem>
-                      <SelectItem value="lg">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="card-padding">Padding (px)</Label>
+                  <Input id="card-padding" type="number" min={0} max={48} step={2} value={cardPadding} onChange={(e) => setCardPadding(parseInt(e.target.value) || 0)} />
+                  <p className="text-xs text-muted-foreground">Card content padding in pixels.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="card-hover">Hover Effect</Label>
@@ -591,15 +584,14 @@ export default function SettingsPage() {
             <CardContent>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="image-aspect">Aspect Ratio</Label>
-                  <Select value={imageAspect} onValueChange={setImageAspect}>
-                    <SelectTrigger id="image-aspect"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="square">Square (1:1)</SelectItem>
-                      <SelectItem value="portrait">Portrait (3:4)</SelectItem>
-                      <SelectItem value="landscape">Landscape (16:9)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="image-aspect-w">Aspect Ratio Width</Label>
+                  <Input id="image-aspect-w" type="number" min={1} max={20} value={imageAspectW} onChange={(e) => setImageAspectW(parseInt(e.target.value) || 1)} />
+                  <p className="text-xs text-muted-foreground">e.g. 1 for square, 16 for widescreen.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image-aspect-h">Aspect Ratio Height</Label>
+                  <Input id="image-aspect-h" type="number" min={1} max={20} value={imageAspectH} onChange={(e) => setImageAspectH(parseInt(e.target.value) || 1)} />
+                  <p className="text-xs text-muted-foreground">e.g. 1 for square, 9 for widescreen.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="image-fit">Image Fit</Label>
@@ -612,8 +604,8 @@ export default function SettingsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="image-radius">Border Radius</Label>
-                  <Input id="image-radius" value={imageRadius} onChange={(e) => setImageRadius(e.target.value)} placeholder="8px" />
+                  <Label htmlFor="image-radius">Border Radius (px)</Label>
+                  <Input id="image-radius" type="number" min={0} max={50} step={1} value={imageRadius} onChange={(e) => { const val = parseInt(e.target.value, 10); if (!isNaN(val)) setImageRadius(val); }} />
                 </div>
               </div>
             </CardContent>
@@ -740,8 +732,8 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="button-radius">Border Radius</Label>
-                  <Input id="button-radius" value={buttonRadius} onChange={(e) => setButtonRadius(e.target.value)} placeholder="6px" />
+                  <Label htmlFor="button-radius">Border Radius (px)</Label>
+                  <Input id="button-radius" type="number" min={0} max={50} step={1} value={buttonRadius} onChange={(e) => { const val = parseInt(e.target.value, 10); if (!isNaN(val)) setButtonRadius(val); }} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="button-size">Size</Label>

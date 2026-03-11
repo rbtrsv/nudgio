@@ -39,6 +39,8 @@ $nudgio_atts = array(
     'widget_style'               => $attributes['widget_style'],
     'widget_columns'             => $attributes['widget_columns'],
     'gap'                        => $attributes['gap'],
+    'card_min_width'             => $attributes['card_min_width'],
+    'card_max_width'             => $attributes['card_max_width'],
     // Group 4: Product Card
     'card_bg_color'              => $attributes['card_bg_color'],
     'card_border_radius'         => $attributes['card_border_radius'],
@@ -48,7 +50,8 @@ $nudgio_atts = array(
     'card_padding'               => $attributes['card_padding'],
     'card_hover'                 => $attributes['card_hover'],
     // Group 5: Product Image
-    'image_aspect'               => $attributes['image_aspect'],
+    'image_aspect_w'             => $attributes['image_aspect_w'],
+    'image_aspect_h'             => $attributes['image_aspect_h'],
     'image_fit'                  => $attributes['image_fit'],
     'image_radius'               => $attributes['image_radius'],
     // Group 6: Product Title in Card
