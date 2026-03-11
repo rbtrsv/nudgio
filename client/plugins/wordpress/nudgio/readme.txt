@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -93,7 +93,7 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 
 **Layout:**
 * `widget_style` — grid, carousel (default: grid)
-* `widget_columns` — max columns at full width, 2-6 (default: 4)
+* `widget_columns` — max columns at full width, 1-6 (default: 4)
 * `gap` — sm, md, lg (default: md)
 
 **Product Card:**
@@ -136,6 +136,9 @@ Yes. The API secret is encrypted before storage in WordPress. It never appears i
 These types require a product context. On non-product pages, the shortcode outputs nothing unless you specify a `product_id` attribute explicitly.
 
 == Changelog ==
+
+= 1.3.2 =
+* Allow single-column layout (widget_columns minimum lowered from 2 to 1)
 
 = 1.3.1 =
 * Renamed sync endpoints from /plugin-sync to /woocommerce-sync (requires server update deployed simultaneously)
@@ -189,6 +192,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.3.2 =
+Single-column layout support for grid and carousel widgets.
 
 = 1.3.1 =
 Sync endpoint rename — deploy server and plugin together.
