@@ -1727,7 +1727,8 @@ async def billing_verify_charge(
         # Map Shopify plan name ("Pro", "Enterprise") to our tier ("PRO", "ENTERPRISE")
         plan_tier = map_shopify_plan_to_tier(shopify_plan_name)
 
-        # Look for existing ShopifyBilling by GID (exclude soft-deleted)
+        # Look for existing ShopifyBilling by GID first, then by connection_id
+        # (a new subscription has a different GID, but connection_id has a unique constraint)
         existing_result = await db.execute(
             select(ShopifyBilling).where(
                 and_(
@@ -1738,8 +1739,22 @@ async def billing_verify_charge(
         )
         existing_billing = existing_result.scalar_one_or_none()
 
+        # If no match by GID, check if a record exists for this connection
+        # (merchant re-subscribed → new GID, same connection_id)
+        if not existing_billing:
+            conn_result = await db.execute(
+                select(ShopifyBilling).where(
+                    and_(
+                        ShopifyBilling.connection_id == connection.id,
+                        ShopifyBilling.deleted_at == None,
+                    )
+                )
+            )
+            existing_billing = conn_result.scalar_one_or_none()
+
         if existing_billing:
-            # Update existing record
+            # Update existing record (GID may change when merchant re-subscribes)
+            existing_billing.shopify_subscription_gid = subscription_gid
             existing_billing.billing_status = billing_status
             existing_billing.plan_name = plan_tier
             existing_billing.test = is_test
@@ -1753,7 +1768,7 @@ async def billing_verify_charge(
                 subscription_gid, billing_status, connection.id,
             )
         else:
-            # No existing record (Managed Pricing case) — create new one
+            # No existing record (first subscription via Managed Pricing) — create new one
             new_billing = ShopifyBilling(
                 connection_id=connection.id,
                 organization_id=connection.organization_id,
