@@ -107,43 +107,18 @@ GAP_PX_MAP = {"sm": 8, "md": 16, "lg": 24}
 
 def _generate_carousel_css(columns: int, gap_px: int) -> str:
     """
-    Generate responsive carousel CSS with @media breakpoints.
+    Generate carousel card CSS with percentage-based flex-basis.
 
-    Breakpoints (inside iframe, so @media checks iframe width = container width):
-    - Mobile (< 480px): 1 card at 85% width (peek at next card)
-    - Tablet (480-767px): 2 cards visible
-    - Desktop (768px+): merchant's configured columns — no cap
-
-    columns=1 is a special case: 100% on all breakpoints.
+    Cards sized as calc((100% - total_gaps) / columns) — exactly N cards
+    fill the container at any width. No breakpoints, no limits.
+    Container shrinks → cards shrink proportionally → auto-responsive.
     """
-    if columns == 1:
-        return """
-            .nudgio-carousel-card {
-                flex: 0 0 100%;
-                scroll-snap-align: start;
-            }
-        """
-
-    # Tablet: 2 cards (or 1 if merchant chose 1 — already handled above)
-    tablet_basis = f"calc((100% - {gap_px}px) / 2)"
-
-    # Desktop: merchant's configured columns, no cap
-    desktop_basis = f"calc((100% - {gap_px * (columns - 1)}px) / {columns})"
+    basis = f"calc((100% - {gap_px * (columns - 1)}px) / {columns})"
 
     return f"""
         .nudgio-carousel-card {{
-            flex: 0 0 85%;
+            flex: 0 0 {basis};
             scroll-snap-align: start;
-        }}
-        @media (min-width: 480px) {{
-            .nudgio-carousel-card {{
-                flex: 0 0 {tablet_basis};
-            }}
-        }}
-        @media (min-width: 768px) {{
-            .nudgio-carousel-card {{
-                flex: 0 0 {desktop_basis};
-            }}
         }}
     """
 
