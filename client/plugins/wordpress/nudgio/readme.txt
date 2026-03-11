@@ -4,7 +4,7 @@ Tags: woocommerce, recommendations, cross-sell, upsell, product recommendations
 Requires at least: 6.1
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -140,6 +140,12 @@ These types require a product context. On non-product pages, the shortcode outpu
 
 == Changelog ==
 
+= 1.3.5 =
+* Added Widget Container and Widget Title panels to Gutenberg block sidebar
+* Widget Container panel includes widget_padding RangeControl
+* Widget Title panel includes title, color, size, and alignment controls
+* Version bump
+
 = 1.3.4 =
 * Converted 5 size enum fields from string to integer: title_size, product_title_size, product_title_weight, price_size, button_size
 * Size fields now accept pixel values (e.g. title_size=24) instead of enum strings (sm/md/lg)
@@ -208,6 +214,9 @@ These types require a product context. On non-product pages, the shortcode outpu
 * Auto-resizing iframes via postMessage
 
 == Upgrade Notice ==
+
+= 1.3.5 =
+Gutenberg block now shows Widget Container and Widget Title panels in the sidebar.
 
 = 1.3.4 =
 Size and weight fields now use integer pixel values instead of enum strings. Existing shortcodes using sm/md/lg values must be updated.

@@ -1,0 +1,15 @@
+[     360ms] Uncaught Error: App Bridge Next: missing required configuration fields: shop
+    at <anonymous> (https://cdn.shopify.com/shopifycloud/app-bridge.js:0:70723)
+    at <anonymous> (https://cdn.shopify.com/shopifycloud/app-bridge.js:0:70800)
+    at <anonymous> (https://cdn.shopify.com/shopifycloud/app-bridge.js:0:70830)
+    at <anonymous> (https://cdn.shopify.com/shopifycloud/app-bridge.js:0:83322)
+    at <anonymous> (https://cdn.shopify.com/shopifycloud/app-bridge.js:0:90627)
+[  387855ms] [ERROR] Embedded init error: Error: App Bridge not loaded
+    at https://client.nudgio.tech/_next/static/chunks/d43f92228f06dc61.js:1:9547
+    at https://client.nudgio.tech/_next/static/chunks/d43f92228f06dc61.js:1:9675
+    at sY (https://client.nudgio.tech/_next/static/chunks/69be39811437728d.js:1:160839)
+    at https://client.nudgio.tech/_next/static/chunks/69be39811437728d.js:1:166727
+    at tD (https://client.nudgio.tech/_next/static/chunks/69be39811437728d.js:1:29334)
+    at s3 (https://client.nudgio.tech/_next/static/chunks/69be39811437728d.js:1:162072)
+    at fC (https://client.nudgio.tech/_next/static/chunks/69be39811437728d.js:1:198038)
+    at fN (https://client.nudgio.tech/_next/static/chunks/69be39811437728d.js:1:197860) @ https://client.nudgio.tech/_next/static/chunks/d43f92228f06dc61.js:0
