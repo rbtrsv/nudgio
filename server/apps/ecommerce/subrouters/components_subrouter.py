@@ -100,6 +100,7 @@ BUTTON_SIZE_MAP = {
 
 # Carousel card width — scales with column count (higher columns = narrower cards)
 CAROUSEL_WIDTH_MAP = {
+    1: "w-full",
     2: "w-48",
     3: "w-56",
     4: "w-64",
@@ -109,10 +110,17 @@ CAROUSEL_WIDTH_MAP = {
 
 # Min card width per column count — used by CSS auto-fill grid
 # Lower values = more columns fit in narrow containers
-GRID_MIN_WIDTH_MAP = {2: 280, 3: 220, 4: 200, 5: 170, 6: 150}
+GRID_MIN_WIDTH_MAP = {1: 400, 2: 280, 3: 220, 4: 200, 5: 170, 6: 150}
 
 # Gap in pixels — for inline grid style (Tailwind gap classes don't work with inline grid)
 GAP_PX_MAP = {"sm": 8, "md": 16, "lg": 24}
+
+# NOTE: All widget endpoints accept a `device` query param ("desktop", "mobile") which is
+# currently unused in rendering logic — CSS responsiveness via @media queries inside the
+# iframe handles device adaptation. Decided to keep this param (not remove as dead code).
+# May be used for server-side device-specific rendering in the future.
+# Same param exists in widget_subrouter.py, shopify_app_proxy_subrouter.py, and
+# shopify_embedded_subrouter.py.
 
 
 # ==========================================
@@ -780,8 +788,8 @@ def generate_recommendation_html(
     if not recommendations:
         return "<div style='display:none'></div>"
 
-    # Server-side validation: clamp columns to 2–6
-    columns = max(2, min(6, vis["widget_columns"]))
+    # Server-side validation: clamp columns to 1–6
+    columns = max(1, min(6, vis["widget_columns"]))
 
     # Backward compat: treat legacy "card" style as "grid"
     style = vis["widget_style"]

@@ -265,7 +265,7 @@
                     help: __( 'Max columns at full width. Responsive: 1→2→N.', 'nudgio' ),
                     value: attributes.widget_columns,
                     onChange: function ( val ) { setAttributes( { widget_columns: val } ); },
-                    min: 2,
+                    min: 1,
                     max: 6,
                 } ),
                 el( SelectControl, {

@@ -36,6 +36,10 @@
 
 {% comment %} Build query string — one param per visual setting {% endcomment %}
 {% assign params = "?top=" | append: block.settings.product_count %}
+{% comment %} Algorithm settings {% endcomment %}
+{% assign params = params | append: "&lookback_days=" | append: block.settings.lookback_days %}
+{% assign params = params | append: "&method=" | append: block.settings.method %}
+{% assign params = params | append: "&min_price_increase_percent=" | append: block.settings.min_price_increase_percent %}
 {% comment %} Group 1: Widget Container {% endcomment %}
 {% assign params = params | append: "&widget_bg_color=" | append: widget_bg_color_enc %}
 {% assign params = params | append: "&widget_padding=" | append: block.settings.widget_padding %}
@@ -89,8 +93,10 @@
   {% assign params = params | append: "&button_full_width=true" %}
 {% endif %}
 
-{% comment %} For product-specific widget types, pass the current product ID {% endcomment %}
-{% if block.settings.widget_type != "bestsellers" and product %}
+{% comment %} Product ID: use manual value if set, otherwise auto-detect from Liquid product context {% endcomment %}
+{% if block.settings.product_id != blank %}
+  {% assign params = params | append: "&product_id=" | append: block.settings.product_id %}
+{% elsif block.settings.widget_type != "bestsellers" and product %}
   {% assign params = params | append: "&product_id=" | append: product.id %}
 {% endif %}
 
@@ -102,7 +108,7 @@
 {% assign iframe_src = proxy_base | append: params %}
 
 {% comment %} Guard: product-specific widget types require a product page context {% endcomment %}
-{% if block.settings.widget_type != "bestsellers" and product == nil %}
+{% if block.settings.widget_type != "bestsellers" and product == nil and block.settings.product_id == blank %}
   <div class="nudgio-recommendations" {{ block.shopify_attributes }}>
     <p style="padding: 16px; color: #6b7280; font-size: 14px; text-align: center;">
       This widget type requires a product page. Move this block to a product page template,
@@ -145,10 +151,48 @@
       "type": "range",
       "id": "product_count",
       "label": "Number of Products",
-      "min": 2,
-      "max": 8,
+      "min": 1,
+      "max": 20,
       "step": 1,
       "default": 4
+    },
+    {
+      "type": "text",
+      "id": "product_id",
+      "label": "Product ID",
+      "info": "Leave empty to auto-detect on product pages. Set manually to show recommendations for a specific product on any page."
+    },
+    {
+      "type": "range",
+      "id": "lookback_days",
+      "label": "Lookback Days",
+      "min": 1,
+      "max": 365,
+      "step": 1,
+      "default": 30,
+      "info": "Number of days to analyze for recommendations. Used by Bestsellers and Cross-sell."
+    },
+    {
+      "type": "select",
+      "id": "method",
+      "label": "Ranking Method",
+      "default": "volume",
+      "options": [
+        { "value": "volume", "label": "Volume (units sold)" },
+        { "value": "value", "label": "Value (revenue)" },
+        { "value": "balanced", "label": "Balanced (volume + value)" }
+      ],
+      "info": "Bestseller ranking method. Only affects the Bestsellers widget type."
+    },
+    {
+      "type": "range",
+      "id": "min_price_increase_percent",
+      "label": "Min Price Increase %",
+      "min": 1,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "info": "Only show products at least this % more expensive. Only affects the Upsell widget type."
     },
     {
       "type": "header",
@@ -224,7 +268,7 @@
       "type": "range",
       "id": "widget_columns",
       "label": "Columns",
-      "min": 2,
+      "min": 1,
       "max": 6,
       "step": 1,
       "default": 4,
@@ -262,7 +306,7 @@
       "type": "select",
       "id": "card_border_width",
       "label": "Card Border Width",
-      "default": "1",
+      "default": "0",
       "options": [
         { "value": "0", "label": "None" },
         { "value": "1", "label": "1px" },
@@ -279,7 +323,7 @@
       "type": "select",
       "id": "card_shadow",
       "label": "Card Shadow",
-      "default": "sm",
+      "default": "md",
       "options": [
         { "value": "none", "label": "None" },
         { "value": "sm", "label": "Small" },
@@ -312,7 +356,7 @@
     },
     {
       "type": "header",
-      "content": "Product Display"
+      "content": "Product Image"
     },
     {
       "type": "select",
@@ -343,6 +387,10 @@
       "info": "CSS border-radius (e.g., 8px, 0)."
     },
     {
+      "type": "header",
+      "content": "Product Title"
+    },
+    {
       "type": "color",
       "id": "product_title_color",
       "label": "Title Color",
@@ -364,7 +412,7 @@
       "type": "select",
       "id": "product_title_weight",
       "label": "Title Weight",
-      "default": "medium",
+      "default": "semibold",
       "options": [
         { "value": "normal", "label": "Normal" },
         { "value": "medium", "label": "Medium" },
