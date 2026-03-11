@@ -98,26 +98,29 @@ BUTTON_SIZE_MAP = {
     "lg": {"padding": "px-6 py-3", "text": "text-base"},
 }
 
-# Min card width per column count — used by CSS auto-fill grid
-# Lower values = more columns fit in narrow containers
-GRID_MIN_WIDTH_MAP = {1: 400, 2: 280, 3: 220, 4: 200, 5: 170, 6: 150}
+# Min card width per column count — used by both CSS auto-fill grid and carousel min-width.
+# Lower values = more columns fit in narrow containers.
+# For carousel: prevents cards from shrinking below usable size on narrow screens.
+MIN_CARD_WIDTH_MAP = {1: 400, 2: 280, 3: 220, 4: 200, 5: 170, 6: 150}
 
 # Gap in pixels — for inline grid style (Tailwind gap classes don't work with inline grid)
 GAP_PX_MAP = {"sm": 8, "md": 16, "lg": 24}
 
-def _generate_carousel_css(columns: int, gap_px: int) -> str:
+def _generate_carousel_css(columns: int, gap_px: int, min_width: int) -> str:
     """
-    Generate carousel card CSS with percentage-based flex-basis.
+    Generate carousel card CSS.
 
-    Cards sized as calc((100% - total_gaps) / columns) — exactly N cards
-    fill the container at any width. No breakpoints, no limits.
-    Container shrinks → cards shrink proportionally → auto-responsive.
+    - flex-basis: calc((100% - total_gaps) / columns) — merchant's intended layout
+    - min-width: prevents cards from shrinking below usable size on narrow screens
+    - When container is too narrow for N cards at min-width, overflow kicks in
+      and scroll appears naturally — that's what makes it a real carousel
     """
     basis = f"calc((100% - {gap_px * (columns - 1)}px) / {columns})"
 
     return f"""
         .nudgio-carousel-card {{
             flex: 0 0 {basis};
+            min-width: {min_width}px;
             scroll-snap-align: start;
         }}
     """
@@ -837,7 +840,7 @@ def generate_recommendation_html(
 
     # CSS auto-fill grid — responds to actual container width, not viewport
     # Works correctly inside iframes (WordPress shortcode, Shopify App Proxy, standalone embed)
-    min_width = GRID_MIN_WIDTH_MAP.get(columns, 200)
+    min_width = MIN_CARD_WIDTH_MAP.get(columns, 200)
     gap_px = GAP_PX_MAP.get(vis["gap"], 16)
     grid_style = _generate_grid_style(columns, min_width, gap_px)
 
@@ -845,7 +848,7 @@ def generate_recommendation_html(
     carousel_css = ""
     if style == "carousel":
         cards_html = generate_carousel_cards(recommendations, vis, shop_urls, aspect_class)
-        carousel_css = _generate_carousel_css(columns, gap_px)
+        carousel_css = _generate_carousel_css(columns, gap_px, min_width)
         container_attr = f'class="nudgio-carousel"'
     else:
         # "grid" or any other value — auto-fill responsive grid
