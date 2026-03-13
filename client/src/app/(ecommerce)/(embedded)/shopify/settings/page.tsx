@@ -497,7 +497,7 @@ export default function ShopifySettingsPage() {
           <s-stack direction="block" gap="base">
             <s-text-field label="Title Text" value={widgetTitle} onChange={(e) => setWidgetTitle(e.currentTarget.value)} details="Leave empty for auto-default based on widget type." />
             <ColorField label="Title Color" value={titleColor} onChange={setTitleColor} details="Hex color (e.g. #111827)" />
-            <s-number-field label="Title Size (px)" value={String(titleSize)} min="8" max="48" step="1" onChange={(e) => setTitleSize(Number(e.currentTarget.value))} />
+            <s-number-field label="Title Size (px)" min={8} max={48} step={1} value={String(titleSize)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setTitleSize(val); }} details="Font size in pixels." />
             <s-select label="Title Alignment" value={titleAlignment} onChange={(e) => setTitleAlignment(e.currentTarget.value)}>
               <s-option value="left">Left</s-option>
               <s-option value="center">Center</s-option>
@@ -567,8 +567,8 @@ export default function ShopifySettingsPage() {
         <s-box padding="base">
           <s-stack direction="block" gap="base">
             <ColorField label="Title Color" value={productTitleColor} onChange={setProductTitleColor} details="Hex color (e.g. #1F2937)" />
-            <s-number-field label="Title Size (px)" value={String(productTitleSize)} min="8" max="36" step="1" onChange={(e) => setProductTitleSize(Number(e.currentTarget.value))} />
-            <s-number-field label="Title Weight" value={String(productTitleWeight)} min="100" max="900" step="100" onChange={(e) => setProductTitleWeight(Number(e.currentTarget.value))} />
+            <s-number-field label="Title Size (px)" min={8} max={36} step={1} value={String(productTitleSize)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setProductTitleSize(val); }} details="Font size in pixels." />
+            <s-number-field label="Title Weight" min={100} max={900} step={100} value={String(productTitleWeight)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setProductTitleWeight(val); }} details="CSS font-weight (100–900)." />
             <s-number-field label="Max Lines" min={1} max={3} step={1} value={String(productTitleLines)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setProductTitleLines(val); }} details="Product title truncation after N lines." />
             <s-select label="Title Alignment" value={productTitleAlignment} onChange={(e) => setProductTitleAlignment(e.currentTarget.value)}>
               <s-option value="left">Left</s-option>
@@ -584,7 +584,7 @@ export default function ShopifySettingsPage() {
           <s-stack direction="block" gap="base">
             <s-checkbox label="Show Price" checked={showPrice || undefined} onChange={(e) => setShowPrice(e.currentTarget.checked)} />
             <ColorField label="Price Color" value={priceColor} onChange={setPriceColor} details="Hex color (e.g. #111827)" />
-            <s-number-field label="Price Size (px)" value={String(priceSize)} min="8" max="36" step="1" onChange={(e) => setPriceSize(Number(e.currentTarget.value))} />
+            <s-number-field label="Price Size (px)" min={8} max={36} step={1} value={String(priceSize)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setPriceSize(val); }} details="Font size in pixels." />
           </s-stack>
         </s-box>
       </s-section>
@@ -597,7 +597,7 @@ export default function ShopifySettingsPage() {
             <ColorField label="Button Color" value={buttonBgColor} onChange={setButtonBgColor} details="Hex color (e.g. #3B82F6)" />
             <ColorField label="Button Text Color" value={buttonTextColor} onChange={setButtonTextColor} details="Hex color (e.g. #FFFFFF)" />
             <s-number-field label="Button Border Radius (px)" min={0} max={50} step={1} value={String(buttonRadius)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setButtonRadius(val); }} details="Button border radius in pixels." />
-            <s-number-field label="Button Size (px)" value={String(buttonSize)} min="8" max="24" step="1" onChange={(e) => setButtonSize(Number(e.currentTarget.value))} />
+            <s-number-field label="Button Size (px)" min={8} max={24} step={1} value={String(buttonSize)} onChange={(e) => { const val = parseInt(e.currentTarget.value, 10); if (!isNaN(val)) setButtonSize(val); }} details="Font size in pixels." />
             <s-select label="Button Style" value={buttonVariant} onChange={(e) => setButtonVariant(e.currentTarget.value)}>
               <s-option value="solid">Solid (filled)</s-option>
               <s-option value="outline">Outline (border)</s-option>
