@@ -13,6 +13,8 @@ function ThemeScript() {
       dangerouslySetInnerHTML={{
         __html: `
           try {
+            // Skip dark mode on Shopify embedded routes — Polaris handles its own theming
+            if (window.location.pathname.startsWith('/shopify')) return;
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
               document.documentElement.classList.add('dark')
             } else {

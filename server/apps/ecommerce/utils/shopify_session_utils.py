@@ -43,6 +43,29 @@ from ..models import EcommerceConnection
 
 logger = logging.getLogger(__name__)
 
+# Tells App Bridge to fetch a fresh session token and retry the request automatically.
+# Must be included on all 401 responses from session-token-authenticated endpoints.
+# See: https://shopify.dev/docs/apps/build/authentication-authorization/session-tokens/set-up-session-tokens
+SHOPIFY_RETRY_HEADER = {"X-Shopify-Retry-Invalid-Session-Request": "1"}
+
+# OPTIONAL ENHANCEMENT — Server-Side Bounce Page Pattern:
+# ─────────────────────────────────────────────────────────
+# If Shopify's automated embedded app check ("Using session tokens for user authentication")
+# doesn't pass with the current client-side-only approach (SPA via shopify.idToken()),
+# we can add server-side session token validation in Next.js proxy.ts for /shopify routes:
+#
+# 1. On /shopify requests, extract `id_token` from URL params (Shopify sends it on initial load)
+# 2. Validate the JWT server-side (HS256 with SHOPIFY_CLIENT_SECRET, audience = SHOPIFY_CLIENT_ID)
+# 3. If invalid/missing → serve a minimal "bounce page" (just meta tag + App Bridge script)
+#    App Bridge then refreshes the token and redirects back via `shopify-reload` param
+# 4. If valid → continue to the SPA normally
+#
+# This follows the official Shopify bounce page pattern from:
+# https://shopify.dev/docs/apps/build/authentication-authorization/set-embedded-app-authorization
+#
+# Currently not needed because our SPA handles session tokens client-side via shopify.idToken(),
+# which is valid for single-page apps per Shopify docs.
+
 
 # ==========================================
 # Session Token Verification
@@ -103,16 +126,19 @@ def verify_shopify_session_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session token expired",
+            headers=SHOPIFY_RETRY_HEADER,
         )
     except jwt.InvalidAudienceError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session token audience mismatch",
+            headers=SHOPIFY_RETRY_HEADER,
         )
     except jwt.InvalidTokenError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid session token: {str(e)}",
+            headers=SHOPIFY_RETRY_HEADER,
         )
 
 
@@ -137,6 +163,7 @@ def extract_shop_domain(decoded_token: dict) -> str:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Session token missing dest claim",
+            headers=SHOPIFY_RETRY_HEADER,
         )
     return dest.replace("https://", "").replace("http://", "").rstrip("/")
 
@@ -469,6 +496,7 @@ async def get_shopify_connection(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing or invalid Authorization header",
+            headers=SHOPIFY_RETRY_HEADER,
         )
     token = auth_header[7:]  # Strip "Bearer "
 

@@ -72,6 +72,7 @@ from ..utils.shopify_billing_utils import (
     map_shopify_plan_to_tier,
 )
 from ..utils.shopify_session_utils import (
+    SHOPIFY_RETRY_HEADER,
     verify_shopify_session_token,
     extract_shop_domain,
     exchange_session_for_access_token,
@@ -266,6 +267,7 @@ async def init_embedded(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Missing or invalid Authorization header",
+                headers=SHOPIFY_RETRY_HEADER,
             )
         token = auth_header[7:]  # Strip "Bearer "
 

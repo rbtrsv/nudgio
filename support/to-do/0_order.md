@@ -332,4 +332,5 @@ When adding or modifying visual widget fields (e.g. colors, border_radius, cta_t
 
 ### 🟢 Future
 - ❌ Granular sync filters (category, price range, tags, selective sync)
+- 💡 (OPTIONAL) Server-side bounce page pattern for Shopify session tokens — if automated embedded app check doesn't pass with client-side-only approach, add server-side `id_token` validation in Next.js `proxy.ts` for `/shopify` routes + minimal bounce page (meta tag + App Bridge script). See: `shopify_session_utils.py` comment block + https://shopify.dev/docs/apps/build/authentication-authorization/set-embedded-app-authorization
 
