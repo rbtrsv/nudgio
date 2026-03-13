@@ -147,6 +147,12 @@ export default function ShopifyEmbeddedLayout({
    * App Bridge script loads via beforeInteractive, so it should be available
    * by the time React hydrates. We poll briefly in case of race conditions.
    */
+  // Force light mode — Polaris handles its own theming, our dark mode CSS must not interfere.
+  // Without this, macOS dark appearance causes body background to go dark in Safari.
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+  }, []);
+
   useEffect(() => {
     // Check if App Bridge is already available
     if (typeof window !== 'undefined' && window.shopify) {
