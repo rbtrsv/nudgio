@@ -13,8 +13,14 @@ function ThemeScript() {
       dangerouslySetInnerHTML={{
         __html: `
           try {
-            // Skip dark mode on Shopify embedded routes — Polaris handles its own theming
-            if (window.location.pathname.startsWith('/shopify')) return;
+            // Skip dark mode on Shopify embedded routes — Polaris handles its own theming.
+            // Force light color-scheme + white background immediately (before CSS loads) —
+            // without this, Safari applies native dark background when macOS is in dark mode.
+            if (window.location.pathname.startsWith('/shopify')) {
+              document.documentElement.style.colorScheme = 'light';
+              document.documentElement.style.backgroundColor = 'white';
+              return;
+            }
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
               document.documentElement.classList.add('dark')
             } else {
